@@ -1,0 +1,122 @@
+"use strict";
+
+let gearPick=[0,0],effectPick=0;
+const gearPools=[Wardrobe.boards,Wardrobe.stones];
+function openGear(){
+  gearPick=[0,saved.gear[0]];
+  effectPick=saved.fx;el("showCoords").checked=saved.coords;renderGear();renderEffects();el("gearDialog").showModal();
+}
+function renderGear(){
+  const [type,id]=gearPick, chosen=gearPools[type][id];
+  for(const [category,items] of gearPools.entries()){
+    el(category?"stonesList":"boardsList").replaceChildren(...items.map((item,i)=>{
+      const button=document.createElement("button"),sample=document.createElement("canvas"),label=document.createElement("span");
+      sample.width=120;sample.height=64;sample.setAttribute("aria-hidden","true");
+      Wardrobe.preview(sample,category?saved.gear[0]:i,category?i:saved.gear[1]);
+      const owns=Wardrobe.owns(item,saved.expedition,saved.trials);
+      button.type="button";button.dataset.item=i;button.className=owns?"owned":"locked";
+      button.setAttribute("aria-pressed",String(category===type && i===id));
+      label.textContent=(i===saved.gear[category]?"✓ ":"")+localizedPair(item[3]);
+      button.setAttribute("aria-label",label.textContent+" · "+(owns?t("available"):t("locked"))+" · "+localizedPair(item[4]));
+      button.append(sample,label);button.onclick=()=>{gearPick=[category,i];renderGear();};return button;
+    }));
+  }
+  Wardrobe.preview(el("gearSample"),type?saved.gear[0]:id,type?id:saved.gear[1]);
+  el("gearName").textContent=localizedPair(chosen[3]);el("gearCondition").textContent=localizedPair(chosen[4]);
+  const owns=Wardrobe.owns(chosen,saved.expedition,saved.trials),worn=saved.gear[type]===id;
+  el("wearGear").textContent=t(worn?"equipped":owns?"equip":"locked");el("wearGear").disabled=!owns||worn;
+}
+function renderEffects(){
+  const preview=el("fxPreview"),ctx=preview.getContext("2d");
+  Wardrobe.preview(preview,saved.gear[0],saved.gear[1]);BoardFX.flourish(ctx,preview.width*.52,preview.height*.55,28,effectPick,.45,true,1);
+  const which=BoardFX.styles[effectPick],owned=BoardFX.owns(effectPick,saved.expedition,saved.trials);
+  el("fxName").textContent=localizedPair(which.name);el("fxCondition").textContent=localizedPair(which.condition);
+  el("wearFx").textContent=t(saved.fx===effectPick?"equipped":owned?"equip":"locked");el("wearFx").disabled=!owned||saved.fx===effectPick;
+  el("fxList").replaceChildren(...BoardFX.styles.map((style,id)=>{
+    const b=document.createElement("button"),sample=document.createElement("canvas"),label=document.createElement("span");b.type="button";b.dataset.effect=id;
+    b.setAttribute("aria-pressed",String(effectPick===id));sample.width=100;sample.height=55;
+    Wardrobe.preview(sample,saved.gear[0],saved.gear[1]);BoardFX.flourish(sample.getContext("2d"),51,30,18,id,.42,true,1);
+    label.textContent=(saved.fx===id?"✓ ":"")+localizedPair(style.name);b.append(sample,label);b.onclick=()=>{effectPick=id;renderEffects();};return b;
+  }));
+}
+el("wearFx").onclick=()=>{if(BoardFX.owns(effectPick,saved.expedition,saved.trials)){saved.fx=effectPick;save();renderEffects();}};
+el("showCoords").onchange=event=>{saved.coords=event.target.checked;document.body.classList.toggle("with-coords",saved.coords);save();};
+el("personalSettings").onclick=openGear;
+el("closeGear").onclick=()=>el("gearDialog").close();
+el("wearGear").onclick=()=>{
+  const [category,id]=gearPick;
+  if(!Wardrobe.owns(gearPools[category][id],saved.expedition,saved.trials))return;
+  saved.gear[category]=id;save();drawWood();boardView();renderGear();
+};
+for(const [selector,labels] of [[".x-axis","ABCDEFGHJ"],[".y-axis","987654321"]]){
+  document.querySelector(selector).replaceChildren(...[...labels].map(c=>{
+    const label=document.createElement("span");label.textContent=c;return label;
+  }));
+}
+function drawForestDepth(w,h,time,zone){
+  if(zone!==0)return;
+  ctx.save();
+  for(let layer=0;layer<2;layer++){
+    const speed=layer?32:13,width=layer?17:9;
+    ctx.fillStyle=layer?"#18372f94":"#40695055";
+    for(let i=0;i<6;i++){
+      const x=((i*179+44-time*speed)%(w+200)+w+200)%(w+200)-110;
+      ctx.fillRect(x,0,width,h*.8);
+      for(let j=0;j<3;j++){ctx.fillRect(x-19+j*5,h*(.14+j*.14),25,5);ctx.fillRect(x+12,h*(.21+j*.12),22,5);}
+    }
+  }
+  ctx.restore();
+}
+// Props react to the board result. Point coordinates and legal moves stay in the Go engine.
+function drawStoryAction(c,site,round,status,age,w,ground){
+  const won=status==="phase"||status==="won",t=won?Math.min(1,age/.85):0;
+  const counter=status==="retry"?1:0,x=w*.49,y=ground-3;
+  c.save();c.translate(x,y);c.lineCap="round";
+  const block=(color,x,y,width,height)=>{c.fillStyle=color;c.fillRect(Math.round(x),Math.round(y),width,height);};
+  if(site===0){
+    // A pinned mail sack loosens and Lulu emerges after the final capture.
+    block("#69513b",-22,-16,43,16);block("#be975e",-19,-19,37,16);block("#dfb772",-15,-16,18,4);
+    block("#72533c",-12,-23,22,5);
+    for(let i=round;i<3;i++){const fly=i===round?t:0;block("#5d695a",-23+i*15+fly*18,-25+fly*17-Math.sin(fly*Math.PI)*18,12,7);}
+    if(round===2&&won)ExpeditionCast.party(c,1,t*17,-4,26*t);
+  }else if(site===2){
+    // Each connection ties a rope. The rescued sailor rides the skiff to shore.
+    const boat=23-Math.round(round===2?t*43:0)+counter*9;
+    block("#724f39",boat-18,-5,37,5);block("#caa375",boat-15,-8,29,3);
+    for(let i=0;i<2;i++){block("#96744f",-34+i*21,-17,5,18);block("#e3bc7c",-34+i*21,-18,5,3);}
+    const ropes=Math.min(2,round+(won?1:0));for(let i=0;i<ropes;i++){
+      c.strokeStyle="#e7ca8a";c.lineWidth=2;c.beginPath();c.moveTo(-31+i*21,-13);c.quadraticCurveTo(-4,-2,boat+8,-9);c.stroke();
+    }
+    if(round===2)ExpeditionCast.party(c,1,boat,-7,26);
+  }else{
+    const count=round+(won?1:0);
+    block("#68533e",-40,-4,82,5);
+    for(let i=0;i<4;i++){const down=i===round?Math.round((1-t)*8):0;if(i<count||i===round){block("#ab8254",-37+i*19,-9+down,16,7);block("#e5bc7b",-37+i*19,-9+down,15,2);}}
+    if(status==="waiting"||counter){const f=counter?1:Math.min(1,age*1.8);block("#e6e5c8",-17+f*37,-16-Math.sin(f*Math.PI)*12,7,5);}
+  }
+  c.restore();
+}
+function drawWaterwheel(x,ground,height,time,clears){
+  const radius=height*.59,cy=ground-radius*.94;
+  ctx.save();ctx.translate(x+height*.27,cy);ctx.rotate(reduceMotion?0:time*.15);
+  for(let k=0;k<2;k++){
+    ctx.strokeStyle=k?"#d6a85e":"#483723";ctx.lineWidth=k?5:13;
+    ctx.beginPath();ctx.arc(0,0,radius,0,Math.PI*2);ctx.stroke();
+  }
+  for(let i=0;i<10;i++){
+    ctx.rotate(Math.PI/5);ctx.fillStyle="#694e35";ctx.fillRect(-3,-radius,6,radius);
+    ctx.fillStyle="#b17a4d";ctx.fillRect(-8,-radius-5,16,11);ctx.fillStyle="#efcf88";ctx.fillRect(-6,-radius-5,12,3);
+  }
+  ctx.restore();
+  if(clears===0){
+    const cx=x-height*.72,base=ground-height*.12;
+    glow(cx,base-14,22,"#f2cf8055");sprite(5,cx,base,height*.26);
+    ctx.save();ctx.strokeStyle="#b7915e";ctx.lineWidth=3;
+    ctx.strokeRect(cx-19,base-32,38,35);
+    for(let i=-1;i<=1;i++)ctx.strokeRect(cx+i*9,base-31,1,32);ctx.restore();
+  }
+  if(clears<3)shield(x-height*.46,ground-height*.44,0);
+  else for(let i=0;i<3;i++){
+    ctx.fillStyle=i%2?"#b08b59":"#dfbe7d";ctx.fillRect(x-height*.37+i*12,ground-2+i%2*3,8,4);
+  }
+}
