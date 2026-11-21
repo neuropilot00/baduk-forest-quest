@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
+<base href="./assets/e25a607f27201e22/">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="囲碁の一手で森のモンスターに立ち向かうパズルゲーム">
 <meta name="color-scheme" content="only dark">
@@ -84,7 +85,7 @@
     <div class="atlas-window"><div id="mapViewport" tabindex="0" data-label="mapTitle"><div id="mapWorld">
       <canvas id="worldLand" width="384" height="652" aria-hidden="true"></canvas><div id="worldLabels" aria-hidden="true"></div><div id="waypoints" role="group" data-label="mapTitle"></div><canvas id="worldActors" width="384" height="652" aria-hidden="true"></canvas>
     </div></div><div class="map-caption"><b id="mapRegion"></b><span id="mapCount"></span></div><button id="locateParty" type="button" data-text="locate"></button><button id="mapSkip" type="button" data-text="finishWalk" hidden></button></div></section>
-  <section class="story-leaf"><div class="scene-id" id="voyLocation"></div><h2 id="voyPlace" aria-live="polite"></h2><div class="map-dialogue"><canvas id="sceneCast" width="144" height="136" aria-hidden="true"></canvas><div><span class="speaker" id="voySpeaker"></span><p id="voyLine"></p></div></div><div class="voyage-actions"><button type="button" id="voyGo" class="voyage-action"></button><button type="button" id="quickTrials" class="voyage-action secondary" data-text="trialTitle"></button><button type="button" id="voyReview" class="voyage-action secondary" hidden></button></div></section></div>
+  <section class="story-leaf"><div class="scene-id" id="voyLocation"></div><h2 id="voyPlace" aria-live="polite"></h2><div class="map-dialogue"><canvas id="sceneCast" width="144" height="136" aria-hidden="true"></canvas><div><span class="speaker" id="voySpeaker"></span><p id="voyLine"></p></div></div><p id="voyEncounter" hidden></p><div class="voyage-actions"><button type="button" id="voyGo" class="voyage-action"></button><button type="button" id="quickTrials" class="voyage-action secondary" data-text="trialTitle"></button><button type="button" id="voyReview" class="voyage-action secondary" hidden></button></div></section></div>
   <section class="voyage-card expedition-roster"><h2 id="partyHeading"></h2>
 <div class="ticket-row"><b id="ticketCount"></b><button type="button" class="control primary" id="recruitDraw"></button></div><p id="ticketRule"></p>
 <div id="recruitResult" hidden aria-live="polite"><span id="recruitPic"></span><div><b id="recruitName"></b><p id="recruitText"></p><button type="button" class="control" id="recruitEquip"></button></div></div>
@@ -1263,7 +1264,7 @@ function encounter() {
 const pointButtons = neighbors.map((_,p)=>{
   const [x,y] = coordinates(p);
   const button = document.createElement("button");
-  button.type = "button";
+  button.type = "button";button.className="point";
   button.onclick = () => attempt(p);
   button.onfocus = () => focusPoint(p);
   button.onkeydown = event => {
