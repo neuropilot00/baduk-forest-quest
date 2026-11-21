@@ -52,7 +52,7 @@ const BoardFX=(()=>{
     }
     draw(start);
   }
-  function cutIn(c,w,h,age,side,kind,foe){
+  function cutIn(c,w,h,age,side,kind,foe,title){
     if(reduceMotion||age<.06||age>.74)return;
     const f=(age-.06)/.68,show=Math.min(1,f*5,(1-f)*5),top=h*.30,bottom=h*.79;
     c.save();c.globalAlpha=.92*show;c.beginPath();c.moveTo(0,top+h*.09);c.lineTo(w,top-h*.09);c.lineTo(w,bottom-h*.09);c.lineTo(0,bottom+h*.09);c.closePath();c.clip();
@@ -60,11 +60,11 @@ const BoardFX=(()=>{
     c.fillStyle=side===2?"#593e47":["#263e43","#29483b","#393551","#24464c"][effect];c.fillRect(0,0,w,h);
     for(let i=0;i<16;i++){const x=(i*w*.097+f*w*(side===1?1:-1)+w*2)%w;c.strokeStyle=i%2?"#d7bf8a":"#96c2b0";c.lineWidth=i%3+1;c.beginPath();c.moveTo(x,top+(i%7)*h*.06);c.lineTo(x+w*.16,top+(i%7)*h*.06-h*.05);c.stroke();}
     if(side===1)ExpeditionCast.party(c,0,w*(.30+f*.08),h*1.23,h*1.12,0,0,2);
-    else if(!trial&&level%10===9)ExpeditionCast.guardian(c,Math.floor(level/10),w*.72,h*1.08,h*1.08,0,1,2);
+    else if((!trial||trial.fortress)&&level%10===9)ExpeditionCast.guardian(c,Math.floor(level/10),w*.72,h*1.08,h*1.08,0,1,2);
     else ExpeditionCast.foe(c,foe,w*.72,h*1.06,h,0,1,2);
-    c.font="bold "+Math.round(h*.13)+"px system-ui";c.textAlign="center";c.strokeStyle="#1b302b";c.lineWidth=5;c.fillStyle="#ffebaf";
-    const bossSkill=!trial&&level===9;
-    const label=side===2?t("whiteCounter"):effect&&!bossSkill?localizedPair(styles[effect].name):t(["link","atari","capture"].includes(kind)?"art"+kind:kind);
+    c.font='700 '+Math.round(h*.13)+'px "Dawn Serif '+(saved.locale==="ko"?"KR":"JP")+'", serif';c.textAlign="center";c.strokeStyle="#1b302b";c.lineWidth=5;c.fillStyle="#ffebaf";
+    const bossSkill=Fortress.isHere();
+    const label=title||(side===2?t("whiteCounter"):effect&&!bossSkill?localizedPair(styles[effect].name):t(["link","atari","capture"].includes(kind)?"art"+kind:kind));
     c.strokeText(label,w*(side===1?.71:.27),h*.63);c.fillText(label,w*(side===1?.71:.27),h*.63);c.restore();
   }
   return {styles,owns,clear,playOn,flourish,cutIn};

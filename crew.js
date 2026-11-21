@@ -1,62 +1,226 @@
 "use strict";
 const Crew=(()=>{
-  const roles=[
-    {gate:3,name:["セナ · 勇者","세나 · 용사"],line:["私が舟を押さえる。隊長、渡し場まで一緒に行こう。","내가 배를 붙들게. 대장, 나루까지 함께 가자."]},
-    {gate:10,name:["ミオ · 司祭","미오 · 성직자"],line:["鐘が戻った。下流の怪我人を迎えに行けるわ。","종이 돌아왔어. 이제 하류의 부상자를 데리러 갈 수 있어."]},
-    {gate:7,name:["レン · 盗賊","렌 · 도적"],line:["橋番の鍵ならここにある。次の扉は任せな。","다리 지기의 열쇠는 내게 있어. 다음 문은 내가 열지."]}
+  const words=(ja,ko)=>localizedPair([ja,ko]);
+  const members=()=>CrewTactics.members;
+  let reveal=null,rolling=false,storageFailed=false;
+  function guide(){return saved.roster.guide+1;}
+  function deployed(){return [...new Set([saved.roster.guide,...saved.roster.slots].filter(id=>id>=0))];}
+  function syncLegacy(){
+    saved.partner=guide();saved.work.crew=saved.roster.slots.filter(id=>id>=4&&id<=6).map(id=>id-3);
+  }
+  let picked=null, notice="";
+  const lanes=[["後列","후열"],["中列","중열"],["前列","전열"]];
+  const laneRoles=[["先読み","수읽기"],["連携","연계"],["防衛","수비"]];
+  const laneHelp=[
+    ["候補手に対する白の応手と、その次の黒の一手を先に見られる。","후보 수에 대한 백의 응수와 다음 흑 착수를 미리 볼 수 있습니다."],
+    ["同じ正解手で二人の得意技が発動すると、勝利時に読星を一つ獲得。","같은 정답 수에서 두 동료의 전문 기술이 발동하면 승리 후 수읽기 별을 하나 얻습니다."],
+    ["白の反撃を受けたら、その直前の局面から一度守り直せる。","백의 반격을 받으면 직전 국면부터 한 번 다시 방어할 수 있습니다."]
   ];
-  const frames=new Map();
-  function image(id,step){
-    const key=id*4+step;if(frames.has(key))return frames.get(key);
-    const c=document.createElement("canvas");c.width=32;c.height=38;const g=c.getContext("2d");
-    const box=(color,x,y,w,h)=>{g.fillStyle=color;g.fillRect(x,y,w,h);};
-    const poly=(color,pts)=>{g.fillStyle=color;g.beginPath();pts.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.closePath();g.fill();};
-    const ink="#293939",skin="#ebb58a",hair="#664d3c",boot="#534535",glint="#f5da91",robe=["","#4e777d","#e5dfbe","#4c586e"][id],shade=["","#344f57","#aebba5","#323e54"][id];
-    const lift=step%2,leg=step===1?2:step===3?-2:0;g.translate(0,-lift);
-    box(ink,10+leg,28,5,7);box(boot,8+leg,34,7,3);box(ink,18-leg,28,5,7);box(boot,18-leg,34,7,3);
-    poly(ink,[[10,14],[20,12],[25,19],[24,31],[7,31],[9,23],[6,19]]);
-    poly(robe,[[11,15],[19,14],[23,19],[21,29],[9,29]]);box(shade,11,18,3,10);
-    box(hair,11,6,11,9);box(skin,14,7,9,8);box(ink,20,9,2,2);
-    if(id===1){
-      poly("#9aabb0",[[9,9],[10,4],[14,2],[20,2],[23,5],[24,9],[17,8],[15,12],[11,12]]);
-      poly("#b86149",[[12,3],[9,0],[5,1],[3,6],[9,4]]);box("#d1d5bc",11,5,10,2);
-      poly("#793f39",[[10,15],[13,16],[11,23],[5,28],[5,18]]);
-      poly(ink,[[6,17],[14,16],[16,19],[14,26],[10,30],[6,26],[4,20]]);
-      poly("#9d7754",[[6,19],[13,18],[14,20],[12,25],[10,27],[7,25]]);box(glint,9,20,2,5);
-      poly("#cad7cd",[[23,23],[28,11],[30,8],[30,12],[25,25]]);box(glint,22,22,5,2);
-    }else if(id===2){
-      poly(robe,[[8,11],[9,5],[14,1],[18,0],[23,5],[24,9],[20,7],[14,8],[12,14],[8,15]]);
-      poly("#f1edd5",[[12,17],[19,16],[23,27],[25,32],[7,32],[10,24]]);
-      poly("#739589",[[13,16],[16,16],[18,31],[14,31]]);box(glint,15,21,4,2);
-      box("#875d3d",25,8,2,27);box(glint,23,4,5,2);box(glint,22,6,2,4);box(glint,27,6,2,4);box("#aedbda",24,7,3,3);
-    }else{
-      poly(shade,[[7,13],[9,6],[14,2],[21,3],[24,7],[17,7],[13,11],[13,15]]);
-      box(shade,15,12,9,3);poly("#995c48",[[9,15],[16,16],[13,19],[4,18],[1,20],[3,16]]);
-      poly(robe,[[10,17],[17,16],[21,22],[23,29],[15,26],[10,31],[6,28]]);
-      box("#a37c58",10,23,11,3);box(glint,16,23,3,2);
-      poly("#c2cdbe",[[20,21],[30,17],[27,21],[21,24]]);poly("#9cb2ab",[[6,25],[1,29],[5,22],[8,22]]);
+  const columns=[["左","왼쪽"],["中央","가운데"],["右","오른쪽"]];
+  const columnName=cell=>localizedPair(lanes[Math.floor(cell/3)])+" "+localizedPair(columns[cell%3]);
+  const memberName=id=>localizedPair(members()[id].name);
+  const unitAt=cell=>saved.roster.slots[saved.roster.cells.indexOf(cell)];
+  function preferredCell(){
+    return [4,7,1,3,5,6,8,0,2].find(cell=>!saved.roster.cells.includes(cell));
+  }
+  function element(tag,cls,id){
+    const e=document.createElement(tag);if(cls)e.className=cls;if(id)e.id=id;return e;
+  }
+  function focusCell(cell,scroll=true){
+    const tile=el("formationGrid").querySelector('[data-cell="'+cell+'"]');
+    if(!tile)return;
+    if(scroll)el("formationGrid").scrollIntoView({block:"center"});
+    tile.focus({preventScroll:true});
+  }
+  function refreshFormation(){
+    const r=saved.roster,ids=Roster.ids(r);
+    renderFormation(ids);
+  }
+  function choose(id,source){
+    if(!Roster.has(saved.roster,id))return;
+    picked=picked===id?null:id;notice="";
+    refreshFormation();
+    const current=saved.roster.slots.indexOf(id);
+    if(source==="bench"&&picked!==null)focusCell(current<0?preferredCell():saved.roster.cells[current]);
+    else if(current>=0)focusCell(saved.roster.cells[current],false);
+  }
+  function commitFormation(change,message){
+    const before=Roster.pack(saved.roster);
+    if(!change())return false;
+    syncLegacy();
+    if(!save()){
+      saved.roster=Roster.load(before,0);syncLegacy();
+      notice=words("編成を保存できませんでした。もう一度お試しください。","편성을 저장하지 못했습니다. 다시 시도해 주세요.");
+      refreshFormation();return false;
     }
-    frames.set(key,c);return c;
+    picked=null;notice=message;renderMap();return true;
   }
-  function draw(c,x,y,h,step=0,gap=.47){
-    if(saved.partner>1&&saved.work.mascot&&saved.expedition>=1)ExpeditionCast.companion(c,1,x-h*.44,y,h*.84);
-    const ids=saved.work.crew;ids.forEach((id,i)=>{const size=h*(i?.84:.89),cx=x+i*h*gap;c.save();c.imageSmoothingEnabled=false;c.drawImage(image(id,step%4),Math.round(cx-size*.42),Math.round(y-size),Math.round(size*32/38),Math.round(size));c.restore();});
+  function placeAt(cell){
+    const r=saved.roster,to=unitAt(cell);
+    if(picked===null){
+      if(to!==undefined)choose(to,"board");return;
+    }
+    if(to===picked){choose(picked,"board");return;}
+    if(!r.slots.includes(picked)&&(r.slots.length>=3||to!==undefined)){
+      notice=r.slots.length>=3?words("編成は3人まで。配置中の仲間を選んで外してください。","세 명이 편성돼 있습니다. 배치된 동료를 골라 해제하세요."):words("空いている位置を選んでください。","비어 있는 칸을 선택하세요.");
+      refreshFormation();focusCell(cell,false);return;
+    }
+    const moving=picked;
+    const message=to===undefined?memberName(moving)+" · "+columnName(cell):words("二人の位置を交換しました。","두 동료의 자리를 바꿨습니다.");
+    if(commitFormation(()=>Roster.place(r,moving,cell),message))focusCell(cell,false);
   }
-  function guide(){return saved.partner===1&&!saved.work.mascot?0:saved.partner;}
-  function filter(){saved.work.crew=saved.work.crew.filter(id=>roles[id-1]?.gate<=saved.expedition);}
+  function quickEquip(id){
+    const r=saved.roster,cell=preferredCell();if(r.slots.length>=3||cell===undefined)return;
+    if(commitFormation(()=>Roster.place(r,id,cell),memberName(id)+" · "+columnName(cell)))focusCell(cell);
+  }
+  function portrait(id,size=104){
+    const canvas=document.createElement("canvas");canvas.width=size;canvas.height=size;canvas.setAttribute("aria-hidden","true");
+    CrewArt.portrait(canvas,id);return canvas;
+  }
+  function card(id,asGuide){
+    const member=members()[id],b=document.createElement("button"),copy=document.createElement("span"),name=document.createElement("b"),line=document.createElement("small"),status=document.createElement("em");
+    const on=asGuide?saved.roster.guide===id:saved.roster.slots.includes(id);
+    b.type="button";b.className="party-card";if(asGuide)b.dataset.member=id+1;else b.dataset.companion=id;
+    if(!asGuide){b.dataset.deployed=String(on);b.classList.add("formation-member");}
+    b.setAttribute("aria-pressed",String(asGuide?on:picked===id));name.textContent=localizedPair(member.name)+" · "+localizedPair(member.role);
+    line.textContent=asGuide?localizedPair(member.technique):localizedPair(member.condition);
+    if(asGuide){
+      status.textContent=on?words("外す","해제"):words("案内役に","길잡이 선택");
+      b.onclick=()=>{commitFormation(()=>Roster.setGuide(saved.roster,on?-1:id),"");};
+    }else{
+      name.textContent=memberName(id);line.textContent=localizedPair(member.role);
+      status.textContent=on?"✓":"";status.hidden=!on;
+      b.setAttribute("aria-label",memberName(id)+" · "+localizedPair(member.role)+(on?" · "+words("配置中","배치됨"):""));
+      b.onclick=()=>choose(id,"bench");
+    }
+    copy.append(name,line);b.append(portrait(id),copy,status);return b;
+  }
+  function formationScaffold(){
+    if(el("formationGrid"))return;
+    const squad=el("squadSection"),list=el("squadList");
+    // Recruitment results stay above the editor; route guides retain their own assignment below it.
+    squad.after(el("guideSection"));
+    const captain=element("p","formation-captain","formationCaptain");
+    const intro=element("div","formation-intro"),help=element("details","formation-help"),summary=element("summary","","formationHelpTitle");
+    help.append(summary,element("dl","","formationHelp"));intro.append(captain,help);
+    const grid=element("div","formation-grid","formationGrid");
+    grid.setAttribute("role","group");grid.setAttribute("aria-labelledby","squadCaption");
+    const detail=element("div","formation-detail","formationDetails"),message=element("p","","formationMessage");
+    message.setAttribute("role","status");
+    const controls=element("div","formation-actions");
+    for(const id of ["formationRemove","formationCancel"]){
+      const b=element("button","control",id);b.type="button";controls.append(b);
+    }
+    el("crewLine").hidden=true;
+    const bench=element("h3","","formationBench");
+    detail.append(message,controls);list.before(intro,grid,detail,bench);
+  }
+  function renderFormation(owned){
+    formationScaffold();
+    const r=saved.roster,section=el("squadSection");section.hidden=!owned.length;
+    if(picked!==null&&!Roster.has(r,picked))picked=null;
+    el("squadCaption").textContent=words("戦闘陣形","전투 진형")+"  "+r.slots.length+" / 3";
+    el("formationCaptain").textContent=words("隊長 ソルビ · 常に出撃","대장 솔비 · 항상 출전");
+    el("formationHelpTitle").textContent=words("陣形の効果","진형 효과");
+    const rules=[];
+    for(const [index,pair] of lanes.entries()){
+      const name=element("dt"),text=element("dd");
+      name.textContent=localizedPair(pair)+" · "+localizedPair(laneRoles[index]);
+      text.textContent=localizedPair(laneHelp[index]);rules.push(name,text);
+    }
+    el("formationHelp").replaceChildren(...rules);
+    const grid=el("formationGrid"),rows=[];
+    for(let lane=0;lane<3;lane++){
+      const group=element("div","formation-row"),label=element("span","formation-lane");
+      const role=element("small","formation-role");role.textContent=localizedPair(laneRoles[lane]);
+      label.append(localizedPair(lanes[lane]),role);group.append(label);
+      for(let col=0;col<3;col++){
+        const cell=lane*3+col,unit=unitAt(cell),button=element("button","formation-tile");
+        button.type="button";button.dataset.cell=cell;button.title=localizedPair(laneHelp[lane]);
+        const occupant=unit===undefined?words("空き","빈칸"):memberName(unit);
+        button.setAttribute("aria-label",columnName(cell)+" · "+localizedPair(laneRoles[lane])+" · "+occupant);
+        button.setAttribute("aria-pressed",String(unit!==undefined&&picked===unit));
+        if(unit!==undefined){
+          button.dataset.unit=unit;const name=element("span","formation-name");name.textContent=occupant;button.append(portrait(unit),name);
+        }else{
+          button.textContent="+";button.setAttribute("aria-disabled",String(picked===null));
+        }
+        button.onclick=()=>placeAt(cell);
+        button.onkeydown=e=>{
+          const delta={ArrowLeft:-1,ArrowRight:1,ArrowUp:-3,ArrowDown:3}[e.key];
+          if(!delta)return;e.preventDefault();const next=cell+delta;
+          if(next>=0&&next<9&&(Math.abs(delta)===3||Math.floor(cell/3)===Math.floor(next/3)))focusCell(next,false);
+        };
+        group.append(button);
+      }
+      rows.push(group);
+    }
+    grid.replaceChildren(...rows);
+    const remove=el("formationRemove"),cancel=el("formationCancel"),info=el("formationMessage");
+    remove.hidden=picked===null||!r.slots.includes(picked);cancel.hidden=picked===null;
+    remove.textContent=words("編成から外す","편성 해제");cancel.textContent=words("選択をやめる","선택 취소");
+    if(!remove.hidden)remove.onclick=()=>{
+      const id=picked,from=r.cells[r.slots.indexOf(id)];
+      if(commitFormation(()=>Roster.remove(r,id),memberName(id)+" · "+words("待機","대기")))focusCell(from,false);
+    };
+    cancel.onclick=()=>{picked=null;notice="";refreshFormation();focusCell(4,false);};
+    const selection=picked===null?null:members()[picked];
+    info.replaceChildren();
+    if(selection){const b=element("b");b.textContent=memberName(picked)+" · "+localizedPair(selection.technique);info.append(b,document.createTextNode(localizedPair(selection.condition)));}
+    const line=element("span");line.textContent=notice||(picked===null?words("仲間を選び、置きたい位置をタップ。","동료를 고른 뒤 배치할 칸을 누르세요."):r.slots.includes(picked)?words("移動先を選択。仲間のいる位置なら入れ替え。","이동할 칸을 고르세요. 동료가 있는 칸은 서로 자리를 바꿉니다."):words("置きたい空き位置を選択。","배치할 빈칸을 고르세요."));
+    info.append(line);el("formationBench").textContent=words("仲間を選ぶ","동료 선택");
+    el("squadList").replaceChildren(...owned.map(id=>card(id,false)));
+    const heading=el("squadCaption");heading.setAttribute("tabindex","-1");
+  }
   function render(){
-    const root=el("squadList"),caption=el("squadCaption"),ids=saved.work.crew;caption.textContent=localizedPair(["出発する二人","함께 떠날 두 사람"]);
-    const lineup=el("crewLine");lineup.textContent=ids.length?ids.map(id=>localizedPair(roles[id-1].name)).join(" · "):localizedPair(["編成する仲間を選ぶ","동행할 대원을 선택하세요"]);
-    root.replaceChildren(...roles.map((role,i)=>{
-      const id=i+1,b=document.createElement("button"),pic=document.createElement("canvas"),text=document.createElement("span"),status=document.createElement("small");
-      b.type="button";b.className="party-card";b.dataset.crew=id;b.disabled=saved.expedition<role.gate;
-      b.setAttribute("aria-pressed",String(ids.includes(id)));pic.width=32;pic.height=38;pic.getContext("2d").drawImage(image(id,0),0,0);
-      text.textContent=localizedPair(role.name);status.textContent=b.disabled?t("recruitAt",role.gate):ids.includes(id)?localizedPair(["外す","제외"]):ids.length===2?localizedPair(["先頭と交代","선두와 교대"]):localizedPair(["加える","편성"]);
-      b.append(pic,text,status);b.onclick=()=>{if(ids.includes(id))saved.work.crew=ids.filter(n=>n!==id);else if(ids.length<2)ids.push(id);else ids.splice(0,1,id);save();renderMap();};return b;
-    }));
-    const mascot=el("mascotToggle");mascot.hidden=saved.expedition<1;mascot.setAttribute("aria-pressed",String(saved.work.mascot));
-    mascot.textContent=localizedPair(["旅のマスコット · ルル","여행 마스코트 · 루루"])+(saved.work.mascot?" ✓":"");
+    const roster=saved.roster,owned=Roster.ids(roster),tickets=Roster.balance(roster,saved.expedition),poolDone=owned.length===Roster.size;
+    el("partyHeading").textContent=words("遠征隊","원정대");el("ticketCount").textContent=words("仲間の招待状","동료 영입권")+" × "+tickets;
+    const draw=el("recruitDraw"),observed=roster.owned;
+    draw.disabled=rolling||!tickets||poolDone;
+    draw.textContent=poolDone?words("全員が合流した","모두 합류했다"):words("招待状を使う","영입권 사용");
+    el("ticketRule").textContent=poolDone?words("遠征隊の仲間が全員そろいました。","원정대 동료가 모두 모였습니다."):words("初めて道を開くと一通。まだ出会っていない仲間が一人来ます。","새 스테이지를 깨면 한 장. 아직 영입하지 않은 동료 한 명이 합류합니다.");
+    if(storageFailed)el("ticketRule").textContent=words("保存できませんでした。招待状は手元にあります。","저장할 수 없어 영입권을 그대로 두었습니다.");
+    draw.onclick=async()=>{
+      if(rolling)return;rolling=true;storageFailed=false;draw.disabled=true;
+      try{
+        const run=()=>{
+          let current=null;try{current=JSON.parse(localStorage.getItem(storageKey));}catch{}
+          if(current?.roster){const latest=Roster.load(current.roster,0);if(latest.seed===roster.seed)Roster.restore(roster,current.roster,saved.expedition);}
+          const before=Roster.pack(roster),id=Roster.draw(roster,saved.expedition,observed);if(id===null)return;
+          syncLegacy();if(save())reveal=id;
+          else{saved.roster=Roster.load(before,0);syncLegacy();storageFailed=true;reveal=null;}
+        };
+        if(navigator.locks?.request)await navigator.locks.request("dawn-bell-recruit",run);else run();
+      }finally{rolling=false;renderMap();if(reveal!==null)el("recruitResult").scrollIntoView({block:"nearest"});}
+    };
+    const result=el("recruitResult");result.hidden=reveal===null||!Roster.has(roster,reveal);
+    if(!result.hidden){const member=members()[reveal];el("recruitPic").replaceChildren(portrait(reveal,150));el("recruitName").textContent=localizedPair(member.name)+" · "+localizedPair(member.role);
+      el("recruitText").textContent=localizedPair(member.technique)+" — "+localizedPair(member.condition);
+      const placed=roster.slots.includes(reveal),full=roster.slots.length>=3;
+      el("recruitEquip").textContent=placed?words("編成中","편성 중"):full?words("編成は3人まで","세 명 편성 중"):words("いま編成する","바로 편성");
+      el("recruitEquip").disabled=placed||full;el("recruitEquip").onclick=()=>quickEquip(reveal);
+    }
+    const guides=owned.filter(id=>id<4);el("guideSection").hidden=!guides.length;
+    el("guideCaption").textContent=words("道案内 · 一人","길잡이 · 한 명");el("partyList").replaceChildren(...guides.map(id=>card(id,true)));
+    renderFormation(owned);
+    const mascot=el("mascotToggle");mascot.hidden=!Roster.has(roster,0)||roster.guide<=0||roster.slots.includes(0);
+    mascot.textContent=words("ルルも一緒に歩く","루루도 함께 걷기")+(saved.work.mascot?" ✓":"");mascot.setAttribute("aria-pressed",String(saved.work.mascot));
     mascot.onclick=()=>{saved.work.mascot=!saved.work.mascot;save();renderMap();};
   }
-  return {roles,image,draw,guide,filter,render};
+  function travelers(){
+    const roster=saved.roster;
+    const ids=[...new Set(roster.slots.filter(id=>Roster.has(roster,id)))];
+    if(ids.length<3 && roster.guide>=0 && Roster.has(roster,roster.guide) && !ids.includes(roster.guide))ids.push(roster.guide);
+    if(ids.length<3 && roster.guide>0 && saved.work.mascot && Roster.has(roster,0) && !ids.includes(0))ids.push(0);
+    return ids.slice(0,3);
+  }
+  function formation(left,right,ground,depth){
+    return WorldScale.formation(travelers(),(id,i)=>typeof Roster.cell==="function"?Roster.cell(saved.roster,id):i+3,left,right,ground,depth);
+  }
+  function draw(c,left,right,ground,heroPx,beat=0,pose=0,depth=0){
+    const actors=formation(left,right,ground,depth);
+    for(const actor of actors)WorldScale.draw(c,actor.id,actor.x,actor.ground,heroPx,pose,beat);
+    return actors;
+  }
+  return {render,draw,travelers,formation,guide,deployed,syncLegacy,clearReveal(){reveal=null;picked=null;notice="";}};
 })();

@@ -14,8 +14,11 @@ const RoadTalk=(()=>{
     el("roadNext").textContent=beat?local(destination+"へ",destination+" 도착"):local("話を聞く　›","이야기 듣기　›");
     const canvas=el("roadIllustration"),c=canvas.getContext("2d"),w=canvas.width,h=canvas.height;
     c.imageSmoothingEnabled=false;c.drawImage(MapArt.battle(rank,id%20),0,0,w,h);
-    ExpeditionCast.party(c,0,w*.3,h*.92,h*.66);
-    if(who||Crew.guide())ExpeditionCast.companion(c,who||Crew.guide(),w*.69,h*.92,h*.66);
+    const party=Crew.travelers(),guests=who>0&&!party.includes(who-1);
+    const heroX=party.length?w*.47:w*.30,ground=h*.92,heroPx=Math.min(h*.62,w/(party.length+2.7));
+    Crew.draw(c,w*.035,heroX-w*.074,ground,heroPx,0,0,3);
+    WorldScale.hero(c,heroX,ground,heroPx);
+    if(guests)WorldScale.draw(c,who-1,w*.75,ground,heroPx);
   }
   function close(){if(el("roadDialog").open)el("roadDialog").close();}
   el("roadSkip").onclick=close;el("roadNext").onclick=()=>{if(beat)close();else{beat++;render();}};
@@ -24,17 +27,21 @@ const RoadTalk=(()=>{
 const BossMatch=(()=>{
   const panel=el("matchDialog"),native=!!document.querySelector('meta[name="local-go-engine"]');
   const local=(ja,ko)=>localizedPair([ja,ko]);
-  let rank,entryDepth=0,practice,position,line=[],selected=null,pending=false,token=0,worker=null,abort=null,finished=false,result=null,zoom=false,notice="";
-  const key=()=>storageKey+".match."+rank+(practice?".practice."+entryDepth:".route");
+  let rank,early=null,entryDepth=0,practice,position,line=[],selected=null,pending=false,token=0,worker=null,abort=null,finished=false,result=null,zoom=false,notice="";
+  const profile=()=>early===null?null:EarlyGuardians.game(early);
+  const entryGame=()=>profile()||MatchRules.entry(MatchPositions[rank],entryDepth);
+  const komi=()=>profile()?.komi??MatchRules.komi[rank];
+  const stageId=()=>early??rank*10+9;
+  const key=()=>early!==null?storageKey+".early-match."+early:storageKey+".match."+rank+(practice?".practice."+entryDepth:".route");
   const persistent=()=>{try{localStorage.setItem(key(),JSON.stringify(line));}catch{}};
   function stop(){cancelAnimationFrame(sceneFrame);token++;abort?.abort();abort=null;worker?.terminate();worker=null;pending=false;}
   function load(restart){
-    const entry=MatchRules.entry(MatchPositions[rank],entryDepth);line=[];
+    const entry=entryGame();line=[];
     if(!restart)try{const raw=JSON.parse(localStorage.getItem(key()));if(Array.isArray(raw)&&raw.length<=1250&&raw.every(Number.isInteger))line=raw;}catch{}
     try{position=MatchRules.replay(entry.size,[...entry.start,...line]);}catch{line=[];position=MatchRules.replay(entry.size,entry.start);}
-    selected=null;finished=position.passes===2;result=finished?MatchRules.score(position,MatchRules.komi[rank]):null;notice="";
+    selected=null;finished=position.passes===2;result=finished?MatchRules.score(position,komi()):null;notice="";
   }
-  const name=()=>localizedPair(Voyage.guardians[rank]);
+  const name=()=>early===null?localizedPair(Voyage.guardians[rank]):localizedPair(Expedition.names[Math.floor(early/20)][early%20])+local("・斥候長"," · 정예대장");
   function paint(){
     const canvas=el("matchBoard"),c=canvas.getContext("2d"),n=position.n,w=canvas.width,u=w/(n+1),g=position.board;
     Wardrobe.surface(c,w,w,saved.gear[0]);c.strokeStyle=Wardrobe.boards[saved.gear[0]][5][2];c.lineWidth=1.6;
@@ -60,12 +67,13 @@ const BossMatch=(()=>{
     const scene=el("matchScene"),ink=scene.getContext("2d"),age=reduceMotion?2:(time-strike)/1000;
     const active=age>=0&&age<.64,push=active?Math.sin(Math.PI*Math.min(1,age/.38)):0;
     const hit=active?Math.sin(Math.PI*Math.max(0,Math.min(1,(age-.2)/.4))):0;
-    ink.imageSmoothingEnabled=false;ink.drawImage(MapArt.battle(Math.floor(rank/2),(rank*10+9)%20),0,0,scene.width,scene.height);
-    const hx=74+(striker===1?18*push:-6*hit),ex=242+(striker===2?-20*push:7*hit);
-    ExpeditionCast.party(ink,0,hx,94-push*2,61,0,0,CastMotion.phase(1,time));
-    Crew.draw(ink,9,95,42,(reduceMotion?0:Math.floor(time/165)%4));
-    if(Crew.guide())ExpeditionCast.companion(ink,Crew.guide(),37,94,61,.025*hit);
-    ExpeditionCast.guardian(ink,rank,ex,94,78,(striker===2?-.11:.14)*push,1,CastMotion.phase(2,time));
+    ink.imageSmoothingEnabled=false;ink.drawImage(MapArt.battle(Math.floor(stageId()/20),stageId()%20),0,0,scene.width,scene.height);
+    const count=Crew.travelers().length,heroPx=Math.min(61,scene.width/(count+4.8));
+    const hx=74+count*16+(striker===1?18*push:-6*hit),ex=242+(striker===2?-20*push:7*hit);
+    Crew.draw(ink,4,hx-heroPx*.53,94,heroPx,reduceMotion?0:Math.floor(time/165)%4,CastMotion.crewPhase(time),2);
+    WorldScale.hero(ink,hx,94,heroPx,CastMotion.phase(1,time));
+    if(early===null)ExpeditionCast.guardian(ink,rank,ex,94,78,(striker===2?-.11:.14)*push,1,CastMotion.phase(2,time));
+    else ExpeditionCast.foe(ink,Expedition.species(early),ex,94,72,(striker===2?-.11:.14)*push,1,CastMotion.phase(2,time));
     if(active){
       const f=Math.min(1,age/.39),a=striker===1?hx+16:ex-16,b=striker===1?ex-13:hx+11;
       const x=a+(b-a)*f,y=65-Math.sin(f*Math.PI)*14;
@@ -79,12 +87,12 @@ const BossMatch=(()=>{
     sceneFrame=requestAnimationFrame(frame);
   }
   function render(){
-    const entry=MatchRules.entry(MatchPositions[rank],entryDepth),n=entry.size;
-    el("matchName").textContent=name();el("matchProfile").textContent=n+local("路","줄")+" · "+local("第","제")+(entry.start.length+line.length+1)+local("手","수")+" · "+(native?"KataGo "+MatchRules.budget(rank,entryDepth)+local("探索","탐색"):local("端末AI ","기기 AI ")+(Math.min(7,rank+entryDepth)+1)+"/8");
+    const entry=entryGame(),n=entry.size;
+    el("matchName").textContent=name();el("matchProfile").textContent=n+local("路","줄")+" · "+local("第","제")+(entry.start.length+line.length+1)+local("手","수")+" · "+(native&&early===null?"KataGo "+MatchRules.budget(rank,entryDepth)+local("探索","탐색"):local("端末AI ","기기 AI ")+(Math.min(7,rank+entryDepth)+1)+"/8");
     const margin=result?.margin;
-    el("matchStatus").textContent=finished?local("黒面積 ","흑 면적 ")+result.black+local(" · 白面積 "," · 백 면적 ")+result.white+local(" · コミ "," · 덤 ")+MatchRules.komi[rank]+"　"+(margin>0?local("黒","흑"):local("白","백"))+" +"+Math.abs(margin):notice||(
+    el("matchStatus").textContent=finished?local("黒面積 ","흑 면적 ")+result.black+local(" · 白面積 "," · 백 면적 ")+result.white+local(" · コミ "," · 덤 ")+komi()+"　"+(margin>0?local("黒","흑"):local("白","백"))+" +"+Math.abs(margin):notice||(
       position.side===2?local("白が考えています…","백이 응수를 읽고 있어요…"):selected!==null?MatchRules.coordinate(n,selected)+" · "+local("ここに打つ？","여기에 둘까요?"):local("黒番。取り残した死石は終局前に取ろう。","흑 차례. 잡을 돌은 끝내기 전에 따내세요."));
-    el("matchHint").textContent=localizedPair(Voyage.matchGoals[rank]);
+    el("matchHint").textContent=finished&&early!==null?local("双方がパス。石と囲んだ空点を数えた。","양쪽이 패스했어요. 돌과 둘러싼 빈 점을 더해 계가했어요."):localizedPair(profile()?.goal||Voyage.matchGoals[rank]);
     el("matchPass").textContent=local("パス","패스");el("matchPass").hidden=finished;el("matchPass").disabled=pending||position.side!==1;
     el("matchPlace").hidden=n===9||finished||position.side!==1;el("matchPlace").disabled=selected===null;el("matchPlace").textContent=local("着手","착수");
     el("matchAgain").hidden=!finished||margin>0;el("matchAgain").textContent=local("もう一局","재대국");
@@ -105,31 +113,43 @@ const BossMatch=(()=>{
       BoardFX.playOn(el("matchFx"),position.n,p,taken,position.side,saved.fx,true);
     }
     line.push(p);position=next;selected=null;notice="";persistent();sound(p<0?"reply":"tap");
-    finished=position.passes===2;result=finished?MatchRules.score(position,MatchRules.komi[rank]):null;
+    finished=position.passes===2;result=finished?MatchRules.score(position,komi()):null;
     if(finished&&result.margin>0&&practice){saved.matchWins|=1<<rank;save();}
     if(p>=0)animateMove(3-next.side,next.taken);
     render();return true;
   }
-  function fallback(){
-    return new Promise((resolve,reject)=>{
-      const src=makeMatchRules.toString()+"\nonmessage=e=>{const x=e.data;postMessage(makeMatchRules().choose(x.state,x.rank,x.komi));};";
-      const blob=URL.createObjectURL(new Blob([src],{type:"text/javascript"}));
-      try{worker=new Worker(blob);}finally{URL.revokeObjectURL(blob);}
-      worker.onmessage=e=>{worker.terminate();worker=null;resolve(e.data);};worker.onerror=e=>reject(Error(e.message));
-      worker.postMessage({state:position,rank:Math.min(7,rank+entryDepth),komi:MatchRules.komi[rank]});
-    });
+  let workerEnabled=true;
+  async function fallback(stamp){
+    const state=position,strength=Math.min(7,rank+entryDepth),extra=komi();
+    if(workerEnabled)try{
+      return await new Promise((resolve,reject)=>{
+        const src=makeMatchRules.toString()+"\nonmessage=e=>{const x=e.data;postMessage(makeMatchRules().choose(x.state,x.rank,x.komi));};";
+        const blob=URL.createObjectURL(new Blob([src],{type:"text/javascript"}));
+        try{worker=new Worker(blob);}finally{URL.revokeObjectURL(blob);}
+        const running=worker;
+        running.onmessage=e=>resolve(e.data);
+        running.onerror=e=>{e.preventDefault();reject(Error("Worker unavailable"));};
+        running.onmessageerror=()=>reject(Error("Worker message unavailable"));
+        running.postMessage({state,rank:strength,komi:extra});
+      });
+    }catch{
+      if(stamp===token)workerEnabled=false;
+    }finally{
+      if(stamp===token){worker?.terminate();worker=null;}
+    }
+    return MatchRules.chooseLocally(state,strength,extra,()=>stamp===token);
   }
   async function whiteMove(){
     if(pending||finished||position.side!==2)return;
     const stamp=++token;pending=true;notice="";render();
     try{
       let p;
-      if(native){
+      if(native&&early===null){
         abort=new AbortController();
         const response=await fetch("/api/move",{method:"POST",signal:abort.signal,headers:{"Content-Type":"application/json"},body:JSON.stringify({rank,entryDepth,moves:line})});
         if(!response.ok)throw Error("engine");
         const answer=await response.json();p=answer.point;
-      }else p=await fallback();
+      }else p=await fallback(stamp);
       const lead=CastMotion.remainingBlackLead;if(lead)await new Promise(done=>setTimeout(done,lead));
       if(token!==stamp)return;pending=false;if(!commit(p))throw Error("Illegal engine move");
     }catch{if(token!==stamp)return;pending=false;notice=local("白の応手を取得できません。もう一度試せます。","백의 응수를 받지 못했어요. 다시 시도할 수 있어요.");render();}
@@ -139,8 +159,8 @@ const BossMatch=(()=>{
     if(!commit(p)){notice=local("そこには打てません。","그곳에는 둘 수 없어요.");render();return;}
     if(!finished)whiteMove();
   }
-  function open(id,practiceOnly,restart=false){
-    stop();CastMotion.reset();rank=id;practice=practiceOnly;entryDepth=practice?Number(el("matchEntry").value)||0:0;zoom=false;BoardFX.clear(el("matchFx"));load(restart);
+  function open(id,practiceOnly,restart=false,earlyStage=null){
+    stop();CastMotion.reset();early=!practiceOnly&&Number.isInteger(earlyStage)&&earlyStage<80&&EarlyGuardians.is(earlyStage)?earlyStage:null;rank=early===null?id:EarlyGuardians.game(early).rank;practice=practiceOnly;entryDepth=practice?Number(el("matchEntry").value)||0:0;zoom=false;BoardFX.clear(el("matchFx"));load(restart);
     const n=position.n,points=el("matchPoints");points.style.gridTemplateColumns="repeat("+n+",1fr)";
     points.style.gridTemplateRows="repeat("+n+",1fr)";points.style.inset=(50/(n+1))+"%";
     points.replaceChildren(...Array.from({length:n*n},(_,p)=>{
@@ -150,16 +170,16 @@ const BossMatch=(()=>{
     }));
     if(!panel.open)panel.showModal();render();if(position.side===2&&!finished)whiteMove();
   }
-  function leave(){stop();panel.close();openMap(practice?mapLocation():rank*10+9);}
+  function leave(){stop();panel.close();openMap(practice?mapLocation():stageId());}
   el("matchBack").onclick=leave;panel.oncancel=e=>{e.preventDefault();leave();};
   el("matchPlace").onclick=()=>{if(selected!==null)blackMove(selected);};el("matchPass").onclick=()=>blackMove(-1);
-  el("matchAgain").onclick=()=>{line=[];persistent();open(rank,practice,true);};
+  el("matchAgain").onclick=()=>{line=[];persistent();open(rank,practice,true,early);};
   el("matchRepeat").onclick=whiteMove;el("matchZoom").onclick=()=>{zoom=!zoom;render();};
   el("matchDone").onclick=()=>{
     if(!finished||result.margin<=0)return;
     try{localStorage.removeItem(key());}catch{}
     if(practice){leave();return;}
-    stop();panel.close();finishDuel(rank*10+9);
+    stop();panel.close();finishDuel(stageId());
   };
-  return {open,get active(){return panel.open;},get position(){return position;},get rank(){return rank;},get result(){return result;},get line(){return line;}};
+  return {open,get early(){return early;},get active(){return panel.open;},get position(){return position;},get rank(){return rank;},get result(){return result;},get line(){return line;}};
 })();

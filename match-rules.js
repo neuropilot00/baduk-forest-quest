@@ -91,11 +91,12 @@ function makeMatchRules(){
     picks.sort((a,b)=>b.value-a.value||a.p-b.p);
     return picks.slice(0,2+rank);
   }
-  function choose(state,rank,extra){
+  function* searchSteps(state,rank,extra){
     if(state.passes===1&&score(state,extra).margin*(state.side===1?1:-1)>0)return -1;
     const moves=options(state,rank);if(!moves.length)return -1;
     if(rank<2)return moves[0].p;
     for(const item of moves){
+      yield;
       const replies=options(item.next,Math.min(3,rank));
       if(replies.length)item.value-=.7*replies[0].value;
       if(rank>=5&&replies[0]){
@@ -106,12 +107,28 @@ function makeMatchRules(){
     moves.sort((a,b)=>b.value-a.value);
     return moves[0].value<-.5?-1:moves[0].p;
   }
+  function choose(state,rank,extra){
+    const search=searchSteps(state,rank,extra);
+    let step=search.next();
+    while(!step.done)step=search.next();
+    return step.value;
+  }
+  async function chooseLocally(state,rank,extra,active){
+    const search=searchSteps(state,rank,extra);
+    while(active()){
+      await new Promise(resolve=>setTimeout(resolve,0));
+      if(!active())return null;
+      const step=search.next();
+      if(step.done)return step.value;
+    }
+    return null;
+  }
   function entry(game,depth){
     const cut=[0,8,20][depth];if(cut===undefined)throw Error("Unknown entry");
     return {...game,start:game.start.slice(0,Math.max(2,game.start.length-cut))};
   }
   const budget=(rank,depth)=>Math.min(1600,visits[rank]*(depth+1));
-  return {visits,komi,budget,entry,coordinate,point,near,move,replay,score,choose};
+  return {visits,komi,budget,entry,coordinate,point,near,move,replay,score,choose,chooseLocally};
 }
 const MatchRules=makeMatchRules();
 if(typeof module!=="undefined")module.exports=MatchRules;

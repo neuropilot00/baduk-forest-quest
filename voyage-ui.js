@@ -2,6 +2,7 @@
 
 const trials=["trial2","trial3","trial4","trialBoss"];
 function startTrial(id){
+  if(id===4){trial={id,fortress:true,key:"fortRehearsal"};showField();startExpedition(9,0);return;}
   const phases=id===0?[exercise(5,0)]:id===1?[exercise(6,3)]:id===2?[Expedition.narrowGate(27,exercise)]
     :[exercise(2,414),exercise(3,415),exercise(5,6),exercise(6,9),Expedition.narrowGate(29,exercise)];
   trial={id,key:trials[id],stage:{enemy:3,species:31,phases}};
@@ -33,6 +34,7 @@ function portrait(canvas,character){
   if(image.naturalWidth)paint();else image.addEventListener("load",paint,{once:true});
 }
 function openMap(id,outcome=false){
+  TempoCombat.leave();
   clearTimeout(timer);WorldMap.cancel();
   mapStage=id;mapOutcome=outcome;
   el("voyage").hidden=false;
@@ -60,17 +62,17 @@ function renderMap(){
   el("mapRegion").textContent=localizedPair(Atlas.chapters[rank].name);
   WorldMap.render(mapStage,mapOutcome);
   portrait(el("sceneCast"),actor);
-  el("voyChapter").textContent=t("chapterLabel",rank+1)+" · "+localizedPair(Expedition.ranks[rank]);
+  el("voyChapter").textContent=t("chapterLabel",rank+1);
   el("voyTitle").textContent=localizedPair(Voyage.chapters[rank]);
-  el("voyLocation").textContent=t("stageLabel",String(mapStage+1).padStart(2,"0"))+" / 80 · "+campaignTitle(mapStage)+(mapStage<saved.expedition?" · ✓ "+t("cleared"):"");
+  el("voyLocation").textContent=t("stageLabel",String(mapStage+1).padStart(2,"0"))+" / 80"+(mapStage<saved.expedition?" · ✓ "+t("cleared"):"");
   el("voyPlace").textContent=mapOutcome?(finale?t("returnCrew"):newRecruit?t("recruit")+" · "+localizedPair(actor.name):t("clearedStage")+" · "+localizedPair(scene.title)):localizedPair(scene.title);
   el("voySpeaker").textContent=localizedPair(actor.name)+" · "+localizedPair(actor.role);
   el("voyLine").textContent=localizedPair(mapOutcome?scene.after:scene.before)+(mapOutcome&&newRecruit?" “"+localizedPair(actor.oath)+"”":"");
   if(locked)el("voyLine").textContent=t("needsSite",localizedPair(Voyage.places[mapStage-1]));
   if(mapOutcome){
     if(lastLoot)el("voyLine").append(" · "+localizedPair(Workshop.materials[lastLoot[0]])+" +"+lastLoot[1]);
-    const joined=Crew.roles.find(role=>role.gate===mapStage+1&&saved.expedition===mapStage+1);
-    if(joined)el("voyLine").append(" · "+localizedPair(joined.name)+"「"+localizedPair(joined.line)+"」");
+    if(ticketWon)el("voyLine").append(" · "+localizedPair(["招待状","영입권"])+" +1");
+    if(teamFound.length)el("voyLine").append(" · "+localizedPair(["同行者の成果","동료의 성과"])+" "+teamFound.map(([i,n])=>localizedPair(Workshop.materials[i])+" +"+n).join(" · "));
     const prize=earnedCosmetic;
     if(prize)el("voyLine").append(" · "+t("unlockedSkin",localizedPair(prize[3])));
     if((mapStage+1)%20===0 && !finale)el("voyLine").append(" · "+t("nextChapter",localizedPair(Voyage.chapters[rank+1])));
@@ -88,22 +90,10 @@ function renderMap(){
     b.onclick=()=>openMap(i===Expedition.rankOf(Math.min(79,saved.expedition))?Math.min(79,saved.expedition):20*i);
     return b;
   }));
-  el("partyList").replaceChildren(...Voyage.cast.map((person,i)=>{
-    const card=document.createElement("button"),pic=document.createElement("canvas"),copy=document.createElement("span");
-    const name=document.createElement("b"),role=document.createElement("small"),status=document.createElement("em");
-    const joined=i===0 || saved.expedition>=person.gate;
-    card.type="button";card.className="party-card";card.dataset.member=i;card.disabled=i===0 || !joined;
-    card.setAttribute("aria-pressed",String(i>0 && i===saved.partner));
-    pic.width=144;pic.height=136;pic.setAttribute("aria-hidden","true");portrait(pic,person);
-    name.textContent=localizedPair(person.name);role.textContent=localizedPair(person.role);
-    status.textContent=i===0?t("protagonist"):!joined?t("recruitAt",person.gate):i===saved.partner?t("deployed"):t("choose");
-    card.onclick=()=>{saved.partner=i;save();renderMap();};
-    copy.append(name,role);card.append(pic,copy,status);return card;
-  }));
   Crew.render();
-  el("trialChoices").replaceChildren(...trials.map((key,i)=>{
+  el("trialChoices").replaceChildren(...[...trials,"fortRehearsal"].map((key,i)=>{
     const b=document.createElement("button");b.type="button";b.className="control";b.dataset.trial=i;
-    b.textContent=((saved.trials&(1<<i))?"✓ ":"")+t(key);b.onclick=()=>startTrial(i);return b;
+    b.textContent=((i<4&&(saved.trials&(1<<i)))?"✓ ":"")+t(key);b.onclick=()=>startTrial(i);return b;
   }));
   el("bossPicker").replaceChildren(...MatchPositions.map((entry,i)=>new Option(((saved.matchWins&(1<<i))?"✓ ":"")+localizedPair(Voyage.guardians[i])+" · "+entry.size+t("lines"),String(i))));
   function entries(){
@@ -130,10 +120,11 @@ el("voyGo").onclick=()=>{
     beginWalk();return;
   }
   showField();trial=null;saved.location=mapStage;saved.track="expedition";save();startExpedition(mapStage);
-  if(saved.gate===mapStage){mode="matchReady";showBossMatch();}
+  if(saved.gate===mapStage||EarlyGuardians.ready(mapStage,saved)){mode="matchReady";showBossMatch();}
 };
 localize();
 resumeTrack();
 openMap(mapLocation());
 battleReady=true;
 requestAnimationFrame(battleLoop);
+CrewArt.ready.then(()=>{if(!el("voyage").hidden)WorldMap.render(mapStage,mapOutcome,false);},()=>{});

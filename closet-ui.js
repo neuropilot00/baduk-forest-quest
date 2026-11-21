@@ -142,8 +142,8 @@ function drawWaterwheel(x,ground,height,time,clears){
     ctx.strokeRect(cx-19,base-32,38,35);
     for(let i=-1;i<=1;i++)ctx.strokeRect(cx+i*9,base-31,1,32);ctx.restore();
   }
-  if(clears<3)shield(x-height*.46,ground-height*.44,0);
-  else for(let i=0;i<3;i++){
+  if(clears<3&&phase!==2)shield(x-height*.46,ground-height*.44,0);
+  else if(clears>=3)for(let i=0;i<3;i++){
     ctx.fillStyle=i%2?"#b08b59":"#dfbe7d";ctx.fillRect(x-height*.37+i*12,ground-2+i%2*3,8,4);
   }
 }

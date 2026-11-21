@@ -14,11 +14,62 @@ const Wardrobe=(()=>{
     ["aurora",0,8,["極夜と極光の石","극야와 극광의 돌"],["天竜の五番勝負を達成","천룡 5연전 성공"],["#45547d","#25263e","#121b2b","#ffffff","#e4f4eb","#c3dbd6"]]
   ];
   boards.push(...Workshop.additions(0));stones.push(...Workshop.additions(1));
-  const owns=(item,progress,badges)=>!!item && (item[6]?Workshop.owns(saved.work,item[6]):progress>=item[1]&&(badges&item[2])===item[2]);
+  // Append campaign rewards after all sixteen recipes; existing wardrobe IDs stay stable.
+  const reachReady=typeof ReachPuzzles!=="undefined"&&typeof SecondReach!=="undefined";
+  const dockBoard=boards.length,shellStones=stones.length;
+  if(reachReady){
+    boards.push(["postDock",null,0,["修復した郵便桟橋の盤","복원한 우편 선착장 목판"],["初級2の20番目の水門を修復","초급 2의 스무 번째 수문 복구"],["#e5c691","#c69b69","#574027"],null,20]);
+    stones.push(["waterScale",null,0,["水秤の甲殻石","물저울 갑각돌"],["初級2の10番目の水門を修復","초급 2의 열 번째 수문 복구"],["#4e6769","#293a3d","#101a1d","#fffbea","#f1ead6","#d8cfbc"],null,10]);
+  }
+  function owns(item,progress,badges){
+    if(!item)return false;
+    if(item[7])return reachReady&&progress>=20&&SecondReach.cleared()>=item[7];
+    return item[6]?Workshop.owns(saved.work,item[6]):progress>=item[1]&&(badges&item[2])===item[2];
+  }
+  function repairedDock(c){
+    const bands=[0,73,162,256,346,441,540];
+    for(let i=0;i<bands.length-1;i++){
+      const top=bands[i],bottom=bands[i+1],joint=[104,373,214,455,159,316][i];
+      c.fillStyle=i%2?"#fff5d51d":"#8755260c";c.fillRect(0,top,540,bottom-top);
+      c.strokeStyle="#70543642";c.lineWidth=2;c.beginPath();
+      c.moveTo(0,top);c.lineTo(540,top);c.moveTo(joint,top);c.lineTo(joint,bottom);c.stroke();
+      c.lineWidth=1.25;c.strokeStyle="#855d3633";
+      for(let n=1;n<=4;n++){
+        const y=top+(bottom-top)*n/5;
+        c.beginPath();c.moveTo(0,y);c.bezierCurveTo(joint*.48,y-5,joint*.76,y+8,joint-3,y);c.stroke();
+        c.beginPath();c.moveTo(joint+3,y+5);c.bezierCurveTo(joint+52,y-7,482,y+4,540,y-3);c.stroke();
+      }
+      // A shallow bow-tie key physically bridges each staggered joint.
+      const y=top+(bottom-top)*.53;
+      c.fillStyle="#967351";c.beginPath();c.moveTo(joint-8,y-5);c.lineTo(joint,y-2);c.lineTo(joint+8,y-5);c.lineTo(joint+8,y+5);c.lineTo(joint,y+2);c.lineTo(joint-8,y+5);c.closePath();c.fill();
+    }
+    c.save();c.translate(46,486);c.rotate(-.26);c.strokeStyle="#77564480";c.lineWidth=2.2;
+    c.beginPath();c.arc(0,0,18,0,Math.PI*2);c.moveTo(12,0);c.arc(0,0,12,0,Math.PI*2);c.stroke();
+    for(const y of [-7,0,7]){c.beginPath();c.moveTo(15,y);c.bezierCurveTo(22,y-4,30,y+4,40,y);c.stroke();}
+    c.restore();
+  }
+  function shellPlates(c,x,y,r,white){
+    c.save();c.translate(x,y);c.scale(r,r);c.rotate(-.26);
+    const ridges=[[-.88,-.48,-.36,-.22,0,-.48],[0,-.48,.42,-.18,.92,-.42],
+      [-.98,.02,-.48,.28,0,.02],[0,.02,.44,.29,.96,.08],
+      [-.81,.48,-.39,.73,0,.49],[0,.49,.4,.73,.81,.51]];
+    c.lineJoin="round";c.lineWidth=.07;c.strokeStyle=white?"#9d957c":"#111f26";
+    for(const [a,b,m,n,e,f] of ridges){
+      c.beginPath();c.moveTo(a,b);c.quadraticCurveTo(m,n+.13,e,f);c.stroke();
+    }
+    c.lineWidth=.032;c.strokeStyle=white?"#fffef5":"#a5bab366";
+    for(const [a,b,m,n,e,f] of ridges){
+      c.beginPath();c.moveTo(a,b-.045);c.quadraticCurveTo(m,n+.085,e,f-.045);c.stroke();
+    }
+    c.lineWidth=.052;c.strokeStyle=white?"#84938899":"#101e24cc";
+    c.beginPath();c.moveTo(.03,-.91);c.quadraticCurveTo(-.08,-.36,0,.02);c.quadraticCurveTo(.07,.51,-.02,.88);c.stroke();
+    c.restore();
+  }
   function surface(c,w,h,id){
     const colors=boards[id][5],gradient=c.createLinearGradient(0,0,w,h);
     gradient.addColorStop(0,colors[0]);gradient.addColorStop(1,colors[1]);c.fillStyle=gradient;c.fillRect(0,0,w,h);
     c.save();c.scale(w/540,h/540);c.lineWidth=1.4;
+    if(reachReady&&id===dockBoard){repairedDock(c);c.restore();return;}
     if(id>=4){
       c.strokeStyle=colors[2];c.globalAlpha=.13;c.lineWidth=.07;
       for(let row=0;row<7;row++)for(let col=0;col<7;col++)Workshop.motif(c,id-4,15+col*88+(row%2)*22,18+row*86,26);
@@ -40,6 +91,7 @@ const Wardrobe=(()=>{
     g.addColorStop(0,tone[start]);g.addColorStop(.73,tone[start+1]);g.addColorStop(1,tone[start+2]);c.fillStyle=g;
     c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fill();c.strokeStyle=white?"#70695e":"#101614";c.lineWidth=Math.max(1,r*.07);c.stroke();c.clip();
     c.strokeStyle=white?"#a08c6e60":"#c9d3db66";c.lineWidth=r*.075;
+    if(reachReady&&id===shellStones){shellPlates(c,x,y,r,white);c.restore();return;}
     if(id>=4){c.strokeStyle=white?"#7c827b89":"#ced4c68c";c.lineWidth=.093;Workshop.motif(c,id-4,x-r*.05,y+r*.07,r*.61);}
     if(id===1){c.beginPath();if(white)c.arc(x,y-r*.05,r*.72,.3,1.63);else{c.moveTo(x-r*.68,y-r*.12);c.lineTo(x-r*.18,y-r*.7);c.lineTo(x+r*.31,y-r*.47);}c.stroke();}
     if(id===2){for(let j=0;j<3;j++){c.beginPath();c.ellipse(x-r*.3,y+r*(.34+j*.19),r,r*.21,-.35,3.4,5.9);c.stroke();}}

@@ -23,3 +23,22 @@
 #gearDialog .settings-caption{font-size:.83rem;line-height:1.5;color:#cad1ba;margin:9px 0}
 .map-stop.cleared i{background:#254f3b;border-color:#ffe3a2;color:#fffadc;min-width:18px;min-height:18px;font-size:13px;box-shadow:0 0 0 2px #254338}
 .map-stop.cleared.here i{background:#254f3b}.map-stop.cleared.here::before{content:"✓";position:absolute;top:-2px;right:0;background:#244b35;color:#ffedbd;border:1px solid #ead193;border-radius:50%;width:15px;height:15px;font:700 12px/14px system-ui;z-index:3}
+
+@media(min-width:800px) and (min-aspect-ratio:6/5){
+  #battleLayout.fortress-view{display:block}
+  #battleLayout.fortress-view[hidden]{display:none}
+  #battleLayout.fortress-view .main{display:grid;grid-template-columns:minmax(0,1.16fr) minmax(0,1fr);grid-template-rows:auto auto auto 1fr;align-items:start;gap:12px}
+  #battleLayout.fortress-view .scene{grid-area:1/1}
+  #battleLayout.fortress-view .route{grid-area:2/1}
+  #battleLayout.fortress-view .challenge{grid-area:3/1}
+  #battleLayout.fortress-view .board-panel{grid-area:1/2/5/3}
+  #battleLayout.fortress-view .board-wrap{width:min(100%,60svh);margin-inline:auto}
+  #battleLayout.fortress-view .rail{margin-top:18px}
+}
+
+.ticket-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:16px}
+.expedition-roster #ticketRule,.expedition-roster .party-card small{color:#c0c9b2;line-height:1.5}
+#recruitResult:not([hidden]){display:flex;align-items:center;gap:12px;margin:15px 0;padding:12px 0;border-block:1px solid #7b8864}
+#recruitPic canvas{width:94px;height:94px;image-rendering:pixelated}
+.expedition-roster .party-card{grid-template-columns:62px 1fr auto}
+.expedition-roster .party-card canvas{width:62px;height:62px;image-rendering:pixelated}
