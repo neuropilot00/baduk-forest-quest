@@ -1,0 +1,52 @@
+/* The poster carries its own painted lettering. These roles style live text. */
+html:lang(ja){
+  --game-ui-font:"Dawn UI JP","Dawn UI KR",sans-serif;
+  --game-display:"Dawn Serif JP","Dawn UI JP","Dawn Serif KR","Dawn UI KR",serif;
+  --prose-break:normal;
+}
+html:lang(ko){
+  --game-ui-font:"Dawn UI KR","Dawn UI JP",sans-serif;
+  --game-display:"Dawn Serif KR","Dawn UI KR","Dawn Serif JP","Dawn UI JP",serif;
+  --prose-break:keep-all;
+}
+html{--game-numbers:var(--game-ui-font);text-size-adjust:100%;-webkit-text-size-adjust:100%}
+body,body button,body select,body option,body textarea,body input,body dialog{font-family:var(--game-ui-font)}
+body :is(#campMenu,#gearDialog,#roadDialog,#matchDialog,#burstDialog,#battleLayout,#voyage) :is(button,select,summary,label,small,p,h2,h3){
+  font-family:var(--game-ui-font);
+}
+body :is(#voyTitle,#voyPlace,#campHeading,#gearHeading,#roadPlace,#matchName,#burstTitle,#journalDialog h2,#partyHeading){
+  font-family:var(--game-display);font-weight:700;letter-spacing:.025em;line-height:1.24;
+  text-wrap:balance;word-break:var(--prose-break);overflow-wrap:break-word;
+}
+body #burstDialog #burstTitle{
+  font-family:var(--game-display);font-weight:700;letter-spacing:.02em;
+  text-shadow:0 2px 1px #323136,0 3px 8px #0a1926;line-height:1.28;
+}
+body :is(#roadDialog #roadLine,#voyage #voyLine,#battleLayout #sceneLine,#journalEntries article p){
+  font-family:var(--game-display);font-weight:600;line-height:1.55;letter-spacing:.012em;
+  word-break:var(--prose-break);overflow-wrap:break-word;line-break:strict;
+}
+body #roadDialog #roadLine{font-size:clamp(1.02rem,3.8vw,1.24rem);line-height:1.62}
+body #voyage #voyLine{font-size:clamp(.87rem,3.45vw,1rem)}
+body #battleLayout #sceneLine{font-size:clamp(.78rem,3.37vw,.93rem);line-height:1.4}
+body :is(#roadWho,#voySpeaker,#enemyName,#skill,#sceneTitle,#objective,#burstGoal,#recruitName){
+  font-family:var(--game-ui-font);font-weight:700;letter-spacing:.005em;line-height:1.4;
+}
+body :is(#objective,#feedback,#matchStatus,#burstRule,#burstGoal,#formationMessage,#ticketRule){
+  word-break:var(--prose-break);overflow-wrap:break-word;line-break:strict;
+}
+body :is(#burstRule,#formationMessage,#ticketRule){line-height:1.5}
+body :is(#chapterTabs,#trialChoices,#fieldTools,.camp-choices,.voyage-actions,.buttons,.settings-tabs) button,
+body :is(#mapMenuOpen,#fieldMenuOpen,#titleMenuOpen,#burstOpen,#burstBack,#menuBack,#mapButton){
+  font-family:var(--game-ui-font);font-weight:680;letter-spacing:.005em;
+}
+body :is(#burstSeconds,#tempoSeconds,#guardHP,#squadCaption,#ticketCount,#turn,#mapCount,#region,#voyLocation,#roadChapter,#voyChapter,#matchStatus){
+  font-family:var(--game-numbers);font-variant-numeric:lining-nums tabular-nums;
+}
+body :is(#burstSeconds,#tempoSeconds,#guardHP){font-weight:750;white-space:nowrap}
+body #burstSeconds{letter-spacing:.025em;text-shadow:0 1px 2px #101a24}
+body #campMenu .formation-member :is(b,small){font-family:var(--game-ui-font)}
+body #campMenu .formation-member small{font-weight:500}
+@media(min-width:750px){
+  body #campHeading{font-size:1.55rem}body #voyTitle{letter-spacing:.035em}
+}

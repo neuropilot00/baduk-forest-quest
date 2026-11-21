@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<base href="./assets/b193b2e58be2cc50/">
+<base href="./assets/9c95e8588a7549aa/">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="囲碁の一手で森のモンスターに立ち向かうパズルゲーム">
 <meta name="color-scheme" content="only dark">
@@ -81,6 +81,7 @@
 <link rel="stylesheet" href="./battle-entrance.css">
 <link rel="stylesheet" href="./map-journey.css">
 <link rel="stylesheet" href="./camp-atlas.css">
+<link rel="stylesheet" href="./battle-layout.css">
 </head>
 <body>
 <section id="titleScene" aria-labelledby="titleName">
@@ -113,14 +114,14 @@
 <div class="scene-head"><div class="unit"><b data-text="party">ソルビ探検隊</b><output class="party-vital" id="allyVital" aria-live="off" hidden></output><span class="meter" role="meter" data-label="partyHP" aria-label="探検隊の体力" aria-valuenow="100"><i id="allyHP"></i></span></div><span class="scene-tag" id="region"></span><div class="unit enemy"><b id="enemyName"></b><span id="enemyShield" role="img" hidden></span><span id="enemyShieldBurst" aria-hidden="true" hidden></span><output id="guardHP"></output><span class="meter" role="meter" data-label="monsterHP" aria-label="モンスターの体力"><i id="enemyHP"></i></span></div></div>
 <div class="combat-call" id="combat" aria-live="polite"></div></div>
 <div id="tempoHud" hidden><b id="tempoTurn"></b><span id="tempoTrack" aria-hidden="true"><i id="tempoBar"></i></span><span id="tempoSeconds"></span><output id="tempoNotice" aria-live="polite"></output><button type="button" id="burstOpen" hidden></button></div>
-<div class="story-strip"><div class="story-heading"><b id="sceneTitle"></b><button type="button" class="control" id="mapButton" data-text="storyMap"></button><button type="button" id="journalButton" data-text="journal">旅の手帳</button></div><p id="sceneLine" aria-live="polite"></p></div>
+<div class="story-strip"><div class="story-heading"><div class="field-place"><b id="sceneTitle"></b><span id="fieldPath" role="img" hidden></span></div><button type="button" class="control" id="mapButton" data-text="storyMap"></button><button type="button" id="journalButton" data-text="journal">旅の手帳</button></div><p id="sceneLine" aria-live="polite"></p></div>
 </section>
 <section class="panel route" aria-labelledby="routeTitle"><div class="route-head"><h2 id="routeTitle" data-text="route">森の冒険ルート</h2><div class="tracks"><button type="button" id="expeditionTab" data-text="expedition">遠征</button><button type="button" id="trainingTab" data-text="training">囲碁の練習</button><button type="button" id="storyTab" data-text="story">物語</button></div></div><div class="rank-row" id="rankRow" hidden><label for="rankPicker" data-text="rankSelect">遠征の難易度</label><select id="rankPicker"></select></div><div id="tinyRoute" hidden></div><div id="stages" class="stages"></div></section>
 <section class="challenge" data-label="battleGoal" aria-label="バトルの目標"><span class="sigil" id="sigil" aria-hidden="true"></span><div><b id="skill"></b><p id="objective"></p></div><button type="button" id="lessonTrace" hidden aria-pressed="false" aria-controls="points objective"></button><span class="turn" id="turn"></span></section>
 <section class="board-panel" data-label="boardLabel" aria-label="碁盤">
 <div class="board-top"><b data-text="board">九路盤</b><span id="toMove"></span></div>
 <div class="board-wrap"><div class="x-axis" aria-hidden="true"></div><div class="y-axis" aria-hidden="true"></div><div class="board"><canvas id="boardArt" class="board-art" width="540" height="540" aria-hidden="true"></canvas><canvas class="board-fx" id="boardFx" width="540" height="540" aria-hidden="true"></canvas><div class="points" id="points" role="group" data-label="boardGrid" aria-label="九路盤の交点"></div></div></div>
-<span class="art-note" id="combatArt" hidden></span><div id="fieldTools" class="field-tools" role="group" data-label="supportLabel" hidden></div><div class="status"><p id="feedback" role="status"></p><div class="buttons"><button type="button" class="control" id="hint" data-text="hint">ヒント</button><button type="button" class="control" id="reset" data-text="retryBoard">打ち直す</button><button type="button" class="control primary" id="next" hidden>次のバトル</button></div></div>
+<span class="art-note" id="combatArt" hidden></span><div class="status"><p id="feedback" role="status"></p><div class="buttons"><div id="fieldTools" class="field-tools" role="group" data-label="supportLabel" hidden></div><button type="button" class="control" id="hint" data-text="hint">ヒント</button><button type="button" class="control" id="reset" data-text="retryBoard">打ち直す</button><button type="button" class="control primary" id="next" hidden>次のバトル</button></div></div>
 </section>
 </div>
 <aside class="rail"><section class="panel field-guide" id="fieldGuide" hidden><details><summary><span data-text="bestiary"></span> <span id="fieldCount"></span></summary><div class="collection expedition-collection" id="fieldCollection"></div></details><h2 data-text="supportLabel"></h2><div class="techbook" id="fieldBook"></div><h2 data-text="battleArtsTitle"></h2><p data-text="battleArtsHelp"></p></section>
@@ -197,6 +198,8 @@
 <script src="./further-fauna.js"></script>
 <script src="./outer-fauna.js"></script>
 <script src="./outer-defense-style.js"></script>
+<script src="./duel-reading.js"></script>
+<script src="./board-flow.js"></script>
 <script src="./second-reach.js"></script>
 <script src="./last-signal.js"></script>
 <script src="./last-stand.js"></script>
@@ -821,6 +824,7 @@ const cast=images.actors.map(loadArt);
 let animation={type:"idle",start:0};
 let lastDraw=0;
 const reduceMotion=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const fieldTransition=boardTransition();
 const screenWidth=760;
 let screenHeight=310,battleReady=false;
 function resizeBattle() {
@@ -907,7 +911,11 @@ function drawBattle(time,force=false) {
   ctx.setTransform(canvas.width/w,0,0,canvas.height/h,0,0);
   ctx.imageSmoothingEnabled=false;
   ctx.fillStyle="#213c35";ctx.fillRect(0,0,w,h);
-  if(journey()){ctx.drawImage(MapArt.battle(Expedition.rankOf(level),level%20),0,0,w,h);}
+  if(journey()){
+    const landscape=MapArt.battle(Expedition.rankOf(level),level%20);
+    const ratio=Math.max(w/landscape.width,h/landscape.height);
+    ctx.drawImage(landscape,(w-landscape.width*ratio)/2,(h-landscape.height*ratio)*.6,landscape.width*ratio,landscape.height*ratio);
+  }
   else if(picture.naturalWidth) {
     const ratio=Math.max(w/picture.naturalWidth,h/picture.naturalHeight)*1.018;
     const width=picture.naturalWidth*ratio,height=picture.naturalHeight*ratio;
@@ -1329,9 +1337,11 @@ function arrive(){
   if(journey()){const from=level;WorldMap.cancel();saved.location=level+1;save();startExpedition(level+1);openMap(level);RoadTalk.open(from,level);}
   else start(level+1);
 }
-function nextAfterVictory(){
-  if(!journey() && level===stages.length-1) return;
-  timer=setTimeout(journey()?()=>openMap(level,true):beginWalk,reduceMotion?550:1800);
+function automaticBoard() {
+  if(mode==="phase"||mode==="matchReady")return true;
+  if(mode!=="won"||trial)return false;
+  if(inTraining())return saved.training[saved.course]<courseLimits[saved.course];
+  return journey()||level<stages.length-1;
 }
 function encounter() {
   return inTraining() ? {enemy:courses[saved.course][3], phases:[mission]} : journey()?campaignStage:storyBattles[level];
@@ -1559,6 +1569,13 @@ function refresh() {
     el("feedback").textContent=localizedPair(CrewTactics.members[crewHint.owner].name)+localizedPair([" · 光る点に黒。青印は"," · 밝은 점에 착수. 파란 표시는 "])+localizedPair(crewHint.label);
   }
   if(!crewReview&&lanternPoints.length>1)el("feedback").textContent=(crewHint?.label?el("feedback").textContent+" · ":"")+localizedPair(["候補は","후보 "])+lanternPoints.length+localizedPair(["か所。どれでも打てます。","곳. 어느 곳에 두어도 됩니다."]);
+  const automatic=automaticBoard();
+  el("battleLayout").dataset.settling=String(automatic);
+  if(automatic&&!el("battleLayout").hidden){
+    const board=state, outcome=mode;
+    el("next").hidden=true;
+    fieldTransition.schedule(board,el("battleLayout"),()=>state===board&&mode===outcome&&!el("battleLayout").hidden,advanceBoard);
+  }
   syncHintAttention();
   el("reset").disabled=mode==="waiting";
   if(battleReady&&!el("battleLayout").hidden)drawBattle(performance.now(),true);
@@ -1572,6 +1589,13 @@ function rail() {
   el("fieldGuide").hidden=!journey();
   document.body.classList.toggle("on-campaign",journey());
   el("tinyRoute").hidden=!journey();
+  const fieldPath=el("fieldPath");
+  fieldPath.hidden=!journey()||!!trial;
+  if(!fieldPath.hidden){
+    const stop=level%20;
+    fieldPath.style.setProperty("--field-position",(stop/19*100)+"%");
+    fieldPath.setAttribute("aria-label",localizedPair(["地方の道","지역 원정길"])+" "+(stop+1)+"/20");
+  }
   if(journey())el("tinyRoute").textContent=t("route")+"   "+Array.from({length:5},(_,i)=>i<level%5?"━":i===level%5?"◆":"─").join(" ")+"   "+localizedPair(Voyage.places[level]);
   const solvedTotal=saved.training.reduce((sum,count)=>sum+count,0);
   const shortNumber=new Intl.NumberFormat(saved.locale);
@@ -1705,13 +1729,14 @@ function encounterText() {
   if(journey()){
     const boss=!trial&&(EarlyGuardians.is(level)||level%10===9);
     const count=trial||boss?t("round",phase+1,stage.phases.length):localizedPair(["第"+(fieldRound+1)+"局",(fieldRound+1)+"번째 문제"]);
-    el("region").textContent=(trial?t(trial.key):campaignTitle(level))+" · "+count;
+    const gate=level%20===19?localizedPair(["区ボス","지역보스"]):localizedPair(["中ボス","중간보스"]);
+    el("region").textContent=boss?gate+" · "+localizedPair(["前哨戦","전초전"])+" "+(phase+1)+"/"+stage.phases.length:(trial?t(trial.key):campaignTitle(level))+" · "+count;
   }
   el("enemyName").textContent=journey()&&!trial&&TempoCombat.foes.length?localizedPair(["敵の群れ","적 무리"]):journey()?((!trial||trial.fortress) && level%10===9?localizedPair(Voyage.guardians[Math.floor(level/10)]):monsterName(stage.species)):t(creatures[stage.enemy][0]);
 }
 function setPosition(puzzle,nextMode="playing") {
   FirstLesson.reset();
-  BattleEntrance.cancel();clearTimeout(timer);
+  fieldTransition.cancel();BattleEntrance.cancel();clearTimeout(timer);
   lanternPoints=[];crewHint=crewReview=crewIntercept=null;interceptSpent=false;beforeMove=null;scouting=false;lights=[];allyMarks=[];counterPoint=null;hintStep=0;usedSkills=new Set();
   if(typeof CastMotion!=="undefined")CastMotion.reset();
   BoardFX.clear(el("boardFx"));
@@ -1853,8 +1878,7 @@ function finish(completedPuzzle=true) {
     }
     if(duel){
       mode="matchReady";battleMessage("unsealMatch","win",mission.kind);message("feedback","unsealMatch");sound("skill");refresh();
-      el("next").hidden=false;el("next").textContent=t("playDuel");
-      timer=setTimeout(showBossMatch,reduceMotion?550:1500);return;
+      return;
     }
     const reward=Expedition.skills.find(([,gate])=>gate>previous && saved.expedition>=gate);
     const captureText=Fortress.isHere()&&phase===2?"artCaptureDone":"groupCaptured";
@@ -1866,7 +1890,7 @@ function finish(completedPuzzle=true) {
     if(reward) message("feedback","skillReward",reward[0]);
     else message("feedback",end?(level===Expedition.total-1?"journeyDone":"trailWon"):"gateWon");
     sound(end?"win":"skill");refresh();
-    if(end){grantMaterials(level);nextAfterVictory();}
+    if(end)grantMaterials(level);
     return;
   }
   const stage=storyBattles[level];
@@ -1892,7 +1916,7 @@ function finish(completedPuzzle=true) {
   } else message("feedback",finalPhase?"battleWon":"bossWeakened");
   sound(finalPhase?"win":"skill");
   refresh();
-  if(finalPhase) nextAfterVictory();
+
 }
 function combatGift(kind){
   return journey() && campaignStage.phases.slice(0,phase+(mode==="phase" || mode==="won"?1:0)).some(m=>m.kind===kind);
@@ -2116,7 +2140,7 @@ el("reset").onclick=()=>{
   const attempt=studyAttempt;
   startExpedition(level,trial?phase:fieldRound,true);window.scrollTo({top:0,behavior:"instant"});studyAttempt=attempt;if(!trial)checkpointStand();
 };
-el("next").onclick=()=>{
+function advanceBoard(){
   if(mode==="matchReady"){showBossMatch();return;}
   if(inTraining()) {
     if (mode!=="won" && mode!=="complete") return;
@@ -2135,7 +2159,8 @@ el("next").onclick=()=>{
     if(level===(journey()?Expedition.total:stages.length)-1) journey()?startExpedition(0):start(0);
     else beginWalk();
   }
-};
+}
+el("next").onclick=advanceBoard;
 el("language").onclick=()=>{
   saved.locale=GameLanguage.next(saved.locale);
   save();

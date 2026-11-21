@@ -1,0 +1,9 @@
+/* The board stays in place as the travellers arrive. Its single temporary
+   caption comes from the active game language and goes away before Black's turn. */
+.arrival-caption {
+  position:absolute; z-index:3; pointer-events:none;
+  left:50%; bottom:4%; transform:translateX(-50%);
+  padding:.28em .8em; white-space:nowrap; border-radius:2px;
+  background:#203137ed; color:#f4e5bd; font-weight:650; font-size:.82rem;
+}
+.board[data-arrival] #boardArt,.reach-goban[data-arrival] #reachBoard { filter:brightness(.79); }

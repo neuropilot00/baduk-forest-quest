@@ -1,0 +1,16 @@
+.route-panel{min-width:0}.route-dock{display:flex;align-items:center;gap:.6em;min-height:42px;padding:4px 10px;background:#263c35;color:#efe6c8}
+.route-dock :is(h2,h3,p,small){margin:0;font-size:.91rem;line-height:1.3}.route-dock :is(#voyGo,#reachAction,#outerAction,#outerLetter){margin-inline-start:auto;flex:none}
+.route-dock [hidden],.story-leaf>[hidden]{display:none!important}
+#voyage .story-leaf :is(#voyLocation,#voyEncounter),#reachMap :is(#reachDistrict,#reachMapGoal,#reachMapCount),#outerLocal :is(#outerCount,#outerGoal){display:none!important}
+#voyage button[data-travel-next] i{outline:2px solid #fff5ba;outline-offset:3px;color:#fff9e4;box-shadow:0 0 0 2px #523f2d,0 0 10px 4px #f6cc60}
+#voyage button[data-travel-next]::before{content:"";position:absolute;pointer-events:none;width:25px;height:25px;border-radius:50%;border:2px solid #ffe39a;animation:map-beacon 1.6s ease-out infinite}
+@keyframes map-beacon{from{transform:scale(.7);opacity:1}to{transform:scale(1.52);opacity:.05}}
+@media(prefers-reduced-motion:reduce){#voyage button[data-travel-next]::before{animation:none}}
+#outerJourney .outer-journey-copy{display:block}#outerJourney .outer-journey-copy button{position:relative;float:right}
+@media(max-width:700px) and (orientation:portrait){
+  :is(.atlas-region,.reach-spread,#outerLocal)>.route-panel{display:flex;flex-direction:column;flex:1 1 0;min-height:0}
+  .atlas-region>.route-panel>.atlas-window,#outerMap #outerLocal .route-panel>#outerViewport,#reachMap .route-panel>#reachViewport{flex:1 1 0;min-height:190px;max-height:none}
+  .route-panel>.route-dock{flex:0 0 auto}
+}
+
+.route-dock:has(#voyGo[hidden]),.route-dock:has(#reachAction[hidden]),.route-dock:has(#outerAction[hidden]):has(#outerLetter[hidden]){display:none}
