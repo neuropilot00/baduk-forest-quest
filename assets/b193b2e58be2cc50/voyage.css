@@ -1,0 +1,116 @@
+
+.atlas-layout #voyEncounter{margin:4px 0 3px;font-size:.78rem;font-weight:650;line-height:1.35;color:#4a5038}
+.map-stop .gate-sign{position:absolute;pointer-events:none;left:calc(50% + 5px);bottom:calc(50% + 6px);width:16px;height:17px;background:#342b25;clip-path:polygon(0 0,100% 0,100% 63%,62% 91%,49% 100%,0 64%)}
+.map-stop .gate-sign:before{content:"";position:absolute;inset:2px 2px 3px;background:#dbb16e;clip-path:polygon(0 0,100% 0,100% 58%,50% 100%,0 58%)}
+.map-stop .gate-sign:after{content:"";position:absolute;inset:4px 5px 6px;background:#6f423c;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
+.map-stop .gate-sign.keep{width:20px;height:19px;clip-path:polygon(0 0,25% 0,25% 24%,40% 24%,40% 0,60% 0,60% 24%,75% 24%,75% 0,100% 0,100% 100%,0 100%)}
+.map-stop .gate-sign.keep:before{inset:6px 2px 2px;clip-path:none;background:#e1bb81}
+.map-stop .gate-sign.keep:after{inset:9px 7px 2px;clip-path:polygon(0 32%,50% 0,100% 32%,100% 100%,0 100%)}
+.map-stop.route-destination i{outline:2px solid #fff2b8;outline-offset:2px}
+@media (max-width:700px) and (orientation:portrait){
+  .shell:has(#voyage:not([hidden])){padding-bottom:0}
+  #voyage:not([hidden]){margin:0 auto;padding-bottom:max(6px,env(safe-area-inset-bottom));min-height:100vh;min-height:100dvh}
+  #voyage:not([hidden]):not(.in-reach):not(.in-outer){display:flex;flex-direction:column;height:100vh;height:100dvh}
+  #voyage>.atlas-head,.atlas-layout>.story-leaf,.atlas-tabs{flex:none}
+  #voyage>.atlas-head #reachAreaOpen:disabled{display:none}
+  #voyage>.atlas-head #mapMenuOpen{white-space:nowrap;flex-shrink:0}
+  #voyage>.atlas-head h1{word-break:keep-all}
+  #voyage>.atlas-layout,.atlas-layout>.atlas-region{display:flex;flex-direction:column;flex:1 1 0;min-height:0;margin:0}
+  #voyage>.atlas-layout{min-height:min-content}
+  .atlas-region>.atlas-window{flex:1 1 0;min-height:190px}
+  #voyage .atlas-window #mapViewport{position:absolute;inset:0;height:100%;max-height:none}
+  #mapWorld,#reachWorld,#outerStageWorld{min-height:100%}
+  #reachMap:not([hidden]):not(.reach-walking),#outerMap:not([hidden]):has(#outerLocal:not([hidden])){display:flex;flex-direction:column;height:calc(100vh - 8px);height:calc(100dvh - max(8px,env(safe-area-inset-bottom)))}
+  #reachMap:not(.reach-walking)>.reach-spread,#outerMap>#outerLocal:not([hidden]){display:flex;flex-direction:column;flex:1 1 0;min-height:0}
+  #reachMap:not(.reach-walking) #reachViewport,#outerMap #outerLocal>#outerViewport{flex:1 1 0;min-height:190px;max-height:none}
+  #reachMap .reach-detail,#outerMap .reach-detail{flex:none}
+}
+
+.voyage{--leaf:#b5d082;--paper:#f5ead0;--deep:#17241f;margin:0 auto 30px}
+.art-note{display:block;max-width:430px;margin:6px auto;color:#eac787;font-size:.82rem;font-weight:bold}.study{margin-top:12px}.study p{font-size:.86rem;color:#d1d8c6}.study .camp-links button{min-height:44px}
+.voyage button{touch-action:manipulation}
+
+
+#sceneCast{position:absolute;bottom:6%;right:1%;height:90%;width:39%;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(3px 8px 3px #15291a88);pointer-events:none}
+.story-leaf{background:var(--paper);color:#263d30;border-radius:0 0 15px 15px;border:1px solid #b5aa86;border-top:4px solid #c39e5c;padding:14px clamp(15px,3vw,32px) 18px}.story-leaf .scene-id{color:#53684a;font-size:.82rem;font-weight:800}.story-leaf h2{font-size:clamp(20px,3vw,30px);margin:2px 0 7px}.story-leaf p{margin:5px 0 12px;line-height:1.65;font-size:1rem;max-width:62ch;word-break:keep-all}.story-leaf .speaker{font-weight:850;color:#385e42}
+.voyage-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.voyage-action{border:1px solid #305440;background:#30583e;color:#fff4d7;border-radius:8px;min-height:43px;padding:8px 16px;font-weight:800}.voyage-action.secondary{background:transparent;color:#395640}.voyage-action:disabled{opacity:.6}
+.voyage-card{padding:16px;border:1px solid #526552;border-radius:12px;background:#1d3029}.voyage-card h2{margin:0;font-size:1.08rem;color:#f6dfa3}.party-list{display:grid;gap:5px;margin-top:10px}.party-card{background:#233a30;border:1px solid #48604d;color:#e6e8cf;border-radius:7px;display:grid;grid-template-columns:50px 1fr auto;align-items:center;text-align:left;gap:8px;padding:4px 9px;min-height:54px}.party-card[aria-pressed=true]{border-color:#a9ba7e}.party-card canvas{width:48px;height:45px;image-rendering:pixelated}.party-card:disabled:not([aria-pressed=true]) canvas{filter:saturate(.3);opacity:.65}.party-card b,.party-card small{display:block}.party-card small{font-size:.78rem;color:#c1cbb7}.party-card em{font-size:.75rem;color:#e9cc91;font-style:normal}.camp-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.camp-links button,#mapButton{min-height:40px}.scene .unit output{font-size:.73rem;color:#fff2bf}.stage-tactic{color:#eff1d3}
+@media(max-width:700px){.story-leaf{padding:10px 13px 14px}.story-leaf p{font-size:.91rem}.voyage-card{padding:12px}.voyage-action{min-height:43px}.scene-head{gap:3px}.scene-tag{max-width:36%;line-height:1.2}.top{flex-wrap:wrap;gap:4px}}
+
+#gearDialog{width:min(590px,calc(100vw - 20px));max-height:90svh;overflow:auto;padding:16px;border:1px solid #857b57;border-radius:14px;background:#1d3029;color:var(--text)}
+#gearDialog::backdrop{background:#0d1919dc}#gearDialog h2{font-size:1.1rem;margin:0}#gearDialog h3{font-size:.95rem;color:#efcf8c;margin:12px 0 5px}
+.gear-items{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}.gear-items button{background:#253a31;border:1px solid #50614e;border-radius:6px;padding:3px;color:#ede7cc;text-align:center;font-size:.76rem;line-height:1.22}.gear-items button[aria-pressed=true]{border:2px solid #f1c87d;padding:2px}.gear-items canvas{display:block;width:100%;height:auto;margin-bottom:3px;border-radius:4px}.gear-items .locked span{color:#bdc8ba}.gear-detail{display:flex;align-items:center;gap:13px;margin-top:14px;border-top:1px solid #50614e;padding-top:12px}.gear-detail canvas{width:36%;height:auto;border-radius:6px}.gear-detail p{margin:3px 0 6px;font-size:.86rem}
+.board-wrap{display:grid;grid-template-columns:13px minmax(0,1fr);grid-template-rows:13px auto;width:min(100%,443px);margin:auto}.board-wrap .board{grid-column:2;grid-row:2;width:100%}.x-axis,.y-axis{font-size:10px;line-height:1;display:grid;color:#c4c7b3;text-align:center;align-items:center;font-variant-numeric:tabular-nums}.x-axis{grid-column:2;grid-template-columns:repeat(9,1fr);padding:0 4px}.y-axis{grid-row:2;grid-template-rows:repeat(9,1fr);padding:4px 0}
+.on-campaign #battleLayout .route{padding:6px 10px}.on-campaign #battleLayout .route-head,.on-campaign #battleLayout .rank-row,.on-campaign #battleLayout .stages{display:none}.on-campaign #tinyRoute{font-size:.78rem;color:#e8d8a7;line-height:1.4}
+@media(max-width:700px){.on-campaign .scene .battle-frame canvas{height:clamp(132px,37.5vw,165px)}.on-campaign .story-strip{min-height:0;padding:4px 7px 6px}.on-campaign .story-strip p{line-height:1.35;margin:1px 0 0}.story-heading #mapButton{min-height:29px;padding:2px 7px;white-space:nowrap}.on-campaign #journalButton{min-height:29px}.on-campaign .challenge{min-height:42px;margin:5px 0}.on-campaign .route{margin-top:5px}.board-wrap{width:min(100%,400px,max(282px,calc(100svh - 381px)))}.board-panel{padding:5px 6px 7px}.on-campaign .scene-head .unit{min-width:72px}.on-campaign #guardHP{font-size:.62rem}.on-campaign .scene-tag{align-self:start}.gear-detail .control{min-height:40px}}
+
+/* Geographic expedition chart. Every hotspot is attached to terrain coordinates. */
+.atlas-head{display:flex;align-items:center;justify-content:space-between;padding:6px 2px 12px;gap:9px}
+.atlas-head small,.map-caption span{color:#bac7a8;font-size:.75rem;letter-spacing:.06em}
+.atlas-head h1{font-family:Georgia,"Hiragino Mincho ProN","AppleMyungjo",serif;font-size:clamp(25px,4vw,38px);line-height:1.18;color:#f8eac2;margin:3px 0}
+#personalSettings,.atlas-tabs button,.home-book summary{background:transparent;border:0;color:#c6d3b9;font:inherit;font-size:.81rem;min-height:40px;cursor:pointer}
+#personalSettings{padding:3px 5px}#personalSettings::before{content:"⚙";margin-right:.3em}
+.atlas-layout{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(270px,1fr);align-items:stretch;gap:0;margin-bottom:15px}
+.atlas-region{min-width:0}.atlas-tabs{display:flex;gap:16px;padding:0 8px;background:#23382d;border-radius:8px 8px 0 0}
+.atlas-tabs button{border-bottom:2px solid transparent;padding:0 4px;color:#b9c7ad}.atlas-tabs button[aria-pressed=true]{color:#ffe4a8;border-bottom-color:#e2ba72;font-weight:bold}
+.atlas-window{position:relative;background:#536c51;overflow:hidden}.atlas-window:after{content:"";position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 2px 7px #263d3633}
+#mapViewport{height:clamp(325px,48svh,490px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#8f9b79 #4f6857}
+#mapWorld{position:relative;width:100%;aspect-ratio:384/652;isolation:isolate}
+#worldLand,#worldActors,#waypoints,#worldLabels{position:absolute;inset:0;width:100%;height:100%;display:block}
+#worldLand,#worldActors{image-rendering:pixelated}
+#worldActors,#worldLabels{pointer-events:none}#worldLabels{z-index:1}
+#worldLabels span{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;font-size:clamp(10px,2.65vw,13px);font-weight:750;color:#fff1c9;text-shadow:1px 1px 0 #1c362a,-1px -1px 0 #1c362a,0 1px 3px #143e2b;background:#2b4134bb;padding:1px 5px;border-radius:2px}
+#waypoints{z-index:2}#worldActors{z-index:3}
+.map-stop{position:absolute;transform:translate(-50%,-50%);min-width:0;width:42px;height:42px;display:grid;place-items:center;padding:0;border:0;border-radius:50%;background:transparent;touch-action:manipulation}
+.map-stop i{position:relative;display:grid;place-items:center;width:15px;height:15px;background:#566352;border:2px solid #f1dbad;border-radius:50%;color:#fff8db;font:800 10px/1 system-ui;box-shadow:0 1px 0 2px #414d3e}
+.map-stop.closed i{background:#7c7960;border-color:#cdbf98;width:12px;height:12px;border-radius:3px}
+.map-stop.closed i:before{content:"";position:absolute;width:6px;height:5px;border:2px solid #5c604e;border-bottom:0;border-radius:3px 3px 0 0;top:-7px}
+.map-stop.closed i:after{content:"";width:2px;height:4px;background:#ece3bd}
+.map-stop.cleared i{background:#375849}.map-stop.here i{background:#b28642}
+.map-stop[aria-pressed=true]:after{content:"";position:absolute;width:25px;height:17px;border:2px solid #fff0aa;border-radius:50%;box-shadow:0 0 0 2px #715b35}.map-stop:focus-visible{outline:3px solid #fff3b7}
+.traveling #waypoints{pointer-events:none}.traveling .map-stop[aria-pressed=true]:after{display:none}
+.map-caption,#locateParty,#mapSkip{position:absolute;z-index:4;bottom:8px;color:#f7ebc8;background:#243a2eea;border:1px solid #c3ba89aa;border-radius:5px}
+.map-caption{left:8px;pointer-events:none;font-size:.78rem;padding:5px 8px}.map-caption span{margin-left:7px;font-size:.7rem}
+#locateParty,#mapSkip{right:8px;min-height:34px;padding:3px 10px;font-size:.78rem}
+.atlas-layout .story-leaf{display:flex;flex-direction:column;justify-content:center;border:0;border-radius:0 8px 8px 0;padding:22px}.map-dialogue{display:flex;align-items:center;gap:8px}
+.map-dialogue #sceneCast{position:static;width:55px;height:60px;flex:0 0 55px;filter:none;object-fit:contain}
+.map-dialogue p{margin:3px 0 9px}.map-dialogue .speaker{font-size:.76rem}.map-dialogue + .voyage-actions{margin-top:5px}
+.home-book{margin:12px 0}.home-book summary{line-height:40px}
+@media(max-width:700px){
+.atlas-layout{display:block;margin-bottom:10px}.atlas-head{padding:1px 2px 8px}.atlas-tabs{gap:0;justify-content:space-around}.atlas-tabs button{flex:1;min-height:34px}.atlas-layout .story-leaf{border-radius:0 0 9px 9px;padding:10px 13px 12px}.atlas-layout .story-leaf h2{font-size:1.19rem;margin:3px 0 5px}.map-dialogue #sceneCast{width:44px;height:48px;flex-basis:44px}.map-dialogue p{font-size:.86rem;line-height:1.44;margin-bottom:3px}.atlas-window #mapViewport{height:clamp(300px,44svh,395px)}
+}
+
+.duel-choice{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-top:12px}.duel-choice label{width:100%;color:#efcf8c;font-size:.86rem}.duel-choice select{max-width:100%;min-height:36px;background:#25392f;color:var(--text);border:1px solid #69816b;border-radius:5px}
+.travel-dialog,.match-dialog{color:#f4ecd1;background:#182a24;border:0;padding:0;box-sizing:border-box}
+.travel-dialog::backdrop,.match-dialog::backdrop{background:#10201cf7}
+.travel-dialog[open]{position:fixed;inset:0;margin:0;display:grid;width:100dvw;max-width:none;height:100dvh;max-height:none;place-items:center;background:linear-gradient(155deg,#213d32,#13231f 62%)}
+.road-full{width:min(100%,960px);height:100%;min-height:0;margin:auto;display:grid;grid-template-rows:auto minmax(130px,1fr) auto;align-content:stretch}
+.travel-dialog[open]{overflow:auto;align-items:stretch}
+.travel-dialog .road-full header{padding-top:max(10px,env(safe-area-inset-top))}
+.travel-dialog #roadIllustration{width:100%;height:100%;min-height:0}
+.travel-dialog .road-words{box-sizing:border-box;padding:14px clamp(18px,5vw,48px) max(18px,env(safe-area-inset-bottom));background:#192b25;color:#fff2d1;border-top:2px solid #91794f}
+.travel-dialog .road-words p{max-width:48em;min-height:2.8em;margin-bottom:12px}
+@media(min-width:750px) and (orientation:landscape){
+ .travel-dialog .road-full{grid-template-columns:minmax(0,3fr) minmax(270px,2fr);grid-template-rows:auto minmax(0,1fr)}
+ .travel-dialog .road-full header{grid-column:1/-1}
+ .travel-dialog .road-words{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;border-top:0}
+}
+.road-full header,.match-shell header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 16px}
+.road-full small,.match-shell small{color:#d7c998;letter-spacing:.08em}
+#roadIllustration,#matchScene{display:block;width:100%;height:auto;image-rendering:pixelated}
+.road-words{padding:15px 7% 18px}.road-words h2{margin:0 0 16px;font-family:Georgia,serif;color:#ffe9b3;font-size:clamp(24px,6vw,42px)}.road-words b{color:#b7d092}.road-words p{font-size:1.07rem;line-height:1.65;min-height:3em;margin:5px 0 16px}
+.match-dialog[open]{width:min(100vw,540px);max-width:100vw;max-height:100dvh;border-radius:7px;overflow:auto}
+.match-shell{padding:8px 10px 14px}.match-shell header{padding:2px 0 6px}.match-shell h2{margin:2px 0;font-size:1.13rem}
+#matchScene{max-height:108px;object-fit:cover;border-radius:5px}#matchProfile{font-size:.78rem;color:#e5ca8d;margin:5px 0}#matchHint,#matchStatus{font-size:.87rem;line-height:1.4;margin:5px 0}
+#matchScroll{overflow:auto;max-height:min(62svh,580px);background:#986c42;border-radius:6px}#matchPaper{width:100%;aspect-ratio:1;position:relative}#matchPaper.zoom{width:175%}#matchBoard{width:100%;height:100%;display:block}
+#matchPoints{position:absolute;display:grid}#matchPoints button{min-width:0;min-height:0;border:0;background:transparent;padding:0;touch-action:manipulation}#matchPoints button:focus-visible{outline:2px solid #247198}
+.match-shell .buttons{justify-content:flex-end;gap:6px;flex-wrap:wrap}.match-shell .control{min-height:38px}
+
+.preferences{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 0 12px;border-bottom:1px solid #536452}.preferences label{font-size:.85rem;color:#ecdfbb;display:flex;gap:5px;align-items:center}
+body:has(#voyage[hidden]) .shell>.top{display:none}body:has(#voyage[hidden]) .shell{padding-top:8px}
+body:not(.with-coords) .board-wrap{display:block}body:not(.with-coords) .x-axis,body:not(.with-coords) .y-axis{display:none}
+.board-fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3}
+.on-campaign #combat[data-idle=true],.on-campaign .board-top>b,.on-campaign .challenge .sigil,.on-campaign .challenge b#skill,.on-campaign .art-note{display:none}
+.on-campaign .board-top{justify-content:flex-end;min-height:16px}.on-campaign .challenge p{margin:0}
+.on-campaign #battleLayout .challenge{align-items:center}.on-campaign #battleLayout .challenge>div{flex:1}
+#matchHint:empty{display:none}.duel-choice select{font:inherit;font-size:.82rem}

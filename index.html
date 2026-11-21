@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<base href="./assets/947a55d61b16d8fa/">
+<base href="./assets/b193b2e58be2cc50/">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="囲碁の一手で森のモンスターに立ち向かうパズルゲーム">
 <meta name="color-scheme" content="only dark">
@@ -57,6 +57,7 @@
 #hint.hint-idle{outline:2px solid #e1bd79;outline-offset:2px}
 </style>
 <link rel="stylesheet" href="./voyage.css">
+<link rel="stylesheet" href="./enemy-shield.css">
 <link rel="stylesheet" href="./reach-map.css">
 <link rel="stylesheet" href="./outer-map.css">
 <link rel="stylesheet" href="./outer-crossings.css">
@@ -71,6 +72,15 @@
 <link rel="stylesheet" href="./pixel-controls.css">
 <link rel="stylesheet" href="./typefaces.css">
 <link rel="stylesheet" href="./type-system.css">
+<link rel="stylesheet" href="./battle-health.css">
+<link rel="stylesheet" href="./battle-results.css">
+<link rel="stylesheet" href="./first-lesson.css">
+<link rel="stylesheet" href="./talk-portraits.css">
+<link rel="stylesheet" href="./story-frame.css">
+<link rel="stylesheet" href="./story-panels.css">
+<link rel="stylesheet" href="./battle-entrance.css">
+<link rel="stylesheet" href="./map-journey.css">
+<link rel="stylesheet" href="./camp-atlas.css">
 </head>
 <body>
 <section id="titleScene" aria-labelledby="titleName">
@@ -100,13 +110,13 @@
 <div class="main">
 <section class="scene" data-label="battleScreen" aria-label="バトル画面">
 <div class="battle-frame"><canvas id="battle" width="312" height="115" aria-hidden="true"></canvas>
-<div class="scene-head"><div class="unit"><b data-text="party">ソルビ探検隊</b><span class="meter" role="meter" data-label="partyHP" aria-label="探検隊の体力" aria-valuenow="100"><i id="allyHP"></i></span></div><span class="scene-tag" id="region"></span><div class="unit enemy"><b id="enemyName"></b><output id="guardHP"></output><span class="meter" role="meter" data-label="monsterHP" aria-label="モンスターの体力"><i id="enemyHP"></i></span></div></div>
+<div class="scene-head"><div class="unit"><b data-text="party">ソルビ探検隊</b><output class="party-vital" id="allyVital" aria-live="off" hidden></output><span class="meter" role="meter" data-label="partyHP" aria-label="探検隊の体力" aria-valuenow="100"><i id="allyHP"></i></span></div><span class="scene-tag" id="region"></span><div class="unit enemy"><b id="enemyName"></b><span id="enemyShield" role="img" hidden></span><span id="enemyShieldBurst" aria-hidden="true" hidden></span><output id="guardHP"></output><span class="meter" role="meter" data-label="monsterHP" aria-label="モンスターの体力"><i id="enemyHP"></i></span></div></div>
 <div class="combat-call" id="combat" aria-live="polite"></div></div>
 <div id="tempoHud" hidden><b id="tempoTurn"></b><span id="tempoTrack" aria-hidden="true"><i id="tempoBar"></i></span><span id="tempoSeconds"></span><output id="tempoNotice" aria-live="polite"></output><button type="button" id="burstOpen" hidden></button></div>
 <div class="story-strip"><div class="story-heading"><b id="sceneTitle"></b><button type="button" class="control" id="mapButton" data-text="storyMap"></button><button type="button" id="journalButton" data-text="journal">旅の手帳</button></div><p id="sceneLine" aria-live="polite"></p></div>
 </section>
 <section class="panel route" aria-labelledby="routeTitle"><div class="route-head"><h2 id="routeTitle" data-text="route">森の冒険ルート</h2><div class="tracks"><button type="button" id="expeditionTab" data-text="expedition">遠征</button><button type="button" id="trainingTab" data-text="training">囲碁の練習</button><button type="button" id="storyTab" data-text="story">物語</button></div></div><div class="rank-row" id="rankRow" hidden><label for="rankPicker" data-text="rankSelect">遠征の難易度</label><select id="rankPicker"></select></div><div id="tinyRoute" hidden></div><div id="stages" class="stages"></div></section>
-<section class="challenge" data-label="battleGoal" aria-label="バトルの目標"><span class="sigil" id="sigil" aria-hidden="true"></span><div><b id="skill"></b><p id="objective"></p></div><span class="turn" id="turn"></span></section>
+<section class="challenge" data-label="battleGoal" aria-label="バトルの目標"><span class="sigil" id="sigil" aria-hidden="true"></span><div><b id="skill"></b><p id="objective"></p></div><button type="button" id="lessonTrace" hidden aria-pressed="false" aria-controls="points objective"></button><span class="turn" id="turn"></span></section>
 <section class="board-panel" data-label="boardLabel" aria-label="碁盤">
 <div class="board-top"><b data-text="board">九路盤</b><span id="toMove"></span></div>
 <div class="board-wrap"><div class="x-axis" aria-hidden="true"></div><div class="y-axis" aria-hidden="true"></div><div class="board"><canvas id="boardArt" class="board-art" width="540" height="540" aria-hidden="true"></canvas><canvas class="board-fx" id="boardFx" width="540" height="540" aria-hidden="true"></canvas><div class="points" id="points" role="group" data-label="boardGrid" aria-label="九路盤の交点"></div></div></div>
@@ -200,6 +210,8 @@
 <script src="./world-scale.js"></script>
 <script src="./foe-tactics.js"></script>
 <script src="./fortress.js"></script>
+<script src="./enemy-shield.js"></script>
+<script src="./recruit-post.js"></script>
 <script src="./crew.js"></script>
 <script src="./wardrobe.js"></script>
 <script src="./board-fx.js"></script>
@@ -207,7 +219,11 @@
 <script src="./bell-sigil.js"></script>
 <script src="./burst-altar.js"></script>
 <script src="./tempo-defense.js"></script>
+<script src="./foe-party.js"></script>
+<script src="./battle-entrance.js"></script>
+<script src="./party-growth.js"></script>
 <script src="./tempo-combat.js"></script>
+<script src="./first-lesson.js"></script>
 <script>
 "use strict";
 const copy = {
@@ -335,7 +351,7 @@ const copy = {
   bossShield:["王の腕のよろいを外そう！","왕의 팔을 덮은 갑옷을 깨세요"],
   bossLink:["また離れた仲間をつなごう！","다시 흩어진 아군을 모으세요"],
   bossRead:["三手で古木王を囲いこめ！","세 수 안에 고목왕을 잡으세요"],
-  winCapture:["捕獲の術！ 盾をこわした！","포획술! 방패 격파"],
+  winCapture:["印の白の最後の呼吸点をふさいだ！","표시된 백의 마지막 활로를 막았어요!"],
   winLink:["連結の術！ 仲間が合流！","연결술! 동료와 합류"],
   winEscape:["救出の術！ 仲間が反撃！","구출술! 동료가 반격"],
   winRead:["包囲完了！ とどめの一撃！","포위 완성! 결정타"],
@@ -578,7 +594,7 @@ const creatures = [
   ["king","#dbbd78","#866644",10]
 ];
 const el = id => document.getElementById(id);
-const blank = {campaignId:CampaignSlots.id,reach:0,reachLamps:"",reachFork:0,finalBell:0,crossings:0,sentries:0,outer:"",outerLamp:"",lamps:"",roster:Roster.blank(),teamBank:0,fortRoute:0,work:Workshop.blank(),coords:false,fx:0,gate:-1,matchWins:0,past:0,location:0,cleared:0, muted:true, locale:"ja", track:"expedition", course:0, expedition:0, round:0, partner:0, trials:0, gear:[0,0], reviews:[0,0,0,0,0,0], marks:"", study:{},
+const blank = {campaignId:CampaignSlots.id,growth:0,reach:0,reachLamps:"",reachFork:0,finalBell:0,crossings:0,sentries:0,outer:"",outerLamp:"",lamps:"",roster:Roster.blank(),teamBank:0,fortRoute:0,work:Workshop.blank(),coords:false,fx:0,gate:-1,matchWins:0,past:0,location:0,cleared:0, muted:true, locale:"ja", track:"expedition", course:0, expedition:0, round:0, partner:0, trials:0, gear:[0,0], reviews:[0,0,0,0,0,0], marks:"", study:{},
   training:courses.map(()=>0)};
 function validTraining(values) {
   return Array.isArray(values) && values.length===courseLimits.length &&
@@ -606,6 +622,7 @@ try {
     saved.finalBell=FinalPost.reconcile(saved,stored.finalBell);
     saved.crossings=CrossingLog.normalize(stored.crossings,saved);
     saved.lamps=Lanterns.merge("",stored.lamps);
+    saved.growth=PartyGrowth.current(stored.growth);
     saved.location=validLocation(stored.location,saved.expedition);
     saved.round=validRound(saved.expedition,stored.round);
     if(stored.gate===saved.expedition && stored.gate%10===9)saved.gate=stored.gate;
@@ -688,7 +705,7 @@ function readStudy(source){
   }
   return output;
 }
-function save() {
+function save(fieldGrant=null) {
   try {
     let prior=null;const previous=localStorage.getItem(storageKey);
     if(previous){try{prior=JSON.parse(previous);}catch{}}
@@ -702,8 +719,16 @@ function save() {
     const priorCrossings=prior&&OuterCampaign.route(prior)===OuterCampaign.route(saved)?CrossingLog.normalize(prior.crossings,prior):0;
     saved.crossings=CrossingLog.merge(saved.crossings,priorCrossings,saved);
     saved.lamps=Lanterns.merge(saved.lamps,prior?.lamps);
+    saved.growth=PartyGrowth.current(PartyGrowth.merged(prior?.growth,saved.growth));
     if(prior?.roster){const disk=Roster.load(prior.roster,0);saved.roster.owned|=disk.owned;saved.roster.paid|=disk.paid;}
-    localStorage.setItem(storageKey,JSON.stringify({...saved,work:Workshop.packed(saved.work),roster:Roster.pack(saved.roster)}));return true;
+    const fieldGrants={...(prior?.campaignId===CampaignSlots.id?prior.fieldGrants:{})};
+    if(fieldGrant)fieldGrants[fieldGrant.id]=fieldGrant.revision;
+    if(prior?.work&&prior.campaignId===CampaignSlots.id){
+      const diskWork=Workshop.read(prior.work);
+      saved.work.earned=saved.work.earned.map((n,i)=>Math.max(n,diskWork.earned[i]));
+      saved.work.made=saved.work.made.map((n,i)=>n|diskWork.made[i]);
+    }
+    localStorage.setItem(storageKey,JSON.stringify({...saved,fieldGrants,work:Workshop.packed(saved.work),roster:Roster.pack(saved.roster)}));return true;
   }catch{return false;}
 }
 const messages = {};
@@ -849,20 +874,6 @@ function sprite(id,x,y,height,angle=0,alpha=1,pose=0) {
   ctx.drawImage(img,frame*144,row*136,144,136,-w/2,-height+height*.055,w,height);
   ctx.restore();
 }
-function shield(x,y,offset=0) {
-  for(const direction of [-1,1]) {
-    ctx.save();
-    ctx.translate(x+direction*offset,y+offset*.4);
-    ctx.rotate(direction*offset*.012);
-    ctx.scale(direction,1);
-    ctx.fillStyle="#397e899e";
-    ctx.strokeStyle="#fff0a2";
-    ctx.lineWidth=3;
-    ctx.beginPath();ctx.moveTo(0,-21);ctx.lineTo(19,-15);ctx.quadraticCurveTo(20,9,0,22);ctx.lineTo(4,5);ctx.lineTo(0,0);ctx.lineTo(3,-9);ctx.closePath();
-    ctx.fill();ctx.stroke();
-    ctx.restore();
-  }
-}
 function spellTrail(x1,y1,x2,y2,color,p) {
   const x=x1+(x2-x1)*p;
   const y=y1+(y2-y1)*p-Math.sin(Math.PI*p)*24;
@@ -908,7 +919,7 @@ function drawBattle(time,force=false) {
   const base=h*.88;
   const heroHeight=Math.min(228,h*.61),isGuardian=journey()&&(!trial||trial.fortress)&&level%10===9;
   const followerCount=journey()?Crew.travelers().length:0;
-  const partyHeight=Math.min(heroHeight*.777,w/(5.3+followerCount*.72));
+  const partyHeight=Math.min(heroHeight*.777,w/(5.3+followerCount*.72))*(followerCount===3&&canvas.width<400?.97:1);
   const foeHeight=journey()?(isGuardian?Math.min(220,h*(level===9?.74:.59)):FaunaMotion.fieldHeight(stage.species,partyHeight)):Math.min(241,h*([.49,.50,.56,.68][zone]));
   if(mode==="walking"){
     drawForestDepth(w,h,clock,zone);
@@ -926,10 +937,23 @@ function drawBattle(time,force=false) {
   }
   const placing=!reduceMotion&&mode==="waiting"?Math.sin(Math.PI*clamp(elapsed/.43)):0;
   const heroX=w*(.235+followerCount*.069)+placing*22+(winning?lunge*33:0)-(hit?impact*9:0);
-  const enemyX=w*.751+(winning?impact*17:0)-(hit?lunge*52:0);
+  const pack=journey()&&!trial?TempoCombat.foes:[];
+  const lanes=pack.length?FoeParty.layout(w,h,base,pack.length):null;
+  const strike=pack.length?TempoCombat.partyHit:null;
+  const aimed=lanes?.[TempoCombat.targetSlot(time)];
+  const targetGround=aimed?.y??base,targetHeight=aimed?.height??foeHeight;
+  const enemyX=aimed?aimed.x:w*.751+(winning?impact*17:0)-(hit?lunge*52:0);
+  if(BattleEntrance.blocking&&journey()){
+    EnemyShield.clear();
+    const id=isGuardian?Math.floor(level/10):stage.species,asset=isGuardian?ExpeditionCast.guardian:ExpeditionCast.foe;
+    const body=isGuardian?FaunaMotion.guards[id].move:FaunaMotion.field[id];
+    const arrival={x:enemyX,height:foeHeight,name:isGuardian?Voyage.guardians[id][1]:Expedition.names.flat()[id][1],kind:body.movement,
+      paint:(ink,x,y,height,frame)=>asset(ink,id,x,y,height,0,1,frame===0?-1:1,true)};
+    if(BattleEntrance.draw(ctx,canvas,w,h,base,heroX,partyHeight,12,heroX-partyHeight*.55,5,arrival,time))return;
+  }
   const exit=mode==="won" && !inTraining()?clamp((elapsed-.48)/.5):0;
   oval(ctx,"#14200b63",heroX,base,heroHeight*.31,8);
-  if(exit<1) oval(ctx,"#14200b63",enemyX,base,foeHeight*.37*(1-exit),Math.min(9,foeHeight*.065));
+  if(!pack.length&&exit<1) oval(ctx,"#14200b63",enemyX,base,foeHeight*.37*(1-exit),Math.min(9,foeHeight*.065));
   if(journey()){
     Crew.draw(ctx,12,heroX-partyHeight*.55,base,partyHeight,reduceMotion?0:Math.floor(time/180)%4,CastMotion.crewPhase(time),5);
     WorldScale.hero(ctx,heroX,base,partyHeight,CastMotion.phase(1,time));
@@ -937,23 +961,26 @@ function drawBattle(time,force=false) {
   else sprite(0,heroX,base+wave*1.2,heroHeight,winning?lunge*.07:wave*.009,1,active?(winning?1:2):0);
   if(journey()){
     if(combatGift("link"))sprite(5,heroX+70,base-heroHeight*.35+wave*2,heroHeight*.31);
-    if(combatGift("atari") && !boundSpent)loop(enemyX,base-foeHeight*.22,foeHeight*.44,9,"#e9bf78",3);
+    if(combatGift("atari") && !boundSpent)loop(enemyX,targetGround-targetHeight*.22,foeHeight*.44,9,"#e9bf78",3);
     if(Fortress.isHere())drawWaterwheel(enemyX,base,foeHeight,clock,phase+(mode==="phase" || mode==="won"?1:0));
     const p=active?impact:0;
-    (isGuardian?ExpeditionCast.guardian:ExpeditionCast.foe)(ctx,isGuardian?Math.floor(level/10):stage.species,enemyX,base-wave*2+exit*6,foeHeight*(1+wave*.014),hit?-lunge*.17:p*.16+wave*.012,1-exit,CastMotion.phase(2,time)||(Fortress.isHere()&&mode==="waiting"?1:0),true);
+    if(pack.length){
+      const frame=CastMotion.phase(2,time),pose=frame===2?"strike":frame===3?"hit":frame===1?"tell":"idle";
+      FoeParty.draw(ctx,pack,w,h,base,time,{pose,beat:clamp(elapsed/.62),hit:strike});
+    }else (isGuardian?ExpeditionCast.guardian:ExpeditionCast.foe)(ctx,isGuardian?Math.floor(level/10):stage.species,enemyX,base-wave*2+exit*6,foeHeight*(1+wave*.014),hit?-lunge*.17:p*.16+wave*.012,1-exit,CastMotion.phase(2,time)||(Fortress.isHere()&&mode==="waiting"?1:0),true);
     if(active && winning){
       const color=Expedition.palettes[Expedition.rankOf(level)][3];
       for(let i=0;i<8;i++){
         const angle=i*Math.PI/4;
         const radius=18+60*impact;
-        spark(enemyX+Math.cos(angle)*radius,base-foeHeight*.5+Math.sin(angle)*radius*.65,3+impact*3,color);
+        spark(enemyX+Math.cos(angle)*radius,targetGround-targetHeight*.5+Math.sin(angle)*radius*.65,3+impact*3,color);
       }
     }
     if(animation.type==="field" && elapsed<.8){
       loop(heroX,base-heroHeight*.35,24+elapsed*80,12+elapsed*36,"#a8f8d1",3);
     }
   }else sprite(zone+1,enemyX,base-wave*1.5+exit*6,foeHeight,hit?-lunge*.12:impact*.12+wave*.008,1-exit,active?(hit?1:2):0);
-  Fortress.draw(ctx,w,h,base,foeHeight,elapsed,clock);
+  EnemyShield.draw(ctx,w,h,base,foeHeight,enemyX,time);
   if(journey()&&!trial&&[0,2,4].includes(level))drawStoryAction(ctx,level,phase,mode,elapsed,w,base);
   const spiritY=base-heroHeight*.32;
   if(skill==="link" || skill==="escape") {
@@ -965,10 +992,6 @@ function drawBattle(time,force=false) {
       for(let i=-1;i<=1;i++) loop(x,spiritY-19,26,12+i*4,"#754a2d",3);
     }
     if(winning && active) spellTrail(heroX+24,base-heroHeight*.6,x,spiritY-14,"#aaffc6",clamp(elapsed*2));
-  }
-  if(skill==="capture" && !Fortress.ownsShield() && (!winning || elapsed<.78)) {
-    ctx.save();ctx.globalAlpha=winning?1-clamp((elapsed-.4)/.38):.89;
-    shield(enemyX-foeHeight*.43,base-foeHeight*.47,winning?clamp((elapsed-.38)/.38)*33:0);ctx.restore();
   }
   if(active && winning && skill==="escape") {
     const release=clamp(elapsed/.7);
@@ -984,7 +1007,7 @@ function drawBattle(time,force=false) {
     for(let n=0;n<steps;n++){
       const angle=(n/steps)*Math.PI*2+elapsed*2;
       const r=52*(1-clamp((elapsed-.32)/.67));
-      const x=enemyX-14+Math.cos(angle)*r,y=base-foeHeight*.45+Math.sin(angle)*r*.62;
+      const x=enemyX-14+Math.cos(angle)*r,y=targetGround-targetHeight*.45+Math.sin(angle)*r*.62;
       oval(ctx,n%2?"#fff7da":"#203b45",x,y,7,7);
       loop(x,y,7,7,"#a6e2ee",1.5);
     }
@@ -993,23 +1016,23 @@ function drawBattle(time,force=false) {
     const used=mission.turns-turns;
     for(let i=0;i<mission.turns;i++) {
       const x=enemyX+(i-(mission.turns-1)/2)*15;
-      const y=base+7;
+      const y=targetGround+7;
       oval(ctx,i<used?"#fce490":"#29372e",x,y,5.2,5.2);
       loop(x,y,5.2,5.2,"#e9ce81",1.2);
     }
   }
   if(mode==="waiting" && !reduceMotion){loop(heroX,base-6,26+clamp(elapsed*2)*24,6,"#e8d5a7",2);}
-  if(active && hit) spellTrail(enemyX-28,base-foeHeight*.45,heroX+10,base-heroHeight*.4,"#ff9a83",clamp(elapsed*2.2));
+  if(active && hit) spellTrail(enemyX-28,targetGround-targetHeight*.45,heroX+10,base-heroHeight*.4,"#ff9a83",clamp(elapsed*2.2));
   if(active && winning && !["link","escape"].includes(skill)){
     const color=skill==="read"?"#b5eaff":skill==="atari"?"#ffb471":"#ffdea0";
-    if(elapsed<.64) spellTrail(heroX+50,base-heroHeight*.72,enemyX-16,base-foeHeight*.46,color,clamp(elapsed*2.4));
+    if(elapsed<.64) spellTrail(heroX+50,base-heroHeight*.72,enemyX-16,targetGround-targetHeight*.46,color,clamp(elapsed*2.4));
     if(elapsed>.38) {
       const f=clamp((elapsed-.38)/.70);
       ctx.save();ctx.globalAlpha=1-f;
-      loop(enemyX-15,base-foeHeight*.45,6+f*83,5+f*51,color,3);
+      loop(enemyX-15,targetGround-targetHeight*.45,6+f*83,5+f*51,color,3);
       for(let i=0;i<15;i++) {
         const a=i*2.4;
-        spark(enemyX-15+Math.cos(a)*f*(45+i*3),base-foeHeight*.45+Math.sin(a)*f*(40+i),2+i%5,color);
+        spark(enemyX-15+Math.cos(a)*f*(45+i*3),targetGround-targetHeight*.45+Math.sin(a)*f*(40+i),2+i%5,color);
       }
       ctx.restore();
     }
@@ -1246,6 +1269,7 @@ function restoreFieldTrail(record){
   if(fieldTrail.length)TempoCombat.newTurn(turns);
 }
 function startExpedition(id,round,restart=false){
+  const entering=round===undefined&&!trial&&!restart;
   const resuming=round===undefined&&id===saved.expedition&&!trial;
   round??=resuming?storedFieldRound(id,saved.round):0;
   if(level!==id || round===0)boundSpent=false;
@@ -1254,6 +1278,7 @@ function startExpedition(id,round,restart=false){
   teamPending=teamCheckpoint;
   studyAttempt={wrong:false,help:false};
   level=id;fieldRound=round;fieldTrail=[];
+  if(!trial)BattleResults.beginAttempt(id,entering);
   viewedRank=Expedition.rankOf(id);
   if(id===9&&(!trial||trial.fortress)){Fortress.begin(round,!!trial);campaignStage=Fortress.stage(exercise,!!trial);}
   else campaignStage=trial?trial.stage:Expedition.stage(id,exercise);
@@ -1261,7 +1286,7 @@ function startExpedition(id,round,restart=false){
   phase=Math.min(round,phases.length-1);
   const current=authored?phases[round]:stand?LastStand.mission(id):TempoCombat.extraProblem(id,round,phases);
   setPosition(current);
-  if(!trial)TempoCombat.begin(id,round,phases.length+Number(LastStand.has(id)),mission.turns);
+  if(!trial){TempoCombat.begin(id,round,phases.length+Number(LastStand.has(id)),mission.turns);encounterText();}
   if(!trial&&!restart&&id===saved.expedition){
     const record=LastStand.load(id);
     if(record?.round===saved.round&&(record.sequence??record.round)===round){
@@ -1273,10 +1298,14 @@ function startExpedition(id,round,restart=false){
   if(campaignStage.phases.slice(0,phase).some(m=>m.kind==="link"))allyMarks=mission.targets.flatMap(p=>[...group(state.board,p).stones].map(q=>[q,"#528850"]));
   message("feedback",id===0?"libertyTip":"placeBlack");
   if(stand){delete messages.combat;el("combat").textContent=localizedPair(LastStand.encounters[id].cue);message("feedback","teachread",turns);}
-  else if(!trial&&id>0&&id%10!==9)battleMessage("enemyIntent","","idle",localizedPair(FoeTactics.profiles[campaignStage.species].cue));
+  else if(!trial&&id>0&&id%10!==9)battleMessage("enemyIntent","","idle",localizedPair(FoeTactics.profiles[TempoCombat.focus?.species??campaignStage.species].cue));
   else if(id%10===9&&(!trial||trial.fortress))battleMessage("guardianArrives","","idle",localizedPair(Voyage.guardians[Math.floor(id/10)]));
   else battleMessage("arriveMsg","","idle",campaignStage.species);
   if(!trial&&TempoCombat.status.ally===0){exhaustedParty();rail();return;}
+  if(entering&&!round&&el("titleScene").hidden&&el("voyage").hidden&&saved.gate!==id&&!EarlyGuardians.ready(id,saved)){
+    const hp=TempoCombat.status;
+    BattleEntrance.begin(id,false,fieldTrail.length>0||hp.hp<hp.max||hp.ally<100||hp.spent>0);
+  }
   refresh();
   rail();
 }
@@ -1451,6 +1480,7 @@ function boardView() {
     ring("#236a50",center(x),center(y),cell*.25,3);
     pointButtons[p].setAttribute("aria-label",pointButtons[p].getAttribute("aria-label")+", "+t("breath"));
   }
+  FirstLesson.update();
 }
 function goal(p) {
   const key = {capture:"goalCapture",link:"goalLink",escape:"goalEscape",read:"goalRead",liberty:"goalLiberty",atari:"goalAtari"}[p.kind];
@@ -1460,6 +1490,17 @@ function meter(id,value) {
   const fill=el(id);
   fill.style.width=value+"%";
   fill.parentElement.setAttribute("aria-valuenow",String(value));
+}
+function showPartyHealth(label,value){
+  const active=Number.isInteger(value);
+  if(label.hidden===active)label.hidden=!active;
+  if(!active)return;
+  const text=value+"/100";
+  if(label.textContent===text)return;
+  label.textContent=text;
+  if(label.getAttribute("role")==="meter")label.setAttribute("aria-valuenow",String(value));
+  label.dataset.health=value===0?"down":value<=25?"low":"ready";
+  label.style.setProperty("--party-health",value+"%");
 }
 function refresh() {
   renderFieldTools();
@@ -1480,8 +1521,10 @@ function refresh() {
   el("guardHP").textContent=inTraining()?"":t("stageHP",Math.max(0,mode==="walking"?0:remaining),phaseCount);
   meter("enemyHP",boss ? bossHP : mode==="won" ? 0 : mission.kind==="read" ? Math.max(14,Math.round((turns/mission.turns)*100)) : 100);
   meter("allyHP",Math.max(28,100-wounds*24));
-  if(journey()&&!trial&&TempoCombat.status){
-    const hp=TempoCombat.status;el("guardHP").textContent=hp.hp+"/"+hp.max;
+  const health=journey()&&!trial?TempoCombat.status:null;
+  showPartyHealth(el("allyVital"),health?.ally);
+  if(health){
+    const hp=health;el("guardHP").textContent=hp.hp+"/"+hp.max;
     meter("enemyHP",Math.round(100*hp.hp/hp.max));meter("allyHP",hp.ally);
   }
   el("turn").textContent=mode==="playing" || mode==="waiting" ? t("moves",turns) : "";
@@ -1664,10 +1707,11 @@ function encounterText() {
     const count=trial||boss?t("round",phase+1,stage.phases.length):localizedPair(["第"+(fieldRound+1)+"局",(fieldRound+1)+"번째 문제"]);
     el("region").textContent=(trial?t(trial.key):campaignTitle(level))+" · "+count;
   }
-  el("enemyName").textContent=journey()?((!trial||trial.fortress) && level%10===9?localizedPair(Voyage.guardians[Math.floor(level/10)]):monsterName(stage.species)):t(creatures[stage.enemy][0]);
+  el("enemyName").textContent=journey()&&!trial&&TempoCombat.foes.length?localizedPair(["敵の群れ","적 무리"]):journey()?((!trial||trial.fortress) && level%10===9?localizedPair(Voyage.guardians[Math.floor(level/10)]):monsterName(stage.species)):t(creatures[stage.enemy][0]);
 }
 function setPosition(puzzle,nextMode="playing") {
-  clearTimeout(timer);
+  FirstLesson.reset();
+  BattleEntrance.cancel();clearTimeout(timer);
   lanternPoints=[];crewHint=crewReview=crewIntercept=null;interceptSpent=false;beforeMove=null;scouting=false;lights=[];allyMarks=[];counterPoint=null;hintStep=0;usedSkills=new Set();
   if(typeof CastMotion!=="undefined")CastMotion.reset();
   BoardFX.clear(el("boardFx"));
@@ -1729,13 +1773,27 @@ function finishTraining() {
   refresh();
 }
 function awardStage(id){
-  ticketWon=true;saved.expedition=id+1;saved.location=Math.min(79,id+1);saved.round=0;saved.gate=-1;
+  if(id<79)MapJourney.write("road",id);
+  ticketWon=true;saved.expedition=id+1;saved.location=id;saved.round=0;saved.gate=-1;
   earnedCosmetic=[...Wardrobe.boards,...Wardrobe.stones].find(item=>item[1]===saved.expedition);
   saved.teamBank=0;
 }
-function grantMaterials(id){
-  if(lastLoot)return;lastLoot=Workshop.reward(saved.work,id);teamFound=CrewTactics.payout(teamPending,id);
-  for(const [material,n] of teamFound)Workshop.earn(saved.work,material,n);save();
+async function grantMaterials(id){
+  if(lastLoot)return;
+  lastLoot=[0,0];
+  const first=ticketWon,skin=earnedCosmetic?.[3],gathered=CrewTactics.payout(teamPending,id);
+  const receipt={id,name:Voyage.places[id],base:[],crew:[],first:false,train:false};
+  const paid=await BattleResults.settle(id,claim=>{
+    const old=saved.work.earned.slice(),[material]=Workshop.reward(saved.work,id);
+    lastLoot=[material,saved.work.earned[material]-old[material]];
+    teamFound=BattleResults.grantMaterials(saved.work,gathered);
+    if(!save(claim)){saved.work.earned=old;lastLoot=null;teamFound=[];return false;}
+    Object.assign(receipt,{base:[lastLoot],crew:teamFound,ticket:Number(first),lamp:Number(first),first,train:true,skins:skin?[skin]:[]});
+    return true;
+  });
+  if(!paid&&lastLoot===null)return;
+  BattleResults.start(receipt);
+  if(mapOutcome&&mapStage===id&&!el("voyage").hidden)BattleResults.present(id);
 }
 function finishDuel(id){
   const early=EarlyGuardians.is(id)&&id<80;
@@ -1772,11 +1830,11 @@ function finish(completedPuzzle=true) {
           const badge=1<<trial.id;
           if(!(saved.trials&badge))earnedCosmetic=Wardrobe.stones.find(item=>item[2]===badge);
           saved.trials|=badge;
-          if(!lastLoot){lastLoot=[4,1+trial.id];Workshop.earn(saved.work,...lastLoot);}
+          if(!lastLoot){lastLoot=BattleResults.grantMaterials(saved.work,[[4,1+trial.id]])[0]||[4,0];}
         }
         save();
       }
-      battleMessage(end?"trialDone":"gateWon","win",mission.kind);message("feedback",end?"trialDone":"gateWon");if(earnedCosmetic)message("feedback","skinNotice");if(end&&lastLoot)el("feedback").append(" · "+localizedPair(Workshop.materials[lastLoot[0]])+" +"+lastLoot[1]);sound(end?"win":"skill");refresh();return;
+      battleMessage(end?"trialDone":"gateWon","win",mission.kind);message("feedback",end?"trialDone":"gateWon");if(earnedCosmetic)message("feedback","skinNotice");if(end&&lastLoot){BattleResults.start({id:null,trial:true,name:[t(trial.key),t(trial.key)],base:[lastLoot],skins:earnedCosmetic?[earnedCosmetic[3]]:[]});BattleResults.present(null);}sound(end?"win":"skill");refresh();return;
     }
     const early=EarlyGuardians.is(level)&&level<80;
     const duel=end&&(early||level%10===9);
@@ -1889,7 +1947,8 @@ function relayNotice(){
   el("feedback").append(localizedPair([" · 中列連携：読星を確保"," · 중열 연계로 수읽기 별 예치"]));
 }
 function attempt(p) {
-  if(mode!=="playing"||crewReview?.survey||state.board[p])return;
+  if(BattleEntrance.blocking||mode!=="playing"||crewReview?.survey)return;
+  if(state.board[p]){FirstLesson.inspect(p);return;}
   lanternPoints=[];crewHint=crewReview=crewIntercept=null;
   if(journey() && scouting){
     scouting=false;usedSkills.add("scout");
@@ -1927,7 +1986,7 @@ function attempt(p) {
   let holds=false;
   if(guardian){holds=guardian.win;reply=guardian.reply;}
   else if(journey()&&!trial&&level%10!==9){
-    const tactic=FoeTactics.plan(campaignStage.species,state,mission,p,turns,{play,group,neighbors,solved,replies});
+    const tactic=FoeTactics.plan((trial?null:TempoCombat.focus?.species)??campaignStage.species,state,mission,p,turns,{play,group,neighbors,solved,replies});
     holds=tactic.holds;reply=tactic.reply;foeDelay=tactic.delay;defenses=tactic.defenses;
   }
   else if(kind==="read" || kind==="capture"){
@@ -2055,7 +2114,7 @@ el("reset").onclick=()=>{
   }
   if(!["retry","playing"].includes(mode))return;
   const attempt=studyAttempt;
-  startExpedition(level,trial?phase:fieldRound,true);studyAttempt=attempt;if(!trial)checkpointStand();
+  startExpedition(level,trial?phase:fieldRound,true);window.scrollTo({top:0,behavior:"instant"});studyAttempt=attempt;if(!trial)checkpointStand();
 };
 el("next").onclick=()=>{
   if(mode==="matchReady"){showBossMatch();return;}
@@ -2065,7 +2124,10 @@ el("next").onclick=()=>{
     else if(availableCourse()) startTraining(availableCourse()-1);
     return;
   }
-  if(mode==="phase") journey()?startExpedition(level,(trial?phase:fieldRound)+1):start(level,phase+1);
+  if(mode==="phase"){
+    if(journey())startExpedition(level,(trial?phase:fieldRound)+1);else start(level,phase+1);
+    if(journey())window.scrollTo({top:0,behavior:"instant"});
+  }
   else if(mode==="walking") arrive();
   else if(mode==="won"){
     if(trial){returnFromTrial();return;}
@@ -2095,7 +2157,7 @@ el("backup").onclick=()=>{
   const expeditionTrack=saved.track==="expedition";
   const data=[saved.cleared,saved.training,expeditionTrack?"story":saved.track,saved.course];
   data.push({expedition:saved.expedition,active:expeditionTrack,round:saved.round,location:mapLocation(),partner:saved.partner,trials:saved.trials,gear:saved.gear,reviews:saved.reviews,marks:saved.marks,past:saved.past,gate:saved.gate,duels:saved.matchWins,fx:saved.fx,xy:+saved.coords});
-  const ex=data[4];if(saved.crossings)ex.k=saved.crossings;if(saved.finalBell)ex.e=saved.finalBell;if(saved.sentries)ex.g=saved.sentries;ex.c=CampaignSlots.id;if(saved.outer)ex.o=saved.outer;if(saved.outerLamp)ex.h=saved.outerLamp;const reachExtra=ReachJournal.pack(saved.reachLamps,saved.reachFork);if(reachExtra)ex.u=reachExtra;if(saved.reach)ex.q=saved.reach;if(saved.lamps)ex.l=saved.lamps;ex.r=Roster.pack(saved.roster);if(saved.teamBank)ex.tb=saved.teamBank;if(saved.fortRoute===1&&saved.expedition===9)ex.fr=1;ex.w=Workshop.packed(saved.work);
+  const ex=data[4];const growth=PartyGrowth.current(saved.growth);if(growth)ex.gp=growth;if(saved.crossings)ex.k=saved.crossings;if(saved.finalBell)ex.e=saved.finalBell;if(saved.sentries)ex.g=saved.sentries;ex.c=CampaignSlots.id;if(saved.outer)ex.o=saved.outer;if(saved.outerLamp)ex.h=saved.outerLamp;const reachExtra=ReachJournal.pack(saved.reachLamps,saved.reachFork);if(reachExtra)ex.u=reachExtra;if(saved.reach)ex.q=saved.reach;if(saved.lamps)ex.l=saved.lamps;ex.r=Roster.pack(saved.roster);if(saved.teamBank)ex.tb=saved.teamBank;if(saved.fortRoute===1&&saved.expedition===9)ex.fr=1;ex.w=Workshop.packed(saved.work);
   if(JSON.stringify(data).length>378){
     ex.z=[ex.round,ex.location,ex.partner,ex.trials,...ex.gear,...ex.reviews,ex.past,ex.gate,ex.duels,ex.fx,ex.xy];
     for(const name of ["round","location","partner","trials","gear","reviews","past","gate","duels","fx","xy"])delete ex[name];
@@ -2155,7 +2217,9 @@ function restoreCampaignPayload(payload){
     if(!CampaignSlots.accept(extra.c,fresh)){
       el("backupStatus").textContent=localizedPair(["別の旅のコードです。タイトルで空の記録を選んでください。","다른 여행의 백업입니다. 타이틀에서 빈 슬롯을 선택해 주세요."]);return;
     }
+    MapJourney.restored();
     saved.campaignId=CampaignSlots.id;
+    PartyGrowth.restore(extra.gp);
     saved.lamps=Lanterns.merge(saved.lamps,extra.l);
     saved.cleared=Math.max(saved.cleared,story);
     saved.training=saved.training.map((value,i)=>Math.max(value,trained[i]));
@@ -2215,9 +2279,11 @@ el("restoreBackup").onclick=()=>{
 };
 </script>
 <script src="./atlas.js"></script>
+<script src="./scenic-art.js"></script>
 <script src="./atlas-art.js"></script>
 <script src="./fauna-motion.js"></script>
 <script src="./cast-motion.js"></script>
+<script src="./map-journey.js"></script>
 <script src="./atlas-ui.js"></script>
 <script src="./closet-ui.js"></script>
 <script src="./match-positions.js"></script>
@@ -2226,11 +2292,18 @@ el("restoreBackup").onclick=()=>{
 <script src="./road-chapters.js"></script>
 <script src="./road-objects.js"></script>
 <script src="./road-poses.js"></script>
+<script src="./talk-portraits.js"></script>
+<script src="./event-landscapes.js"></script>
+<script src="./story-frame.js"></script>
+<script src="./story-panels.js"></script>
 <script src="./journey-events.js"></script>
+<script src="./battle-results.js"></script>
 <script src="./voyage-ui.js"></script>
+<script src="./camp-atlas.js"></script>
+<script src="./pack-ui.js"></script>
 <script src="./camp-menu.js"></script>
 <script src="./front-door.js"></script>
-<script>CampaignSlots.menu();</script>
+<script>CampaignSlots.menu();PartyInfo.install();</script>
 <script src="./reach-art.js"></script>
 <script src="./reach-map.js"></script>
 <script src="./outer-story.js"></script>

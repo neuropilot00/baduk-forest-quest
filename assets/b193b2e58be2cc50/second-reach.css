@@ -1,0 +1,30 @@
+#reachBattleDialog{box-sizing:border-box;border:0;background:#182d28;color:#f4ebce;width:min(100%,600px);max-width:100%;max-height:100dvh;overflow:auto;margin:auto;padding:0;overscroll-behavior:contain}
+#reachBattleDialog::backdrop{background:#0a1a18e8}
+.reach-fight{width:min(100%,500px);margin:auto;padding:9px 14px max(12px,env(safe-area-inset-bottom));box-sizing:border-box}
+.reach-fight header{display:flex;align-items:center;gap:10px;margin-bottom:5px}
+.reach-fight header h2,.reach-fight header small{margin:0;line-height:1.2}
+.reach-fight header h2{font-size:1.14rem;font-family:var(--game-display,serif)}
+#reachHP{margin-inline-start:auto;text-align:end;font-size:.7rem;line-height:1.45;font-variant-numeric:tabular-nums}
+#reachHP span{display:block;color:#a6d8b8}#reachHP span+span{color:#f5ca99}
+.reach-fight header small{font-size:.74rem;color:#c6ceae}
+.reach-fight button{font:inherit;color:inherit;background:#263f34;border:1px solid #658168;border-radius:5px;min-height:40px;padding:5px 12px;touch-action:manipulation}
+#reachHint.hint-idle{outline:2px solid #edca81;outline-offset:2px}
+#reachBattleBack{font-size:25px;width:44px;line-height:1}
+#reachScene{display:block;width:100%;height:auto;max-height:23dvh;object-fit:cover;image-rendering:pixelated}
+#reachGoal{margin:7px 0;font-weight:700;min-height:1.4em}
+#reachStatus{font-size:.89rem;margin:4px 0 5px;min-height:1.5em}
+.reach-goban{width:min(100%,50dvh);aspect-ratio:1;margin:auto;position:relative}
+.reach-goban>canvas,#reachPoints{position:absolute;inset:0;width:100%;height:100%}
+#reachFx{pointer-events:none}
+#reachPoints{display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(9,1fr)}
+#reachPoints button{border:0;padding:0;margin:0;border-radius:50%;background:transparent;min-height:0;min-width:0;box-shadow:none}
+#reachPoints button:focus-visible{outline:3px solid #176675;outline-offset:-4px}
+.reach-fight nav{display:flex;gap:7px}.reach-fight nav button:last-child{margin-inline-start:auto;background:#ead398;color:#213129}
+#reachBattleDialog [hidden]{display:none!important}
+@media(min-aspect-ratio:6/5) and (min-width:700px){
+#reachBattleDialog{width:min(900px,95vw)}
+.reach-fight{display:grid;grid-template-columns:minmax(220px,1fr) minmax(270px,48%);grid-template-rows:auto auto auto auto 1fr auto;width:100%;gap:5px 18px}
+.reach-fight header,#reachScene,.reach-fight #tempoHud,#reachGoal,#reachStatus{grid-column:1}#reachScene{max-height:none}
+.reach-goban{grid-column:2;grid-row:1/span 6;width:min(100%,78dvh)}
+.reach-fight nav{grid-column:1}
+}
