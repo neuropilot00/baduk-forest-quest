@@ -1,0 +1,21 @@
+#outerCrossingDialog{box-sizing:border-box;width:min(100%,780px);max-width:100vw;max-height:100dvh;padding:0;border:1px solid #637b67;border-radius:10px;background:#172b28;color:#f6edd6;overscroll-behavior:contain}
+#outerCrossingDialog::backdrop{background:#071313dc}
+#outerCrossingDialog article{box-sizing:border-box;padding:14px clamp(12px,3vw,23px) max(14px,env(safe-area-inset-bottom));margin:auto}
+#outerCrossingDialog header{display:flex;align-items:center;gap:11px;margin-bottom:9px}
+#outerCrossingDialog header button,#crossAction{min-width:42px;min-height:42px;border:1px solid #7f9079;border-radius:6px;padding:5px 12px;background:#2d483c;color:#fff3cf;font:inherit}
+#outerCrossingDialog header button{font-size:1.5rem}#crossPlace{font-size:.78rem;color:#d4caa9}#crossName{margin:2px 0;font:600 1.14rem/1.25 var(--game-display,serif)}
+#crossScene{width:100%;max-height:20dvh;object-fit:cover;display:block;image-rendering:pixelated;border-radius:3px}
+#crossGoal,#crossMessage{margin:8px 0;font-size:.91rem;line-height:1.4;overflow-wrap:break-word;word-break:var(--prose-break,normal)}
+#crossGoal{font-weight:650}#crossMessage{color:#e9d6ad}
+#crossBoardFrame{position:relative;width:min(100%,47dvh,450px);aspect-ratio:1;margin:8px auto}
+#crossBoard,#crossFX,#crossPoints{position:absolute;inset:0;width:100%;height:100%}
+#crossBoard,#crossFX{display:block;pointer-events:none}
+#crossPoints{display:grid;grid-template:repeat(9,minmax(0,1fr))/repeat(9,minmax(0,1fr))}
+#crossPoints button{background:transparent;border:0;border-radius:0;min-width:0;min-height:0;padding:0;touch-action:manipulation}
+#crossPoints button:focus-visible{outline:2px solid #236b80;outline-offset:-3px}
+#crossReward{margin:8px 0;align-items:center;gap:8px}#crossReward:not([hidden]){display:flex}#crossStamp{image-rendering:pixelated;background:#203731;border-radius:3px;padding:3px}
+#crossAction:not([hidden]){display:block;margin-left:auto}
+@media(min-width:750px) and (min-aspect-ratio:6/5){
+#outerCrossingDialog article{display:grid;grid-template-columns:minmax(220px,1fr) minmax(295px,1.1fr);column-gap:20px;align-items:start}
+#outerCrossingDialog header{grid-column:1/-1}#crossScene,#crossGoal,#crossMessage,#crossReward,#crossAction{grid-column:1}#crossBoardFrame{grid-column:2;grid-row:2/8;width:min(100%,74dvh);margin:0}
+}

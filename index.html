@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<base href="./assets/e25a607f27201e22/">
+<base href="./assets/297714582a58e969/">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="囲碁の一手で森のモンスターに立ち向かうパズルゲーム">
 <meta name="color-scheme" content="only dark">
@@ -189,6 +189,7 @@
 <script src="./outer-defense-style.js"></script>
 <script src="./second-reach.js"></script>
 <script src="./last-signal.js"></script>
+<script src="./last-stand.js"></script>
 <script src="./expedition.js"></script>
 <script src="./voyage.js"></script>
 <script src="./workshop.js"></script>
@@ -633,6 +634,7 @@ function availablePartner(id,frontier){
 }
 function validRound(frontier,value){
   if(frontier>=80 || !Number.isInteger(value) || value<0) return 0;
+  if(value===3 && LastStand.has(frontier))return 3;
   return value<Expedition.stage(frontier,exercise).phases.length?value:0;
 }
 // Two bits per position keep shared history idempotent across independent backups.
@@ -904,9 +906,10 @@ function drawBattle(time,force=false) {
   shade.addColorStop(0,"#07171b6e");shade.addColorStop(.27,"#07171b00");shade.addColorStop(.73,"#10180d00");shade.addColorStop(1,"#0b171bd9");
   ctx.fillStyle=shade;ctx.fillRect(0,0,w,h);
   const base=h*.88;
-  const heroHeight=Math.min(228,h*.61), foeHeight=journey()?Math.min(220,h*(level===9?.74:.59)):Math.min(241,h*([.49,.50,.56,.68][zone]));
+  const heroHeight=Math.min(228,h*.61),isGuardian=journey()&&(!trial||trial.fortress)&&level%10===9;
   const followerCount=journey()?Crew.travelers().length:0;
   const partyHeight=Math.min(heroHeight*.777,w/(5.3+followerCount*.72));
+  const foeHeight=journey()?(isGuardian?Math.min(220,h*(level===9?.74:.59)):FaunaMotion.fieldHeight(stage.species,partyHeight)):Math.min(241,h*([.49,.50,.56,.68][zone]));
   if(mode==="walking"){
     drawForestDepth(w,h,clock,zone);
     const progress=clamp((time-animation.start)/walkDuration);
@@ -926,7 +929,7 @@ function drawBattle(time,force=false) {
   const enemyX=w*.751+(winning?impact*17:0)-(hit?lunge*52:0);
   const exit=mode==="won" && !inTraining()?clamp((elapsed-.48)/.5):0;
   oval(ctx,"#14200b63",heroX,base,heroHeight*.31,8);
-  if(exit<1) oval(ctx,"#14200b63",enemyX,base,foeHeight*.37*(1-exit),9);
+  if(exit<1) oval(ctx,"#14200b63",enemyX,base,foeHeight*.37*(1-exit),Math.min(9,foeHeight*.065));
   if(journey()){
     Crew.draw(ctx,12,heroX-partyHeight*.55,base,partyHeight,reduceMotion?0:Math.floor(time/180)%4,CastMotion.crewPhase(time),5);
     WorldScale.hero(ctx,heroX,base,partyHeight,CastMotion.phase(1,time));
@@ -937,8 +940,7 @@ function drawBattle(time,force=false) {
     if(combatGift("atari") && !boundSpent)loop(enemyX,base-foeHeight*.22,foeHeight*.44,9,"#e9bf78",3);
     if(Fortress.isHere())drawWaterwheel(enemyX,base,foeHeight,clock,phase+(mode==="phase" || mode==="won"?1:0));
     const p=active?impact:0;
-    const isGuardian=(!trial||trial.fortress)&&level%10===9;
-    (isGuardian?ExpeditionCast.guardian:ExpeditionCast.foe)(ctx,isGuardian?Math.floor(level/10):stage.species,enemyX,base-wave*2+exit*6,foeHeight*(1+wave*.014),hit?-lunge*.17:p*.16+wave*.012,1-exit,CastMotion.phase(2,time)||(Fortress.isHere()&&mode==="waiting"?1:0));
+    (isGuardian?ExpeditionCast.guardian:ExpeditionCast.foe)(ctx,isGuardian?Math.floor(level/10):stage.species,enemyX,base-wave*2+exit*6,foeHeight*(1+wave*.014),hit?-lunge*.17:p*.16+wave*.012,1-exit,CastMotion.phase(2,time)||(Fortress.isHere()&&mode==="waiting"?1:0),true);
     if(active && winning){
       const color=Expedition.palettes[Expedition.rankOf(level)][3];
       for(let i=0;i<8;i++){
@@ -1104,7 +1106,7 @@ function sceneText() {
   if(journey() && mode!=="walking"){
     el("sceneTitle").textContent=(trial?t(trial.key):campaignTitle(level))+" · "+localizedPair(Voyage.places[level]);
     const fortLine=Fortress.story();if(fortLine){el("sceneLine").textContent=localizedPair(fortLine);return;}
-    const beat=!trial?Voyage.battleScenes[level]?.[phase]:null;
+    const beat=mission.lastStand?LastStand.encounters[level].cue:!trial?Voyage.battleScenes[level]?.[phase]:null;
     el("sceneLine").textContent=localizedPair(mode==="won"?Voyage.scene(level).after:mode==="phase"?Voyage.actions[mission.kind]:beat??Voyage.tactics[mission.kind]);return;
   }
   if(mode==="walking"){
@@ -1213,19 +1215,59 @@ function resumeTrack(){
   else start(Math.min(saved.cleared,stages.length-1));
 }
 let ticketWon=false,lastLoot=null,teamPending=0,teamCheckpoint=0,teamFound=[];
-function startExpedition(id,round=(id===saved.expedition?saved.round:0)){
+let standOpening=null;
+function checkpointStand(options={}){
+  if(!mission||!journey()||trial||!LastStand.has(level)||level!==saved.expedition)return;
+  const round=mission.lastStand?3:phase;
+  if(saved.round!==round)return;
+  const combat=TempoCombat.snapshot();
+  if(!combat)return;
+  if(options.retry){
+    // Only the current defense restarts. A paid finisher and incoming damage persist.
+    combat.run={...combat.checkpoint,used:combat.run.used,ally:combat.run.ally};
+    combat.spent=0;
+  }
+  LastStand.store(level,{round,first:options.retry?null:standOpening,combat,study:{...studyAttempt},team:teamPending});
+}
+addEventListener("pagehide",()=>{if(mode==="playing"&&journey()&&!trial&&el("voyage").hidden)checkpointStand();});
+function openStand(id,record){
+  standOpening=null;
+  setPosition(LastStand.mission(id));
+  TempoCombat.begin(id,3,4,2);
+  if(record){
+    const witness=LastStand.restoreOpening(mission,record.first);
+    if(witness){standOpening=record.first;state=witness.state;last=witness.point;turns=1;TempoCombat.newTurn(turns);}
+    TempoCombat.restore(record.combat);
+    if(record.study)studyAttempt={wrong:record.study.wrong===true,help:record.study.help===true};
+    if(Number.isInteger(record.team)&&record.team>=0&&record.team<2**31)teamPending=record.team;
+  }
+  delete messages.combat;el("combat").textContent=localizedPair(LastStand.encounters[id].cue);
+  message("feedback",turns===1?"readReply":"teachread",turns);
+  checkpointStand();refresh();rail();
+}
+function startExpedition(id,round=(id===saved.expedition?saved.round:0),restartStand=false){
   if(level!==id || round===0)boundSpent=false;
   ticketWon=false;lastLoot=null;teamFound=[];
   if(!round)teamCheckpoint=0;else if(!trial&&id===saved.expedition)teamCheckpoint=saved.teamBank;
   teamPending=teamCheckpoint;
   studyAttempt={wrong:false,help:false};
   level=id;
-  phase=round;
+  const extra=!trial&&LastStand.has(id)&&round===3;
+  phase=extra?2:round;standOpening=null;
   viewedRank=Expedition.rankOf(id);
   if(id===9&&(!trial||trial.fortress)){Fortress.begin(round,!!trial);campaignStage=Fortress.stage(exercise,!!trial);}
   else campaignStage=trial?trial.stage:Expedition.stage(id,exercise);
+  if(extra){
+    const entry=!restartStand&&id===saved.expedition&&saved.round===3?LastStand.load(id):null;
+    openStand(id,entry);return;
+  }
   setPosition(campaignStage.phases[phase]);
-  if(!trial)TempoCombat.begin(id,round,campaignStage.phases.length,mission.turns);
+  if(!trial)TempoCombat.begin(id,round,campaignStage.phases.length+(LastStand.has(id)?1:0),mission.turns);
+  if(!trial&&LastStand.has(id)&&id===saved.expedition&&round===saved.round&&!restartStand){
+    const record=LastStand.load(id);
+    if(record?.round===round&&TempoCombat.restore(record.combat)&&record.study)
+      studyAttempt={wrong:record.study.wrong===true,help:record.study.help===true};
+  }
   if(campaignStage.phases.slice(0,phase).some(m=>m.kind==="link"))allyMarks=mission.targets.flatMap(p=>[...group(state.board,p).stones].map(q=>[q,"#528850"]));
   message("feedback",id===0?"libertyTip":"placeBlack");
   if(!trial&&id>0&&id%10!==9)battleMessage("enemyIntent","","idle",localizedPair(FoeTactics.profiles[campaignStage.species].cue));
@@ -1419,6 +1461,7 @@ function refresh() {
   renderFieldTools();
   sceneText();
   boardView();
+  if(mission.lastStand)el("objective").textContent=turns===2?localizedPair(["最後の守り · 印の白を黒2手で取る","마지막 방어 · 흑 두 수로 표시한 백을 따내세요"]):localizedPair(["白が逃げた先の最後の呼吸点を塞ごう。","달아난 백 무리의 마지막 활로를 막으세요."]);
   if(Fortress.isHere()&&phase<3)el("objective").textContent=Fortress.objective();
   el("battleLayout").classList.toggle("fortress-view",!!Fortress.isHere());
   const art=el("combatArt");art.hidden=!journey() || !["link","atari","capture"].includes(mission.kind);
@@ -1433,6 +1476,10 @@ function refresh() {
   el("guardHP").textContent=inTraining()?"":t("stageHP",Math.max(0,mode==="walking"?0:remaining),phaseCount);
   meter("enemyHP",boss ? bossHP : mode==="won" ? 0 : mission.kind==="read" ? Math.max(14,Math.round((turns/mission.turns)*100)) : 100);
   meter("allyHP",Math.max(28,100-wounds*24));
+  if(journey()&&!trial&&TempoCombat.status){
+    const hp=TempoCombat.status;el("guardHP").textContent=hp.hp+"/"+hp.max;
+    meter("enemyHP",Math.round(100*hp.hp/hp.max));meter("allyHP",hp.ally);
+  }
   el("turn").textContent=mode==="playing" || mode==="waiting" ? t("moves",turns) : "";
   el("toMove").textContent=t(mode==="complete"?"courseDone":mode);
   const courseFinished=inTraining() && saved.training[saved.course]===courseLimits[saved.course];
@@ -1589,6 +1636,7 @@ function useFieldSkill(id){
     TempoCombat.rewind(beforeMove.tempo,beforeMove.turns);
     ({state,turns,last,wounds,teamPending}=beforeMove);
     beforeMove=null;mode="playing";lights=[];hinted=null;scouting=false;
+    if(mission.lastStand){standOpening=null;checkpointStand();}
     usedSkills.add(id);battleMessage("rewound");message("feedback","rewound");
   }
   animation={type:"field",start:performance.now()};sound("skill");refresh();
@@ -1607,7 +1655,11 @@ function encounterText() {
   const stage=encounter();
   el("region").textContent=inTraining()?t("problemNumber",Math.min(problemNumber+1,courseLimits[saved.course]))
     :t("battleNumber",level+1)+" · "+t("round",phase+1,stage.phases.length);
-  if(journey()) el("region").textContent=(trial?t(trial.key):campaignTitle(level))+(stage.phases.length>1?" · "+t("round",phase+1,stage.phases.length):"");
+  if(journey()){
+    const hasDefense=!trial&&LastStand.has(level),total=stage.phases.length+Number(hasDefense);
+    const current=mission.lastStand?total:phase+1;
+    el("region").textContent=(trial?t(trial.key):campaignTitle(level))+(total>1?" · "+t("round",current,total):"");
+  }
   el("enemyName").textContent=journey()?((!trial||trial.fortress) && level%10===9?localizedPair(Voyage.guardians[Math.floor(level/10)]):monsterName(stage.species)):t(creatures[stage.enemy][0]);
 }
 function setPosition(puzzle,nextMode="playing") {
@@ -1697,6 +1749,16 @@ function finish() {
   if(inTraining()){finishTraining(); return;}
   if(journey()){
     const end=phase+1===campaignStage.phases.length;
+    if(end&&!trial&&LastStand.has(level)&&!mission.lastStand){
+      const carry={round:3,first:null,combat:TempoCombat.nextSnapshot(),study:{...studyAttempt},team:teamPending};
+      if(level===saved.expedition){
+        saved.round=3;saved.teamBank=teamPending;LastStand.store(level,carry);save();
+      }
+      mode="waiting";delete messages.combat;
+      el("combat").textContent=localizedPair(LastStand.encounters[level].cue);
+      message("feedback","gateWon");sound("skill");refresh();
+      TempoCombat.prepareReply(reduceMotion?140:700,()=>openStand(level,carry));return;
+    }
     const previous=saved.expedition;
     if(!trial){teamCheckpoint=teamPending;if(level===previous)saved.teamBank=teamPending;
       if(level%10===9)FaunaMotion.transition(Math.floor(level/10),phase);}
@@ -1724,11 +1786,15 @@ function finish() {
     const early=EarlyGuardians.is(level)&&level<80;
     const duel=end&&(early||level%10===9);
     if(level===previous&&saved.gate!==level&&!EarlyGuardians.ready(level,saved)){
-      const entry=saved.study[mission.kind]??[0,0,0],result=studyAttempt.wrong?2:studyAttempt.help?1:0;
-      entry[result]++;saved.study[mission.kind]=entry;markStudy(level,phase,result+1);
+      const learned=mission.lastStand?campaignStage.phases[phase].kind:mission.kind;
+      const entry=saved.study[learned]??[0,0,0],result=studyAttempt.wrong?2:studyAttempt.help?1:0;
+      entry[result]++;saved.study[learned]=entry;markStudy(level,phase,result+1);
       if(duel){if(early)saved.sentries|=EarlyGuardians.bit(level)<<5;else saved.gate=level;saved.round=phase;}
       else if(end)awardStage(level);
-      else saved.round=phase+1;
+      else{
+        saved.round=phase+1;
+        if(LastStand.has(level))LastStand.store(level,{round:saved.round,combat:TempoCombat.nextSnapshot(),study:{wrong:false,help:false}});
+      }
       save();rail();
     }
     if(duel){
@@ -1740,6 +1806,11 @@ function finish() {
     const captureText=Fortress.isHere()&&phase===2?"artCaptureDone":"groupCaptured";
     const artText={link:"artLinkDone",atari:"artAtariDone",capture:captureText}[mission.kind];
     battleMessage(artText??("win"+mission.kind[0].toUpperCase()+mission.kind.slice(1)),"win",mission.kind,state.captured.length);
+    if(mission.lastStand){
+      const remaining=TempoCombat.status.hp;
+      delete messages.combat;el("combat").textContent=localizedPair(remaining?["逃げ道を閉じた。敵は道を譲った。","도주로가 막혔다. 적이 길을 내어주고 물러났다."]:["最後の守りを崩した。敵を撃破！","마지막 방어를 무너뜨렸다. 적 격파!"]);
+      LastStand.store(level,null);
+    }
     if(reward) message("feedback","skillReward",reward[0]);
     else message("feedback",end?(level===Expedition.total-1?"journeyDone":"trailWon"):"gateWon");
     sound(end?"win":"skill");refresh();
@@ -1790,7 +1861,7 @@ function retryAfter(reply) {
   mode="retry";
   if(journey()&&!trial)TempoCombat.hit();
   if(journey())studyAttempt.wrong=true;
-  wounds++;
+  wounds++;if(mission.lastStand)checkpointStand({retry:true});
   const notice={link:"partyScattered",escape:"blockedEscape"}[mission.kind] ?? "countered";
   const advice={link:"retryLink",escape:"retryEscape",read:"retryRead",capture:"retryCapture",liberty:"retryLiberty",atari:"retryAtari"}[mission.kind];
   battleMessage(notice,"bad","bad");
@@ -1899,6 +1970,7 @@ function attempt(p) {
   }
   if(!holds&&journey()&&!trial)reply=TempoDefense.counter(priorState,state,mission)??reply;
   if(journey()&&!trial)TempoCombat.attack(holds,false);
+  if(mission.lastStand&&holds){standOpening=p;checkpointStand();}
   mode="waiting";
   battleMessage(holds?"enemySearching":"enemyCounter");
   message("feedback","waitReply");
@@ -1916,7 +1988,7 @@ function attempt(p) {
     if(journey()&&!trial)TempoCombat.newTurn(turns);
     battleMessage(reply?"enemyFighting":"enemyStopped","","bad");
     message("feedback","readReply",turns);if(relay)relayNotice();
-    sound("reply");
+    sound("reply");if(mission.lastStand)checkpointStand();
     refresh();
   };
   const replyDelay=reduceMotion?100:(foeDelay??450);
@@ -1973,8 +2045,9 @@ el("reset").onclick=()=>{
     crewIntercept=crewReview=crewHint=null;mode="playing";counterPoint=null;hinted=guard.point;hintStep=2;
     studyAttempt.help=true;TempoCombat.newTurn(turns);battleMessage("rewound");message("feedback","hintFound");refresh();return;
   }
+  if(!trial&&LastStand.has(level)&&mode==="waiting"&&!mission.lastStand&&saved.round===3)return;
   const attempt=studyAttempt;
-  startExpedition(level,phase);studyAttempt=attempt;
+  startExpedition(level,mission.lastStand?3:phase,true);studyAttempt=attempt;if(mission.lastStand)checkpointStand();
 };
 el("next").onclick=()=>{
   if(mode==="matchReady"){showBossMatch();return;}
@@ -2141,6 +2214,10 @@ el("restoreBackup").onclick=()=>{
 <script src="./closet-ui.js"></script>
 <script src="./match-positions.js"></script>
 <script src="./match-rules.js"></script>
+<script src="./road-forest.js"></script>
+<script src="./road-chapters.js"></script>
+<script src="./road-objects.js"></script>
+<script src="./road-poses.js"></script>
 <script src="./journey-events.js"></script>
 <script src="./voyage-ui.js"></script>
 <script src="./camp-menu.js"></script>
