@@ -1,0 +1,12 @@
+.unit.enemy #enemyShield,.unit.enemy #enemyShieldBurst{display:inline-block;position:relative;width:17px;height:20px;margin-inline-end:3px;vertical-align:middle;pointer-events:none}
+.unit.enemy #enemyShield{background-image:var(--enemy-shield-art);background-size:136px 20px;background-repeat:no-repeat;image-rendering:pixelated}
+#enemyShield[data-damage="1"]{background-position:-17px 0}
+#enemyShield[data-damage="2"]{background-position:-34px 0}
+.unit.enemy #enemyShield[hidden],.unit.enemy #enemyShieldBurst[hidden]{display:none}
+#enemyShield.shield-chip{animation:shieldChip .29s ease-out both}
+#enemyShieldBurst::before,#enemyShieldBurst::after{content:"";position:absolute;inset:0;background-image:var(--enemy-shield-art);background-size:136px 20px;background-repeat:no-repeat;image-rendering:pixelated;animation:shieldFlake .36s ease-out both}
+#enemyShieldBurst::before{background-position:-51px 0;--dx:-5px;--spin:-19deg}
+#enemyShieldBurst::after{background-position:-68px 0;--dx:6px;--spin:20deg}
+@keyframes shieldChip{0%{filter:brightness(1.8)}100%{filter:brightness(1)}}
+@keyframes shieldFlake{0%{opacity:1;transform:translate(0,0)}100%{opacity:0;transform:translate(var(--dx),4px) rotate(var(--spin))}}
+@media(prefers-reduced-motion:reduce){#enemyShield.shield-chip,#enemyShieldBurst::before,#enemyShieldBurst::after{animation:none}}

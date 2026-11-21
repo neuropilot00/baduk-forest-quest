@@ -1,0 +1,22 @@
+.map-dialogue {align-items:flex-start}
+.map-dialogue .map-face {
+  position:relative; flex:0 0 auto; align-self:start; padding:0; border:0;
+  border-radius:5px; overflow:visible; background:transparent; color:#fdf1bc;
+}
+.map-dialogue .map-face:focus-visible {outline:3px solid #75622b; outline-offset:3px}
+.map-dialogue .map-face:not(:disabled) {cursor:pointer; touch-action:manipulation}
+.map-dialogue .map-face:not(:disabled)::after {
+  content:"";position:absolute;right:-1px;bottom:0;width:17px;height:14px;
+  border-radius:4px 4px 4px 0;background-color:#273d34;
+  background-image:radial-gradient(circle at 5px 6px,#f8deb0 1px,transparent 1.45px),radial-gradient(circle at 9px 6px,#f8deb0 1px,transparent 1.45px),radial-gradient(circle at 13px 6px,#f8deb0 1px,transparent 1.45px);
+  box-shadow:0 0 0 1px #c2af80;pointer-events:none
+}
+.map-dialogue .map-face:disabled {opacity:1;filter:none}
+.map-dialogue .map-face #sceneCast {
+  display:block; width:clamp(72px,18vw,86px); height:auto; aspect-ratio:1;
+  border-radius:4px;box-shadow:inset 0 0 0 1px #5a664a; image-rendering:auto;
+}
+.map-dialogue .map-face + div {min-width:0}
+#voyage .map-dialogue .talk-question {display:block;margin:0 0 .22em;font-weight:600;color:#485d48;font-size:.87em}
+.inline-talk-face {display:inline-block;float:left;width:68px;height:68px;object-fit:contain;margin:0 9px 4px 0;border-radius:4px}
+:is(#reachLine,#outerStory):has(.inline-talk-face){display:flow-root}

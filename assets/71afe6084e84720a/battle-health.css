@@ -1,0 +1,16 @@
+/* The expedition's measured health, directly beside the character name. */
+#allyVital,#reachAllyVital {
+  display:inline-flex;align-items:center;justify-content:flex-start;gap:.38em;
+  color:#f4ffe7;font-family:var(--game-ui,sans-serif);font-size:.85rem;
+  font-weight:750;line-height:1.2;font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+#allyVital[hidden],#reachAllyVital[hidden] {display:none}
+.party-vital::before {
+  content:"";width:11px;height:10px;flex:none;background:linear-gradient(#daffd8 0 20%,#98e7aa 20% 65%,#60bca0 65%);
+  clip-path:polygon(0 20%,18% 20%,18% 0,38% 0,38% 18%,62% 18%,62% 0,82% 0,82% 20%,100% 20%,100% 55%,82% 55%,82% 72%,65% 72%,65% 86%,55% 86%,55% 100%,45% 100%,45% 86%,35% 86%,35% 72%,18% 72%,18% 55%,0 55%);
+}
+.party-vital[data-health=low]::before,.party-vital[data-health=down]::before {background:#ffb68a}
+.scene-head .unit:has(#allyVital:not([hidden])) .meter {margin-top:3px;height:5px}
+#reachHP #reachAllyVital {position:relative;padding-bottom:5px;margin-bottom:1px}
+#reachAllyVital::after {content:"";position:absolute;inset:auto 0 0;height:3px;background:linear-gradient(to right,#8be0a6 0 var(--party-health,100%),#394b42 var(--party-health,100%) 100%)}
+@media(max-width:700px){.on-campaign .scene-head #guardHP{font-size:.79rem}}

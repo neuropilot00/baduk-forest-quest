@@ -1,0 +1,22 @@
+/* Story illustrations use continuous tone. All board and battle canvases retain their pixel rendering. */
+#reachForkDialog[data-film=true] #forkScene,
+#lastDeliveryDialog #letterScene,
+#outerCrossingDialog[data-mode=earned] #crossScene { image-rendering:auto; }
+#outerCrossingDialog[data-mode=earned] { background:#182b2a; }
+#outerCrossingDialog[data-mode=earned] article { display:block;max-width:760px; }
+#outerCrossingDialog[data-mode=earned] #crossScene {
+  aspect-ratio:1.56; width:100%; height:auto; max-height:54dvh; object-fit:fill;
+}
+#outerCrossingDialog[data-mode=earned] #crossMessage { margin-top:1em; }
+#outerCrossingDialog[data-mode=earned] #crossGoal,
+#outerCrossingDialog[data-mode=earned] #crossBoardFrame { display:none; }
+@media(min-width:740px) and (min-aspect-ratio:5/4) {
+  #reachForkDialog[data-film=true] #forkWords,
+  #lastDeliveryDialog article>section {
+    left:55%; right:0; top:0; bottom:0; width:45%; height:100%; max-height:none;
+    display:flex; flex-direction:column; align-items:stretch; justify-content:safe center;
+    padding:clamp(24px,4vw,70px); background:#152a29;
+  }
+  #reachForkDialog[data-film=true] #forkWords { top:auto; height:auto; max-height:73%; }
+  #outerCrossingDialog[data-mode=earned] #crossScene { aspect-ratio:2.8; }
+}

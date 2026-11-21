@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<base href="./assets/9c95e8588a7549aa/">
+<base href="./assets/71afe6084e84720a/">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="囲碁の一手で森のモンスターに立ち向かうパズルゲーム">
 <meta name="color-scheme" content="only dark">
@@ -77,6 +77,7 @@
 <link rel="stylesheet" href="./first-lesson.css">
 <link rel="stylesheet" href="./talk-portraits.css">
 <link rel="stylesheet" href="./story-frame.css">
+<link rel="stylesheet" href="./oath-pictures.css">
 <link rel="stylesheet" href="./story-panels.css">
 <link rel="stylesheet" href="./battle-entrance.css">
 <link rel="stylesheet" href="./map-journey.css">
@@ -132,6 +133,7 @@
 </aside>
 </main>
 </div>
+<dialog id="siteBrief" aria-labelledby="briefTitle" aria-describedby="briefQuestion briefGoal"><div class="brief-inner"><small id="briefQuestion"></small><h2 id="briefTitle"></h2><div id="briefSpeech"></div><p id="briefGoal"></p><footer><button type="button" id="briefStay" class="control"></button><button type="button" id="briefStart" class="control"></button></footer></div></dialog>
 <dialog id="roadDialog" class="travel-dialog" aria-labelledby="roadPlace"><div class="road-full"><header><small id="roadChapter"></small><button class="control" id="roadSkip" data-text="skipScene"></button></header><canvas id="roadIllustration" width="384" height="154" aria-hidden="true"></canvas><div class="road-words"><h2 id="roadPlace"></h2><b id="roadWho"></b><p id="roadLine" aria-live="polite"></p><button class="voyage-action" id="roadNext"></button></div></div></dialog>
 <dialog id="burstDialog" aria-labelledby="burstTitle" aria-describedby="burstRule">
   <div class="rite-world">
@@ -189,6 +191,7 @@
 <script src="./reach-journal.js"></script>
 <script src="./campaign-slots.js"></script>
 <script src="./campaign-backup.js"></script>
+<script src="./oath-pictures.js"></script>
 <script src="./reach-fork.js"></script>
 <script src="./final-post.js"></script>
 <script src="./outer-puzzles.js"></script>
@@ -528,7 +531,7 @@ function goodMove(state, mission, turns, point) {
   const result = play(state,point,black);
   if (!result) return false;
   return solved(result.board,mission) || (
-    mission.kind === "read" && turns > 1 && replies(result,mission,turns-1,point).every(reply=>reply.canWin)
+    (mission.kind === "read" || mission.kind === "capture") && turns > 1 && replies(result,mission,turns-1,point).every(reply=>reply.canWin)
   );
 }
 const generatedCount=3600;
@@ -737,7 +740,7 @@ function save(fieldGrant=null) {
 const messages = {};
 function message(id,key,...args) {
   messages[id]=[key,args];
-  el(id).textContent=t(key,...args);
+  el(id).textContent=Array.isArray(key)?localizedPair(key):t(key,...args);
 }
 function localize() {
   document.body.classList.toggle("with-coords",saved.coords);
@@ -968,7 +971,6 @@ function drawBattle(time,force=false) {
   }
   else sprite(0,heroX,base+wave*1.2,heroHeight,winning?lunge*.07:wave*.009,1,active?(winning?1:2):0);
   if(journey()){
-    if(combatGift("link"))sprite(5,heroX+70,base-heroHeight*.35+wave*2,heroHeight*.31);
     if(combatGift("atari") && !boundSpent)loop(enemyX,targetGround-targetHeight*.22,foeHeight*.44,9,"#e9bf78",3);
     if(Fortress.isHere())drawWaterwheel(enemyX,base,foeHeight,clock,phase+(mode==="phase" || mode==="won"?1:0));
     const p=active?impact:0;
@@ -990,25 +992,8 @@ function drawBattle(time,force=false) {
   }else sprite(zone+1,enemyX,base-wave*1.5+exit*6,foeHeight,hit?-lunge*.12:impact*.12+wave*.008,1-exit,active?(hit?1:2):0);
   EnemyShield.draw(ctx,w,h,base,foeHeight,enemyX,time);
   if(journey()&&!trial&&[0,2,4].includes(level))drawStoryAction(ctx,level,phase,mode,elapsed,w,base);
-  const spiritY=base-heroHeight*.32;
-  if(skill==="link" || skill==="escape") {
-    const travel=winning?clamp(elapsed/.85):0;
-    const x=384-travel*85;
-    glow(x,spiritY-20,25,"#ffe77888");
-    sprite(5,x,spiritY+Math.sin(clock*3)*3,heroHeight*.30);
-    if(skill==="escape" && !winning) {
-      for(let i=-1;i<=1;i++) loop(x,spiritY-19,26,12+i*4,"#754a2d",3);
-    }
-    if(winning && active) spellTrail(heroX+24,base-heroHeight*.6,x,spiritY-14,"#aaffc6",clamp(elapsed*2));
-  }
-  if(active && winning && skill==="escape") {
-    const release=clamp(elapsed/.7);
-    ctx.save();ctx.globalAlpha=1-release;
-    for(const sign of [-1,1]) {
-      ctx.strokeStyle="#e4b274";ctx.lineWidth=4;
-      ctx.beginPath();ctx.arc(384+sign*release*42,spiritY-19,24,sign>0?-1.4:1.75,sign>0?1.4:4.55);ctx.stroke();
-    }
-    ctx.restore();
+  if(active && winning && (skill==="link" || skill==="escape")){
+    MapArt.deliverySeal(ctx,heroX,enemyX,base,partyHeight,skill,elapsed);
   }
   if(active && winning && skill==="read"){
     const steps=mission.turns;
@@ -1246,7 +1231,7 @@ function resumeTrack(){
   else start(Math.min(saved.cleared,stages.length-1));
 }
 let ticketWon=false,lastLoot=null,teamPending=0,teamCheckpoint=0,teamFound=[];
-let fieldRound=0,fieldTrail=[];
+let fieldRound=0,fieldTrail=[],fieldLessonVersion=1;
 function storedFieldRound(id,round){
   const record=LastStand.load(id);
   return record?.round===round&&Number.isInteger(record.sequence)&&record.sequence>=round&&record.sequence<32?record.sequence:round;
@@ -1257,7 +1242,7 @@ function checkpointStand(options={}){
   const marker=fieldMarker(level,fieldRound,campaignStage.phases.length);
   const combat=TempoCombat.snapshot();
   if(saved.round!==marker||!combat||combat.run.id!==level||combat.run.round!==fieldRound||combat.run.clear)return;
-  LastStand.store(level,{round:marker,sequence:fieldRound,trail:options.retry?[]:fieldTrail,combat,study:{...studyAttempt},team:teamPending});
+  LastStand.store(level,{round:marker,sequence:fieldRound,lessonVersion:fieldLessonVersion,trail:options.retry?[]:fieldTrail,combat,study:{...studyAttempt},team:teamPending});
 }
 addEventListener("pagehide",()=>{if(mode==="playing"&&journey()&&!trial&&el("voyage").hidden)checkpointStand();});
 function restoreFieldTrail(record){
@@ -1288,16 +1273,18 @@ function startExpedition(id,round,restart=false){
   level=id;fieldRound=round;fieldTrail=[];
   if(!trial)BattleResults.beginAttempt(id,entering);
   viewedRank=Expedition.rankOf(id);
+  const record=!trial&&id===saved.expedition?LastStand.load(id):null;
+  const hasRecord=record?.round===saved.round&&(record?.sequence??record?.round)===round;
+  fieldLessonVersion=id>=20&&id<40&&hasRecord&&!(record.lessonVersion>0)?0:1;
   if(id===9&&(!trial||trial.fortress)){Fortress.begin(round,!!trial);campaignStage=Fortress.stage(exercise,!!trial);}
-  else campaignStage=trial?trial.stage:Expedition.stage(id,exercise);
+  else campaignStage=trial?trial.stage:Expedition.stage(id,exercise,fieldLessonVersion===0);
   const phases=campaignStage.phases,authored=round<phases.length,stand=LastStand.has(id)&&round===phases.length;
   phase=Math.min(round,phases.length-1);
   const current=authored?phases[round]:stand?LastStand.mission(id):TempoCombat.extraProblem(id,round,phases);
   setPosition(current);
   if(!trial){TempoCombat.begin(id,round,phases.length+Number(LastStand.has(id)),mission.turns);encounterText();}
   if(!trial&&!restart&&id===saved.expedition){
-    const record=LastStand.load(id);
-    if(record?.round===saved.round&&(record.sequence??record.round)===round){
+    if(hasRecord){
       restoreFieldTrail(record);TempoCombat.restore(record.combat);
       if(record.study)studyAttempt={wrong:record.study.wrong===true,help:record.study.help===true};
       if(Number.isInteger(record.team)&&record.team>=0&&record.team<2**31)teamPending=record.team;
@@ -1493,6 +1480,10 @@ function boardView() {
   FirstLesson.update();
 }
 function goal(p) {
+  if(p.studyPrompt){
+    if(p===mission&&turns>0&&turns<p.turns)return localizedPair(["印の白を追おう · 黒は残り"+turns+"手","표시된 백 무리를 쫓으세요 · 흑 "+turns+"수 남음"]);
+    return localizedPair(p.studyPrompt);
+  }
   const key = {capture:"goalCapture",link:"goalLink",escape:"goalEscape",read:"goalRead",liberty:"goalLiberty",atari:"goalAtari"}[p.kind];
   return t(key,p.turns);
 }
@@ -1516,6 +1507,7 @@ function refresh() {
   renderFieldTools();
   sceneText();
   boardView();
+  if(mission.studyPattern)el("objective").textContent=goal(mission);
   if(mission.lastStand)el("objective").textContent=turns===2?localizedPair(["最後の守り · 印の白を黒2手で取る","마지막 방어 · 흑 두 수로 표시한 백을 따내세요"]):localizedPair(["白が逃げた先の最後の呼吸点を塞ごう。","달아난 백 무리의 마지막 활로를 막으세요."]);
   if(Fortress.isHere()&&phase<3)el("objective").textContent=Fortress.objective();
   el("battleLayout").classList.toggle("fortress-view",!!Fortress.isHere());
@@ -1537,7 +1529,7 @@ function refresh() {
     const hp=health;el("guardHP").textContent=hp.hp+"/"+hp.max;
     meter("enemyHP",Math.round(100*hp.hp/hp.max));meter("allyHP",hp.ally);
   }
-  el("turn").textContent=mode==="playing" || mode==="waiting" ? t("moves",turns) : "";
+  el("turn").textContent=!mission.studyPattern&&(mode==="playing"||mode==="waiting")?t("moves",turns):"";
   el("toMove").textContent=t(mode==="complete"?"courseDone":mode);
   const courseFinished=inTraining() && saved.training[saved.course]===courseLimits[saved.course];
   el("next").hidden=mode!=="walking" && mode!=="phase" && mode!=="won" && mode!=="complete";
@@ -1872,7 +1864,7 @@ function finish(completedPuzzle=true) {
       else if(end){awardStage(level);LastStand.store(level,null);}
       else{
         saved.round=fieldMarker(level,fieldRound+1,campaignStage.phases.length);
-        LastStand.store(level,{round:saved.round,sequence:fieldRound+1,combat:TempoCombat.nextSnapshot(),study:{wrong:false,help:false},team:teamPending});
+        LastStand.store(level,{round:saved.round,sequence:fieldRound+1,lessonVersion:1,combat:TempoCombat.nextSnapshot(),study:{wrong:false,help:false},team:teamPending});
       }
       save();rail();
     }
@@ -2113,7 +2105,11 @@ el("hint").onclick=()=>{
   if(mode!=="playing") return;
   if(journey()){
     studyAttempt.help=true;
-    if(hintStep===0){hintStep=1;message("feedback","teach"+mission.kind);refresh();return;}
+    if(hintStep===0){
+      hintStep=1;
+      message("feedback",Expedition.studyHint(mission,turns)??"teach"+mission.kind);
+      refresh();return;
+    }
     if(!trial&&hinted===null){void showLantern();return;}
     hintStep=2;
   }
@@ -2305,9 +2301,15 @@ el("restoreBackup").onclick=()=>{
 </script>
 <script src="./atlas.js"></script>
 <script src="./scenic-art.js"></script>
+<script src="./forest-outposts.js"></script>
 <script src="./atlas-art.js"></script>
 <script src="./fauna-motion.js"></script>
 <script src="./cast-motion.js"></script>
+<script src="./brief-road.js"></script>
+<script src="./brief-upriver.js"></script>
+<script src="./brief-tide.js"></script>
+<script src="./brief-downriver.js"></script>
+<script src="./map-visit.js"></script>
 <script src="./map-journey.js"></script>
 <script src="./atlas-ui.js"></script>
 <script src="./closet-ui.js"></script>
@@ -2320,6 +2322,7 @@ el("restoreBackup").onclick=()=>{
 <script src="./talk-portraits.js"></script>
 <script src="./event-landscapes.js"></script>
 <script src="./story-frame.js"></script>
+<script src="./event-plates.js"></script>
 <script src="./story-panels.js"></script>
 <script src="./journey-events.js"></script>
 <script src="./battle-results.js"></script>
