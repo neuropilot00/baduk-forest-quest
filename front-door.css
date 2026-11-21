@@ -1,0 +1,24 @@
+.shell>.top{display:none!important}.at-title,.in-settings{overflow:hidden}
+#titleScene{position:fixed;inset:0;z-index:30;isolation:isolate;overflow:hidden;background:#183b36;color:#fff1cb;text-align:center}
+#titleScene[hidden],#gearDialog[hidden],.preference-pane[hidden]{display:none!important}
+#titleArt{position:absolute;inset:0;margin:auto;width:100%;height:100%;object-fit:cover;object-position:50% 60%;image-rendering:pixelated}
+.title-words{position:absolute;left:0;right:0;top:max(9svh,env(safe-area-inset-top));padding:1rem;text-shadow:0 3px 0 #25443a,0 5px 14px #112e28}
+#titleName{font-family:Georgia,"Hiragino Mincho ProN","AppleMyungjo",serif;font-size:clamp(42px,12vw,82px);line-height:1.15;letter-spacing:.045em;color:#ffedbd;margin:0 auto}
+#titleStory{font-family:Georgia,"Hiragino Mincho ProN","AppleMyungjo",serif;font-size:clamp(15px,4vw,23px);letter-spacing:.21em;color:#f4d7a3;margin:1em 0}
+#enterGame{position:absolute;inset:0;width:100%;height:100%;color:inherit;background:none;border:0;cursor:pointer}
+#titlePrompt{position:absolute;left:50%;bottom:max(6svh,env(safe-area-inset-bottom));transform:translateX(-50%);min-width:max-content;padding:12px 25px;border:1px solid #c2ac77;border-radius:4px;background:#1b382ee8;color:#fff1c5;font-size:1rem;font-weight:740;letter-spacing:.06em}
+#enterGame:focus-visible #titlePrompt{outline:2px solid #ffe3a4;outline-offset:4px}
+@media(min-aspect-ratio:4/5){#titleArt{object-fit:contain;background:radial-gradient(ellipse at 50% 55%,#718d76,#1e3f36 75%)}.title-words{top:7svh}}
+#gearDialog{position:fixed;inset:0;z-index:25;background:#142a23;color:#e6e8d9;width:100%;height:100%;max-width:none;max-height:none;box-sizing:border-box;overflow:auto;border:0;border-radius:0;margin:0;padding:0}
+.settings-inner{min-height:100%;max-width:610px;margin:auto;padding:max(19px,env(safe-area-inset-top)) 16px max(36px,env(safe-area-inset-bottom));box-sizing:border-box;background:linear-gradient(#203c32,#182d26 340px)}
+.settings-head{display:flex;align-items:center;gap:13px;margin:0 0 21px}.settings-head h2{font-size:1.5rem!important}.settings-head button{width:43px;height:43px;border:1px solid #536b56;border-radius:50%;background:#233d32;color:#eee2bc;font:24px/1 system-ui}
+.settings-tabs{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid #66745a;margin-bottom:18px;gap:2px}
+.settings-tabs button{border:0;border-bottom:3px solid transparent;color:#b7c6ae;background:none;min-height:44px;font:650 .93rem system-ui;cursor:pointer}
+.settings-tabs button[aria-selected=true]{color:#ffdfa1;border-bottom-color:#d2ac68}
+#gearDialog .preferences{display:grid;grid-template-columns:1fr;gap:0;align-content:start;width:100%}
+.pref-row{display:flex;justify-content:space-between;align-items:center;min-height:61px;border-bottom:1px solid #465b4a;gap:12px}
+.pref-row label,.pref-row b{font-weight:650}#gearDialog .pref-row button{min-width:82px;min-height:37px}
+#gearDialog .gear-items{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}#gearDialog .gear-items button{padding:5px 3px}#gearDialog .gear-detail{margin-top:16px;min-height:78px}
+#gearDialog .settings-caption{font-size:.83rem;line-height:1.5;color:#cad1ba;margin:9px 0}
+.map-stop.cleared i{background:#254f3b;border-color:#ffe3a2;color:#fffadc;min-width:18px;min-height:18px;font-size:13px;box-shadow:0 0 0 2px #254338}
+.map-stop.cleared.here i{background:#254f3b}.map-stop.cleared.here::before{content:"✓";position:absolute;top:-2px;right:0;background:#244b35;color:#ffedbd;border:1px solid #ead193;border-radius:50%;width:15px;height:15px;font:700 12px/14px system-ui;z-index:3}

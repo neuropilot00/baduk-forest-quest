@@ -2,10 +2,33 @@
 
 let gearPick=[0,0],effectPick=0;
 const gearPools=[Wardrobe.boards,Wardrobe.stones];
-function openGear(){
-  gearPick=[0,saved.gear[0]];
-  effectPick=saved.fx;el("showCoords").checked=saved.coords;renderGear();renderEffects();el("gearDialog").showModal();
+let settingsTab="basic",settingsOrigin=0;
+const prefNames={basic:["基本","기본"],board:["碁盤","바둑판"],stone:["碁石","바둑돌"],fx:["着手演出","착수 효과"]};
+function settingsLabels(){
+  for(const [key,pair] of Object.entries(prefNames))el("tab-"+key).textContent=localizedPair(pair);
+  el("langLabel").textContent=localizedPair(["言語","언어"]);el("soundLabel").textContent=localizedPair(["効果音","효과음"]);
 }
+function selectPreference(key){
+  settingsTab=key;
+  for(const id of Object.keys(prefNames)){el("pane-"+id).hidden=id!==key;el("tab-"+id).setAttribute("aria-selected",String(id===key));el("tab-"+id).tabIndex=id===key?0:-1;}
+  el("gearDetail").hidden=key!=="board"&&key!=="stone";
+  if(key==="board"||key==="stone"){const category=key==="stone"?1:0;gearPick=[category,saved.gear[category]];renderGear();}
+  if(key==="fx")renderEffects();
+}
+for(const [i,key] of Object.keys(prefNames).entries()){
+  const tab=el("tab-"+key);tab.onclick=()=>selectPreference(key);
+  tab.onkeydown=e=>{if(!["ArrowLeft","ArrowRight"].includes(e.key))return;e.preventDefault();const next=Object.keys(prefNames)[(i+(e.key==="ArrowRight"?1:3))%4];selectPreference(next);el("tab-"+next).focus();};
+}
+function openGear(){
+  settingsOrigin=window.scrollY;effectPick=saved.fx;el("showCoords").checked=saved.coords;
+  settingsLabels();selectPreference("basic");el("gearDialog").hidden=false;document.body.classList.add("in-settings");
+  document.querySelector(".shell").inert=true;el("gearDialog").scrollTop=0;el("closeGear").focus({preventScroll:true});
+}
+function closeSettings(){
+  el("gearDialog").hidden=true;document.body.classList.remove("in-settings");document.querySelector(".shell").inert=false;
+  window.scrollTo({top:settingsOrigin,behavior:"instant"});el("personalSettings").focus({preventScroll:true});
+}
+el("gearDialog").addEventListener("keydown",e=>{if(e.key==="Escape"){e.preventDefault();closeSettings();}});
 function renderGear(){
   const [type,id]=gearPick, chosen=gearPools[type][id];
   for(const [category,items] of gearPools.entries()){
@@ -42,7 +65,7 @@ function renderEffects(){
 el("wearFx").onclick=()=>{if(BoardFX.owns(effectPick,saved.expedition,saved.trials)){saved.fx=effectPick;save();renderEffects();}};
 el("showCoords").onchange=event=>{saved.coords=event.target.checked;document.body.classList.toggle("with-coords",saved.coords);save();};
 el("personalSettings").onclick=openGear;
-el("closeGear").onclick=()=>el("gearDialog").close();
+el("closeGear").onclick=closeSettings;
 el("wearGear").onclick=()=>{
   const [category,id]=gearPick;
   if(!Wardrobe.owns(gearPools[category][id],saved.expedition,saved.trials))return;

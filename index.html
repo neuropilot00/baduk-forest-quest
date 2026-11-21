@@ -55,8 +55,10 @@
 .field-tools{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:6px auto;max-width:430px}.field-tools button,#rankPicker{border:1px solid #70866c;background:#253a32;color:var(--text);border-radius:6px;padding:5px 9px;min-height:36px;font:inherit;font-size:.82rem}.field-tools button[aria-pressed=true]{outline:2px solid var(--amber)}.field-tools button:disabled{opacity:.55}.field-guide summary{cursor:pointer;color:var(--amber);padding:5px 0;font-weight:700}.field-guide .collection{margin-top:8px;grid-template-columns:repeat(4,minmax(0,1fr))}.field-guide .creature{font-size:.77rem}.rank-row{display:flex;align-items:center;gap:8px;margin:5px 0;color:var(--sub);font-size:.8rem}.rank-row label{color:var(--amber)}.route-head{flex-wrap:wrap}.tracks button{min-height:36px}.status{flex-wrap:wrap}.buttons{margin-left:auto}.point{touch-action:manipulation}.expedition-collection canvas{aspect-ratio:1.2}
 </style>
 <link rel="stylesheet" href="./voyage.css">
+<link rel="stylesheet" href="./front-door.css">
 </head>
 <body>
+<section id="titleScene" aria-labelledby="titleName"><canvas id="titleArt" width="384" height="640" aria-hidden="true"></canvas><div class="title-words"><h1 id="titleName">囲碁探検隊</h1><p id="titleStory">消えた朝の鐘</p></div><button type="button" id="enterGame"><span id="titlePrompt">タップして冒険へ</span></button></section>
 <div class="shell">
 <header class="top"><div class="brand"><span class="mark" aria-hidden="true">碁</span><span data-text="title">囲碁探検隊</span></div><div class="top-actions"><span class="pill" id="progress"></span></div></header>
 <section class="voyage" id="voyage" aria-labelledby="voyTitle" hidden>
@@ -100,7 +102,18 @@
 <dialog id="matchDialog" class="match-dialog" aria-labelledby="matchName"><div class="match-shell"><header><div><small data-text="duelTitle"></small><h2 id="matchName"></h2></div><button type="button" id="matchBack" class="control" data-text="storyMap"></button></header>
 <canvas id="matchScene" width="320" height="104" aria-hidden="true"></canvas><p id="matchProfile"></p><p id="matchHint"></p><div id="matchScroll"><div id="matchPaper"><canvas id="matchBoard" width="720" height="720" aria-hidden="true"></canvas><canvas class="board-fx" id="matchFx" width="720" height="720" aria-hidden="true"></canvas><div id="matchPoints" role="group" data-label="boardLabel"></div></div></div>
 <p id="matchStatus" role="status"></p><div class="buttons"><button id="matchPlace" class="control primary"></button><button id="matchPass" class="control"></button><button id="matchZoom" class="control" data-text="enlarge"></button><button id="matchAgain" class="control"></button><button id="matchRepeat" class="control" data-text="retryAI"></button><button id="matchDone" class="control primary"></button></div></div></dialog>
-<dialog id="gearDialog" aria-labelledby="gearHeading"><div class="journal-head"><h2 id="gearHeading" data-text="settings"></h2><button id="closeGear" class="control" data-text="closeBook"></button></div><div class="preferences"><button class="sound" id="language" type="button" lang="ko">한국어</button><button class="sound" id="sound" type="button" aria-pressed="false" data-label="soundOnAction" aria-label="効果音をオンにする">消音</button><label><input type="checkbox" id="showCoords"> <span data-text="coordinatesLabel"></span></label></div><h3 data-text="boardsTitle"></h3><div class="gear-items" id="boardsList"></div><h3 data-text="stonesTitle"></h3><div class="gear-items" id="stonesList"></div><div class="gear-detail"><canvas width="150" height="84" id="gearSample" aria-hidden="true"></canvas><div><b id="gearName"></b><p id="gearCondition"></p><button class="control primary" id="wearGear"></button></div></div><h3 data-text="fxTitle"></h3><div id="fxList" class="gear-items"></div><div class="gear-detail"><canvas width="150" height="84" id="fxPreview" aria-hidden="true"></canvas><div><b id="fxName"></b><p id="fxCondition"></p><button type="button" id="wearFx" class="control primary"></button></div></div></dialog>
+<section id="gearDialog" aria-labelledby="gearHeading" hidden><div class="settings-inner">
+<header class="settings-head"><button type="button" id="closeGear" data-label="storyMap">‹</button><h2 id="gearHeading" data-text="settings"></h2></header>
+<div class="settings-tabs" role="tablist" aria-labelledby="gearHeading">
+<button role="tab" id="tab-basic" aria-controls="pane-basic" data-pref="basic">基本</button><button role="tab" id="tab-board" aria-controls="pane-board" data-pref="board">盤</button><button role="tab" id="tab-stone" aria-controls="pane-stone" data-pref="stone">碁石</button><button role="tab" id="tab-fx" aria-controls="pane-fx" data-pref="fx">着手演出</button></div>
+<div id="pane-basic" class="preference-pane preferences" role="tabpanel" aria-labelledby="tab-basic">
+<div class="pref-row"><b id="langLabel"></b><button class="sound" id="language" type="button">한국어</button></div>
+<div class="pref-row"><b id="soundLabel"></b><button class="sound" id="sound" type="button" aria-pressed="false"></button></div>
+<div class="pref-row"><label for="showCoords" data-text="coordinatesLabel"></label><input type="checkbox" id="showCoords"></div></div>
+<div id="pane-board" class="preference-pane" role="tabpanel" aria-labelledby="tab-board" hidden><div class="gear-items" id="boardsList"></div></div>
+<div id="pane-stone" class="preference-pane" role="tabpanel" aria-labelledby="tab-stone" hidden><div class="gear-items" id="stonesList"></div></div>
+<div id="gearDetail" class="gear-detail" hidden><canvas width="150" height="84" id="gearSample" aria-hidden="true"></canvas><div><b id="gearName"></b><p id="gearCondition"></p><button class="control primary" id="wearGear"></button></div></div>
+<div id="pane-fx" class="preference-pane" role="tabpanel" aria-labelledby="tab-fx" hidden><div id="fxList" class="gear-items"></div><div class="gear-detail"><canvas width="150" height="84" id="fxPreview" aria-hidden="true"></canvas><div><b id="fxName"></b><p id="fxCondition"></p><button type="button" id="wearFx" class="control primary"></button></div></div></div></div></section>
 <dialog id="journalDialog" aria-labelledby="journalHeading"><div class="journal-head"><h2 id="journalHeading" data-text="journal">旅の手帳</h2><button class="control" id="closeJournal" type="button" data-text="closeBook">閉じる</button></div><div id="journalEntries"></div><button class="control primary" type="button" id="enterStory" data-text="openStory">物語を進める</button></dialog>
 <dialog id="trainingBackup" aria-labelledby="backupHeading"><div class="backup-content">
 <h2 id="backupHeading" data-text="backupTitle">進み具合のバックアップ</h2>
@@ -1685,7 +1698,7 @@ el("language").onclick=()=>{
   refresh();
   rail();
   if(!el("voyage").hidden) renderMap();
-  if(el("gearDialog").open){renderGear();renderEffects();}
+  if(!el("gearDialog").hidden){settingsLabels();renderGear();renderEffects();}
 };
 el("expeditionTab").onclick=()=>openMap(mapLocation());
 el("rankPicker").onchange=()=>{viewedRank=Number(el("rankPicker").value);rail();};
@@ -1769,5 +1782,6 @@ el("restoreBackup").onclick=()=>{
 <script src="./match-rules.js"></script>
 <script src="./journey-events.js"></script>
 <script src="./voyage-ui.js"></script>
+<script src="./front-door.js"></script>
 </body>
 </html>
