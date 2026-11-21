@@ -1,0 +1,41 @@
+.camp-open{appearance:none;-webkit-tap-highlight-color:transparent;border:1px solid #667860;border-radius:7px;background:#233a30;color:#efe5c7;padding:6px 12px;min-height:40px;font:650 .85rem system-ui;cursor:pointer}
+#titleMenuOpen{position:absolute;z-index:3;top:max(14px,env(safe-area-inset-top));right:max(15px,env(safe-area-inset-right));min-height:42px;background:#18382cd9;border-color:#ad986966;color:#fff0ca;font-size:.82rem}
+#fieldMenuOpen{min-height:32px;flex:0 0 auto;padding:4px 8px;font-size:.76rem}
+#battleLayout>.rail,#battleLayout .route-head,#battleLayout #rankRow,#voyage #quickTrials{display:none!important}
+#battleLayout .route:has(#tinyRoute[hidden]){display:none}
+#battleLayout>.main{min-width:0}
+@media(min-width:800px){#battleLayout:not([hidden]){grid-template-columns:minmax(0,1fr)}#battleLayout:not(.fortress-view)>.main{max-width:820px;margin-inline:auto;width:100%}}
+body.camp-visible{overflow:hidden}
+#campMenu{box-sizing:border-box;position:fixed;inset:0;width:100%;height:100%;max-width:none;max-height:none;margin:0;border:0;border-radius:0;padding:0;background:#152c25;color:#eee6ce;text-align:left;overscroll-behavior:contain}
+#campMenu::backdrop{background:#111f1b}
+#campMenu:not([open]),#campMenu [hidden]{display:none!important}
+.camp-inner{box-sizing:border-box;max-width:680px;margin:auto;min-height:100%;padding:0 max(18px,env(safe-area-inset-right)) max(28px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left))}
+.camp-head{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:14px;background:#152c25f7;border-bottom:1px solid #415b49;padding:max(15px,env(safe-area-inset-top)) 0 13px;margin-bottom:22px}
+.camp-head h2{margin:0;color:#f5e4b9;font:700 clamp(1.24rem,4.5vw,1.6rem)/1.25 system-ui}
+.camp-back{display:grid;place-content:center;width:44px;height:44px;font:26px/1 system-ui;background:#203a30;border:1px solid #5a7159;color:#efdfb3;border-radius:50%}
+.camp-choices{display:grid;gap:0;border-top:1px solid #4b6050}
+.camp-choice,.camp-choices #personalSettings{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:58px;padding:13px 6px;border:0;border-radius:0;border-bottom:1px solid #44604d;background:none;color:#eee6cf;text-align:start;font:650 1.04rem/1.3 system-ui}
+#campMenu .camp-choices #personalSettings::before{display:none}
+.camp-choices button:after{content:"›";color:#bba673;font-size:1.4rem;line-height:1}
+.camp-choice:hover,.camp-choice:focus-visible{color:#ffe2a3;background:#223e31}
+.camp-pane{display:grid;gap:14px}
+.camp-pane button,.camp-pane select,.camp-pane summary{min-height:44px}
+.camp-pane .voyage-card,.camp-pane>.panel,.camp-locations,.camp-courses{width:100%;min-width:0;margin:0;box-sizing:border-box}
+.camp-pane h3{font-size:1rem;color:#f4dda8;margin:0 0 8px}
+.camp-action-list{display:flex;gap:8px;flex-wrap:wrap}
+.camp-action-list button{flex:1 1 110px}
+#camp-records>#journalButton,#camp-records>#campBackup{justify-self:start;min-width:10rem;font-size:.9rem;padding:8px 13px}
+.camp-pane #chapterTabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.camp-pane #stages{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:7px}
+.camp-pane .stage{width:100%;min-height:52px}
+.camp-pane .party-card{width:100%}
+#campMenu #gearDialog{z-index:4}
+@media(prefers-reduced-motion:no-preference){#campMenu[open] .camp-head{animation:camp-arrive .16s ease-out}@keyframes camp-arrive{from{opacity:.65;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}}
+
+#camp-library .collection .locked{display:none}
+#camp-library .home-book:not(:has(#collection .creature:not(.locked))){display:none}
+#camp-library #fieldCollection:not(:has(.creature:not(.locked))){display:none}
+#furtherBestiary>summary{scroll-margin-block-start:4.75rem}
+#furtherBestiary .collection{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,90px),1fr));gap:6px}
+#furtherBestiary .creature{min-width:0;line-height:1.35;overflow-wrap:anywhere;text-align:center}
+#furtherBestiary canvas{display:block;width:100%;height:auto;margin:auto;image-rendering:pixelated}

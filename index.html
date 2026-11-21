@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<base href="./assets/71afe6084e84720a/">
+<base href="./assets/4cd7798e53f71990/">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="囲碁の一手で森のモンスターに立ち向かうパズルゲーム">
 <meta name="color-scheme" content="only dark">
@@ -29,8 +29,8 @@
 .tracks button{font-size:.75rem;font-weight:780;min-height:30px;border:1px solid #475c51;border-radius:6px;padding:2px 8px;background:#21322c}
 .tracks button[aria-pressed=true]{color:#ffe0a1;border-color:#9c8150;background:#39372a}
 .backup-button{width:100%}
-#trainingBackup{width:min(440px,calc(100vw - 28px));border:1px solid #597361;border-radius:12px;background:var(--card);color:var(--text);padding:15px}
-#trainingBackup::backdrop{background:#101a19d4}
+#fieldReviewOffer,#trainingBackup{width:min(440px,calc(100vw - 28px));border:1px solid #597361;border-radius:12px;background:var(--card);color:var(--text);padding:15px}
+#fieldReviewOffer::backdrop,#trainingBackup::backdrop{background:#101a19d4}
 .backup-content h2{font-size:1rem;margin:0}
 .backup-content p{font-size:.85rem;color:var(--sub)}
 .backup-content textarea{width:100%;padding:6px;resize:vertical;border-radius:6px;background:#121e1b;color:var(--text);font:inherit}
@@ -171,6 +171,7 @@
 <div id="gearDetail" class="gear-detail" hidden><canvas width="150" height="84" id="gearSample" aria-hidden="true"></canvas><div><b id="gearName"></b><p id="gearCondition"></p><p id="gearMaterials" hidden></p><button class="control" id="makeGear" hidden></button> <button class="control primary" id="wearGear"></button></div></div>
 <div id="pane-fx" class="preference-pane" role="tabpanel" aria-labelledby="tab-fx" hidden><div id="fxList" class="gear-items"></div><div class="gear-detail"><canvas width="150" height="84" id="fxPreview" aria-hidden="true"></canvas><div><b id="fxName"></b><p id="fxCondition"></p><button type="button" id="wearFx" class="control primary"></button></div></div></div></div></section>
 <dialog id="journalDialog" aria-labelledby="journalHeading"><div class="journal-head"><h2 id="journalHeading" data-text="journal">旅の手帳</h2><button class="control" id="closeJournal" type="button" data-text="closeBook">閉じる</button></div><div id="journalEntries"></div><button class="control primary" type="button" id="enterStory" data-text="openStory">物語を進める</button></dialog>
+<dialog id="fieldReviewOffer" aria-labelledby="reviewOfferTitle"><h2 id="reviewOfferTitle"></h2><p></p><div class="backup-actions"><button class="control" type="button"></button><button class="control" type="button"></button></div></dialog>
 <dialog id="trainingBackup" aria-labelledby="backupHeading"><div class="backup-content">
 <h2 id="backupHeading" data-text="backupTitle">進み具合のバックアップ</h2>
 <p data-text="backupHelp">コードを保存しておけば、別の端末でも続きから遊べます。</p>
@@ -228,6 +229,8 @@
 <script src="./foe-party.js"></script>
 <script src="./battle-entrance.js"></script>
 <script src="./party-growth.js"></script>
+<script src="./outer-crossings.js"></script>
+<script src="./field-book.js"></script>
 <script src="./tempo-combat.js"></script>
 <script src="./first-lesson.js"></script>
 <script>
@@ -1242,7 +1245,7 @@ function checkpointStand(options={}){
   const marker=fieldMarker(level,fieldRound,campaignStage.phases.length);
   const combat=TempoCombat.snapshot();
   if(saved.round!==marker||!combat||combat.run.id!==level||combat.run.round!==fieldRound||combat.run.clear)return;
-  LastStand.store(level,{round:marker,sequence:fieldRound,lessonVersion:fieldLessonVersion,trail:options.retry?[]:fieldTrail,combat,study:{...studyAttempt},team:teamPending});
+  LastStand.store(level,{round:marker,sequence:fieldRound,readingBook:1,pick:mission.bookCode,lessonVersion:fieldLessonVersion,trail:options.retry?[]:fieldTrail,combat,study:{...studyAttempt},team:teamPending});
 }
 addEventListener("pagehide",()=>{if(mode==="playing"&&journey()&&!trial&&el("voyage").hidden)checkpointStand();});
 function restoreFieldTrail(record){
@@ -1280,7 +1283,7 @@ function startExpedition(id,round,restart=false){
   else campaignStage=trial?trial.stage:Expedition.stage(id,exercise,fieldLessonVersion===0);
   const phases=campaignStage.phases,authored=round<phases.length,stand=LastStand.has(id)&&round===phases.length;
   phase=Math.min(round,phases.length-1);
-  const current=authored?phases[round]:stand?LastStand.mission(id):TempoCombat.extraProblem(id,round,phases);
+  const current=authored?phases[round]:stand?LastStand.mission(id):FieldBook.select(id,round,phases,{replay:id<saved.expedition,legacy:hasRecord&&record.readingBook!==1&&(Array.isArray(record.trail)||Number.isInteger(record.first))});
   setPosition(current);
   if(!trial){TempoCombat.begin(id,round,phases.length+Number(LastStand.has(id)),mission.turns);encounterText();}
   if(!trial&&!restart&&id===saved.expedition){
@@ -1504,6 +1507,7 @@ function showPartyHealth(label,value){
   label.style.setProperty("--party-health",value+"%");
 }
 function refresh() {
+  if(mission?.reviewOffer)FieldBook.offer(mission,()=>el("mapButton").click(),()=>mode==="playing"&&el("voyage").hidden&&el("titleScene").hidden&&!el("battleLayout").hidden&&mission);
   renderFieldTools();
   sceneText();
   boardView();
@@ -1830,6 +1834,7 @@ function finish(completedPuzzle=true) {
     const ordinary=!trial&&!EarlyGuardians.is(level)&&level%10!==9;
     const end=ordinary?TempoCombat.status.hp===0:phase+1===campaignStage.phases.length;
     const previous=saved.expedition;
+    if(completedPuzzle&&!trial&&level===previous)FieldBook.solved(mission);
     if(!trial){teamCheckpoint=teamPending;if(level===previous)saved.teamBank=teamPending;
       if(level%10===9)FaunaMotion.transition(Math.floor(level/10),phase);}
     mode=end?"won":"phase";
@@ -1864,7 +1869,7 @@ function finish(completedPuzzle=true) {
       else if(end){awardStage(level);LastStand.store(level,null);}
       else{
         saved.round=fieldMarker(level,fieldRound+1,campaignStage.phases.length);
-        LastStand.store(level,{round:saved.round,sequence:fieldRound+1,lessonVersion:1,combat:TempoCombat.nextSnapshot(),study:{wrong:false,help:false},team:teamPending});
+        LastStand.store(level,{round:saved.round,sequence:fieldRound+1,readingBook:1,lessonVersion:1,combat:TempoCombat.nextSnapshot(),study:{wrong:false,help:false},team:teamPending});
       }
       save();rail();
     }
@@ -1964,6 +1969,7 @@ function relayNotice(){
 }
 function attempt(p) {
   if(BattleEntrance.blocking||mode!=="playing"||crewReview?.survey)return;
+  if(!FieldBook.allow(mission,()=>el("mapButton").click()))return;
   if(state.board[p]){FirstLesson.inspect(p);return;}
   lanternPoints=[];crewHint=crewReview=crewIntercept=null;
   if(journey() && scouting){
@@ -2187,6 +2193,13 @@ el("backup").onclick=()=>{
     // Signed checkpoint gate -1 uses byte 255; all other fields are already bounded to one byte.
     ex.p=btoa(String.fromCharCode(...ex.z.map(n=>n&255)));delete ex.z;
   }
+  const book=FieldBook.snapshot();
+  if(book){
+    checkpointStand();
+    const id=saved.expedition,record=id<80?LastStand.load(id):null;
+    const core=record&&record.sequence>=Expedition.stage(id,exercise).phases.length+Number(LastStand.has(id))&&record.round===saved.round?[id,record]:null;
+    ex.reading={version:1,book,core,regions:SecondReach.exportExtras()};
+  }
   backupCode.value=CampaignBackup.format(data);
   delete messages.backupStatus;
   el("backupStatus").textContent="";
@@ -2219,6 +2232,11 @@ function restoreCampaignPayload(payload){
     if(Array.isArray(extra.z)&&extra.z.length===17&&extra.z.every(Number.isSafeInteger)){
       const a=extra.z;Object.assign(extra,{round:a[0],location:a[1],partner:a[2],trials:a[3],gear:a.slice(4,6),reviews:a.slice(6,12),past:a[12],gate:a[13],duels:a[14],fx:a[15],xy:a[16]});
     }
+    const reading=extra.reading;
+    if(reading!==undefined&&(!reading||reading.version!==1||!FieldBook.valid(reading.book)||!Array.isArray(reading.regions)||
+       reading.regions.length>12||reading.core!==null&&(!Array.isArray(reading.core)||reading.core.length!==2||
+       reading.core[0]!==extra.expedition||!Number.isInteger(reading.core[1]?.sequence)||reading.core[1].sequence>=32||
+       reading.core[1].sequence<3||!Number.isInteger(reading.core[1].round))))throw Error("invalid reading history");
     let incomingReach=ReachProgress.read(extra.q,extra.expedition);
     const reachExtra=ReachJournal.unpack(extra.u),incomingFork=ReachJournal.fork(0,reachExtra.fork,incomingReach);
     const [oath,oathQ]=CampaignSlots.oath(),localFork=ReachJournal.fork(oath,saved.reachFork,Math.max(oathQ,saved.reach));
@@ -2281,6 +2299,17 @@ function restoreCampaignPayload(payload){
     drawWood();
     saved.track=extra.active?"expedition":track;
     if(unlocked(saved.training,course)) saved.course=course;
+    if(reading){
+      FieldBook.restore(reading.book);
+      if(reading.core&&reading.core[0]===saved.expedition){
+        const [id,rec]=reading.core,local=LastStand.load(id);
+        if(id<80&&rec.round===saved.round&&rec.sequence>=Expedition.stage(id,exercise).phases.length+Number(LastStand.has(id))&&
+           (!local||local.round!==saved.round||local.sequence<rec.sequence||
+           local.sequence===rec.sequence&&local.pick===rec.pick&&FieldBook.continuesLine(local.trail,rec.trail))&&
+           (rec.pick===undefined||rec.pick===FieldBook.currentPick(id,rec.sequence)))LastStand.store(id,rec);
+      }
+      SecondReach.restoreExtras(reading.regions);
+    }
     save();
     resumeTrack();
     if(!el("voyage").hidden) openMap(mapLocation());
@@ -2337,7 +2366,6 @@ el("restoreBackup").onclick=()=>{
 <script src="./outer-story.js"></script>
 <script src="./outer-map-art.js"></script>
 <script src="./outer-district-art.js"></script>
-<script src="./outer-crossings.js"></script>
 <script src="./last-delivery.js"></script>
 <script src="./outer-map.js"></script>
 </body>
