@@ -13,11 +13,17 @@ const Wardrobe=(()=>{
     ["copper",5,0,["煤黒と象牙色の石","먹빛돌과 상아빛돌"],["モルを仲間にする","모루 영입"],["#74594b","#382a28","#201c20","#fff7e9","#f3e4ce","#d3bfa3"]],
     ["aurora",0,8,["極夜と極光の石","극야와 극광의 돌"],["天竜の五番勝負を達成","천룡 5연전 성공"],["#45547d","#25263e","#121b2b","#ffffff","#e4f4eb","#c3dbd6"]]
   ];
-  const owns=(item,progress,badges)=>!!item && progress>=item[1] && (badges&item[2])===item[2];
+  boards.push(...Workshop.additions(0));stones.push(...Workshop.additions(1));
+  const owns=(item,progress,badges)=>!!item && (item[6]?Workshop.owns(saved.work,item[6]):progress>=item[1]&&(badges&item[2])===item[2]);
   function surface(c,w,h,id){
     const colors=boards[id][5],gradient=c.createLinearGradient(0,0,w,h);
     gradient.addColorStop(0,colors[0]);gradient.addColorStop(1,colors[1]);c.fillStyle=gradient;c.fillRect(0,0,w,h);
     c.save();c.scale(w/540,h/540);c.lineWidth=1.4;
+    if(id>=4){
+      c.strokeStyle=colors[2];c.globalAlpha=.13;c.lineWidth=.07;
+      for(let row=0;row<7;row++)for(let col=0;col<7;col++)Workshop.motif(c,id-4,15+col*88+(row%2)*22,18+row*86,26);
+      c.restore();return;
+    }
     for(let i=0;i<42;i++){
       const y=i*14;c.beginPath();c.strokeStyle=i%3===0?"#fff6c955":"#4e5b4d25";
       if(id===2){c.ellipse((i*89)%570,y,35+i%7*16,5+i%5,0,.1,Math.PI*1.84);}
@@ -34,6 +40,7 @@ const Wardrobe=(()=>{
     g.addColorStop(0,tone[start]);g.addColorStop(.73,tone[start+1]);g.addColorStop(1,tone[start+2]);c.fillStyle=g;
     c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fill();c.strokeStyle=white?"#70695e":"#101614";c.lineWidth=Math.max(1,r*.07);c.stroke();c.clip();
     c.strokeStyle=white?"#a08c6e60":"#c9d3db66";c.lineWidth=r*.075;
+    if(id>=4){c.strokeStyle=white?"#7c827b89":"#ced4c68c";c.lineWidth=.093;Workshop.motif(c,id-4,x-r*.05,y+r*.07,r*.61);}
     if(id===1){c.beginPath();if(white)c.arc(x,y-r*.05,r*.72,.3,1.63);else{c.moveTo(x-r*.68,y-r*.12);c.lineTo(x-r*.18,y-r*.7);c.lineTo(x+r*.31,y-r*.47);}c.stroke();}
     if(id===2){for(let j=0;j<3;j++){c.beginPath();c.ellipse(x-r*.3,y+r*(.34+j*.19),r,r*.21,-.35,3.4,5.9);c.stroke();}}
     if(id===3){c.strokeStyle=white?"#6aa89c77":"#aaa2fa77";for(let j=0;j<2;j++){c.beginPath();c.moveTo(x-r*.78,y+r*(.1+j*.2));c.bezierCurveTo(x-r*.15,y-r,x+r*.1,y+r*.7,x+r*.83,y-r*.14);c.stroke();}}

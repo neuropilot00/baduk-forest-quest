@@ -1,37 +1,17 @@
 "use strict";
 const FrontDoor=(()=>{
-  const cover=el("titleScene"),shell=document.querySelector(".shell"),canvas=el("titleArt"),ctx=canvas.getContext("2d");
+  const cover=el("titleScene"),shell=document.querySelector(".shell"),image=el("titleArt");
   let active=false;
-  const local=(ja,ko)=>localizedPair([ja,ko]);
   function paint(){
-    const w=384,h=640,c=ctx;
-    c.imageSmoothingEnabled=false;
-    const fill=(color,x,y,sw,sh)=>{c.fillStyle=color;c.fillRect(Math.round(x),Math.round(y),Math.round(sw),Math.round(sh));};
-    const polygon=(color,points)=>{c.fillStyle=color;c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fill();};
-    const sky=c.createLinearGradient(0,0,0,460);sky.addColorStop(0,"#123635");sky.addColorStop(.46,"#59817b");sky.addColorStop(.79,"#e0b880");sky.addColorStop(1,"#efdca4");c.fillStyle=sky;c.fillRect(0,0,w,h);
-    for(let j=-36;j<=36;j+=2){const width=Math.sqrt(36*36-j*j);fill("#ffdf91",256-width,290+j,width*2,2);}
-    for(let i=0;i<18;i++)fill(i%2?"#84a198":"#d4cda4",(i*53)%410-18,221+i*7,i%5*11+11,2);
-    function ridge(y,a,seed,color){const pts=[[-4,h],[-4,y]];for(let x=0;x<=388;x+=4)pts.push([x,y+Math.round((Math.sin(x/58+seed)+.61*Math.sin(x/24+seed*.7)+.25*Math.sin(x/10))*a/2)*2]);pts.push([388,h]);polygon(color,pts);}
-    ridge(330,25,2,"#8d9c84");ridge(355,26,5,"#738e7f");ridge(379,29,8,"#4b756b");
-    fill("#56877b",0,403,w,160);
-    for(let i=0;i<180;i++){const y=406+(i*43)%140;fill(i%4?"#74a394":"#d2c58f",(i*89+(y%9)*8)%390,y,2+(i%7)*3,1+i%2);}
-    const pine=(x,y,s,color)=>{for(let k=0;k<3;k++)polygon(color,[[x,y-(34+k*17)*s],[x+(19-k*4)*s,y-k*15*s],[x-(18-k*4)*s,y-k*15*s]]);fill(color,x-3*s,y-4*s,6*s,13*s);};
-    for(let i=0;i<21;i++)pine(i*23-15,401+Math.sin(i)*7,0.3+(i%4)*.06,"#3f655a");
-    // A bronze bell hangs between the two roofs across the river.
-    fill("#3d5047",249,337,5,63);fill("#405446",281,337,5,63);
-    polygon("#3f5550",[[238,344],[256,328],[265,316],[276,329],[297,342],[291,347],[241,347]]);
-    polygon("#a2875a",[[247,339],[264,319],[261,333]]);fill("#e3c07a",239,342,56,2);
-    fill("#d7aa67",259,346,13,13);fill("#e1bc74",256,356,19,4);fill("#5c6555",238,399,61,3);
-    ridge(507,28,3,"#335c4e");ridge(531,30,7,"#294b3f");
-    polygon("#a39a69",[[37,527],[121,503],[181,519],[244,514],[277,525],[211,532],[150,532],[63,560],[0,568]]);
-    pine(2,547,1.82,"#203f36");pine(368,537,1.37,"#28483b");pine(388,566,2.4,"#18372f");
-    for(let i=0;i<60;i++)fill(i%2?"#668360":"#78926a",(i*71)%386,518+(i*13)%20,1+i%4,2);
-    ExpeditionCast.party(c,0,128,524,101);ExpeditionCast.companion(c,1,58,526,101);
-    ridge(574,15,4,"#203e34");ridge(606,19,8,"#17352c");
-    for(let i=0;i<32;i++)fill(i%3?"#d9bf7380":"#e8d59d",(i*83)%384,444+(i*29)%98,2,i%3?1:2);
-    el("titleName").textContent=t("title");el("titlePrompt").textContent=local("タップして冒険へ","탭하여 원정 시작");
-    el("titleStory").textContent=local("消えた朝の鐘","사라진 새벽종");
+    const lang=saved.locale==="ko"?"ko":"ja",source="./dawnbell-portrait-"+lang+".webp";
+    if(image.getAttribute("src")!==source){
+      cover.classList.remove("cover-error");el("titleWide").srcset="./dawnbell-wide-"+lang+".webp";image.src=source;
+    }
+    el("titleName").textContent=t("title");el("titlePrompt").textContent=localizedPair(["冒険をはじめる","원정 시작"]);
+    el("titleStory").textContent=localizedPair(["消えた朝の鐘","사라진 새벽종"]);
   }
+  image.addEventListener("error",()=>cover.classList.add("cover-error"));
+  image.addEventListener("load",()=>cover.classList.remove("cover-error"));
   function show(visible){
     active=visible;cover.hidden=!visible;shell.inert=visible;document.body.classList.toggle("at-title",visible);
     if(visible){paint();el("enterGame").focus({preventScroll:true});}
@@ -39,7 +19,6 @@ const FrontDoor=(()=>{
   }
   function enter(){show(false);openMap(mapLocation());el("voyGo").focus({preventScroll:true});}
   el("enterGame").onclick=enter;
-  for(const image of [CastMotion.poses,ExpeditionCast.sheet])image.addEventListener("load",()=>{if(active)paint();});
   let entered=false;try{entered=sessionStorage.getItem("bfq-entered")==="1";}catch{}
   show(!entered);
   return {show,enter,get active(){return active;}};

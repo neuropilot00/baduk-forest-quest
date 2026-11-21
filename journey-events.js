@@ -15,7 +15,7 @@ const RoadTalk=(()=>{
     const canvas=el("roadIllustration"),c=canvas.getContext("2d"),w=canvas.width,h=canvas.height;
     c.imageSmoothingEnabled=false;c.drawImage(MapArt.battle(rank,id%20),0,0,w,h);
     ExpeditionCast.party(c,0,w*.3,h*.92,h*.66);
-    if(who||saved.partner)ExpeditionCast.companion(c,who||saved.partner,w*.69,h*.92,h*.66);
+    if(who||Crew.guide())ExpeditionCast.companion(c,who||Crew.guide(),w*.69,h*.92,h*.66);
   }
   function close(){if(el("roadDialog").open)el("roadDialog").close();}
   el("roadSkip").onclick=close;el("roadNext").onclick=()=>{if(beat)close();else{beat++;render();}};
@@ -63,7 +63,8 @@ const BossMatch=(()=>{
     ink.imageSmoothingEnabled=false;ink.drawImage(MapArt.battle(Math.floor(rank/2),(rank*10+9)%20),0,0,scene.width,scene.height);
     const hx=74+(striker===1?18*push:-6*hit),ex=242+(striker===2?-20*push:7*hit);
     ExpeditionCast.party(ink,0,hx,94-push*2,61,0,0,CastMotion.phase(1,time));
-    if(saved.partner)ExpeditionCast.companion(ink,saved.partner,37,94,61,.025*hit);
+    Crew.draw(ink,9,95,42,(reduceMotion?0:Math.floor(time/165)%4));
+    if(Crew.guide())ExpeditionCast.companion(ink,Crew.guide(),37,94,61,.025*hit);
     ExpeditionCast.guardian(ink,rank,ex,94,78,(striker===2?-.11:.14)*push,1,CastMotion.phase(2,time));
     if(active){
       const f=Math.min(1,age/.39),a=striker===1?hx+16:ex-16,b=striker===1?ex-13:hx+11;

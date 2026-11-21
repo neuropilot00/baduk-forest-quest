@@ -62,12 +62,15 @@ function renderMap(){
   portrait(el("sceneCast"),actor);
   el("voyChapter").textContent=t("chapterLabel",rank+1)+" · "+localizedPair(Expedition.ranks[rank]);
   el("voyTitle").textContent=localizedPair(Voyage.chapters[rank]);
-  el("voyLocation").textContent=t("stageLabel",String(mapStage+1).padStart(2,"0"))+" / 80 · "+campaignTitle(mapStage);
+  el("voyLocation").textContent=t("stageLabel",String(mapStage+1).padStart(2,"0"))+" / 80 · "+campaignTitle(mapStage)+(mapStage<saved.expedition?" · ✓ "+t("cleared"):"");
   el("voyPlace").textContent=mapOutcome?(finale?t("returnCrew"):newRecruit?t("recruit")+" · "+localizedPair(actor.name):t("clearedStage")+" · "+localizedPair(scene.title)):localizedPair(scene.title);
   el("voySpeaker").textContent=localizedPair(actor.name)+" · "+localizedPair(actor.role);
   el("voyLine").textContent=localizedPair(mapOutcome?scene.after:scene.before)+(mapOutcome&&newRecruit?" “"+localizedPair(actor.oath)+"”":"");
   if(locked)el("voyLine").textContent=t("needsSite",localizedPair(Voyage.places[mapStage-1]));
   if(mapOutcome){
+    if(lastLoot)el("voyLine").append(" · "+localizedPair(Workshop.materials[lastLoot[0]])+" +"+lastLoot[1]);
+    const joined=Crew.roles.find(role=>role.gate===mapStage+1&&saved.expedition===mapStage+1);
+    if(joined)el("voyLine").append(" · "+localizedPair(joined.name)+"「"+localizedPair(joined.line)+"」");
     const prize=earnedCosmetic;
     if(prize)el("voyLine").append(" · "+t("unlockedSkin",localizedPair(prize[3])));
     if((mapStage+1)%20===0 && !finale)el("voyLine").append(" · "+t("nextChapter",localizedPair(Voyage.chapters[rank+1])));
@@ -97,6 +100,7 @@ function renderMap(){
     card.onclick=()=>{saved.partner=i;save();renderMap();};
     copy.append(name,role);card.append(pic,copy,status);return card;
   }));
+  Crew.render();
   el("trialChoices").replaceChildren(...trials.map((key,i)=>{
     const b=document.createElement("button");b.type="button";b.className="control";b.dataset.trial=i;
     b.textContent=((saved.trials&(1<<i))?"✓ ":"")+t(key);b.onclick=()=>startTrial(i);return b;

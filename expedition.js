@@ -11,23 +11,10 @@ const Expedition = (() => {
   const tracks = [
     [1,2,3,1,4], [2,4,3,5,5], [4,5,3,6,6], [5,6,7,6,7]
   ];
-  const names = [
-    [["岩角の雄羊","바위뿔 숫양"],["渓流カワセミ","여울 물총새"],["木札センザンコウ","나무패 천산갑"],["火花イモリ","불꽃 도롱뇽"],["鈴羽の蛾","방울날개 나방"],["白羽フクロウ","흰날개 올빼미"],["晶尾サソリ","수정꼬리 전갈"],["祠を背負う亀","사당을 인 거북"]],
-    [["珊瑚キノコ","산호버섯"],["渦羽ミミズク","물결수리부엉이"],["水晶クワガタ","수정사슴벌레"],["波紋ヒキガエル","물비늘두꺼비"],["潮音コウモリ","파도소리박쥐"],["真珠ガメ","진주거북"],["滝の大蛇","폭포이무기"],["深淵の水竜","심연수룡"]],
-    [["火花キノコ","불씨버섯"],["熾火の夜鳥","잉걸밤새"],["鉄角カブト","쇠뿔장수풍뎅이"],["溶岩ガエル","용암개구리"],["灰翼コウモリ","재빛날개박쥐"],["炉石ガメ","화로돌거북"],["火走りヘビ","불길뱀"],["火口の飛竜","분화구비룡"]],
-    [["霜笠キノコ","서리갓버섯"],["月読みフクロウ","달읽는부엉이"],["鏡角クワガタ","거울뿔사슴벌레"],["星詠みガエル","별점개구리"],["雪灯コウモリ","눈등불박쥐"],["氷河ガメ","빙하거북"],["銀河ヘビ","은하뱀"],["極光の天竜","극광천룡"]]
-  ];
-  // Each family has its own pixel silhouette. Region markings and palettes identify species.
-  const shapes = [
-    [".....33333.....","...32222223....","..3224422423...",".322242222223..","33333333333333.","....311113.....","....314143.....","....311113.....","...31111113....","...33...333...."],
-    ["..33.....33....","..313...313....","..322333223....",".32244244223...",".32314341323...",".32222322223...","..322424223....","..312222213....","...3111113.....","...44...44....."],
-    ["..33.....33....","...23...32.....","....23332......","..332222233....",".31223332213...","..322323223....","3322232322233..","..322323223....",".33223232233...","33..33333..33.."],
-    ["...333...333...","..34223.34223..","..31423321423..","...322222223...",".3322222222233.","322244444422223","322211111122223",".332211112233..","...33222233....",".3333....3333.."],
-    ["33.........33..","313..3.3..313..","3123333333213..","3222322232223..","3222342432223..","3222322232223..","3233322233323..","33..31113..33..",".....313.......",".....3.3......."],
-    [".....3333......","...33244233....","..3223223223...","..3242332423...","33323223223333.","312222222223143",".3331111111113.","...3111111333..","..3333..3333..."],
-    [".......33333...","......3224423..","......32142223.",".......322233..","....3333223....","...32222223....","..32233333.....","..3223...333...","...322333223...","....3222223....",".....33333....."],
-    ["....3....3.....",".3..23..323....",".23.3233223....","322332224223...","3222222334233..",".322322222223..","..3332243333...","..33222223.....",".32221112233...","3322311132233..","...33...33....."]
-  ];
+  const names = [[["岩角の雄羊","바위뿔 숫양"],["渓流カワセミ","여울 물총새"],["木札センザンコウ","나무패 천산갑"],["火花イモリ","불꽃 도롱뇽"],["鈴羽の蛾","방울날개 나방"],["白羽フクロウ","흰날개 올빼미"],["晶尾サソリ","수정꼬리 전갈"],["祠を背負う亀","사당을 인 거북"],["苔冠の山鹿","이끼관 사슴"],["切株ヤドカリ","그루터기 소라게"],["野ばら兎","들장미 토끼"],["笹葉カマキリ","댓잎 사마귀"]],
+    [["錨爪ガニ","닻집게 게"],["硝子クラゲ","유리 해파리"],["葦嘴サギ","갈대부리 왜가리"],["扇エイ","부채 가오리"],["帆ビレ竜馬","돛지느러미 해마"],["渦巻きオウム貝","회오리 앵무조개"],["水車ウナギ","물레 장어"],["沼の提灯魚","늪 초롱아귀"],["舟背ラッコ","뗏목 해달"],["泡羽トンボ","거품날개 잠자리"],["岩屋ウツボ","틈바위 곰치"],["水琴ムール貝","물금 홍합"]],
+    [["煙突バク","굴뚝 맥"],["鋏牙クワガタ","가윗턱 사슴벌레"],["釜腹イノシシ","솥배 멧돼지"],["炉縁ヤモリ","화덕붙이 도마뱀붙이"],["煤翼カラス","검댕 까마귀"],["鎚嘴キツツキ","망치부리 딱따구리"],["鉄輪アルマジロ","철테 아르마딜로"],["灰火ヒドラ","잿불 히드라"],["火床ダチョウ","불마루 타조"],["岩芯モグラ","암심 두더지"],["火口タコ","분화구 문어"],["鎧ハリネズミ","갑옷 고슴도치"],["溶岩ヒトデ","용암 불가사리"]],
+    [["雪笠ペンギン","눈갓 펭귄"],["薄氷アザラシ","살얼음 물범"],["星角シロサイ","별뿔 흰코뿔소"],["氷柱セイウチ","고드름 바다코끼리"],["流星モモンガ","유성 하늘다람쥐"],["燭台トナカイ","촛대 순록"],["氷鏡マンモス","빙경 매머드"],["霜刃リュウグウウミウシ","서리칼 갯민숭달팽이"],["風鈴コウモリ","풍경 박쥐"],["硝子鶴","유리 두루미"],["極光マンタ","극광 쥐가오리"],["銀鈴キツネ","은방울 여우"],["甲冑シロクマ","갑주 북극곰"]]];
   const palettes = [
     ["#ebdeb0","#78b968","#263e34","#ffdb87"],
     ["#caf2df","#539eaa","#213d50","#a4f4f1"],
@@ -64,8 +51,9 @@ const Expedition = (() => {
   const rankOf=id=>Math.floor(id/rankSize);
   const numberOf=id=>id%rankSize+1;
   function species(id) {
-    const n=numberOf(id);
-    return rankOf(id)*8+(n%10===0?7:(n-1)%8);
+    const rank=rankOf(id),local=id%20,offset=[0,12,24,37][rank];
+    const encounter=local-(local>=10?1:0);
+    return offset+encounter%names[rank].length;
   }
   function route(id) { return (rankOf(id)+Math.floor((numberOf(id)-1)/5))%paths.length; }
   // Each edited three-move position has four starting liberties and exactly one winning first move.
@@ -115,69 +103,6 @@ const Expedition = (() => {
     const problem=getExercise(course,(kind==="liberty"?800:950)+serial);
     return kind==="liberty"?{...problem,kind}:problem;
   }
-  const artCache=new Map();
-  function monsterArt(doc,id){
-    if(artCache.has(id)) return artCache.get(id);
-    const family=id%8,rank=Math.floor(id/8),shape=shapes[family];
-    const surface=doc.createElement("canvas");
-    const unit=4, top=12, width=60;
-    surface.width=width;surface.height=top+shape.length*unit+2;
-    const ink=surface.getContext("2d"),cell=(x,y)=>shape[y]?.[x]??".";
-    const ramps=[
-      [["#665b41","#af9b70","#ebdeb0","#fff2c9"],["#355331","#50834b","#80ae5e","#b8d77b"],["#172d29","#294537","#415940","#698059"],["#b47c3c","#d79e56","#ffdb87","#fff2b0"]],
-      [["#4a797c","#86b7ae","#c6ead2","#efffe9"],["#2d5966","#397e8d","#66adb1","#a0d9c9"],["#152e3a","#214155","#395966","#63858b"],["#478eaa","#77cbce","#a8f0de","#e5fff1"]],
-      [["#825346","#c48365","#ffbf8c","#ffdda3"],["#733842","#a94942","#d9744f","#f5a964"],["#302431","#533644","#6c494d","#94605c"],["#b35d32","#e2933f","#ffd772","#fff2af"]],
-      [["#73667f","#b1a6c1","#e2dbee","#fff4fa"],["#514963","#706b97","#9a94c8","#c3b9e1"],["#262b42","#404055","#54566c","#84859b"],["#498aab","#71c6d2","#a3eded","#e1fffc"]]
-    ][rank];
-    // Paint and light the silhouette on a fine pixel grid, including a one-pixel rim.
-    for(let y=0;y<shape.length*unit;y++) for(let x=0;x<width;x++){
-      const cx=Math.floor(x/unit),cy=Math.floor(y/unit),c=cell(cx,cy);
-      if(c===".") continue;
-      const dx=x%unit,dy=y%unit;
-      const left=cell(cx-1,cy)===".",right=cell(cx+1,cy)===".";
-      const above=cell(cx,cy-1)===".",below=cell(cx,cy+1)===".";
-      if((dx===0 && left || dx===3 && right) && (dy===0 && above || dy===3 && below)) continue;
-      const edge=(dx===0 && left)||(dy===0 && above)||(dx===3 && right)||(dy===3 && below);
-      const noise=(x*17+y*11+Math.floor(x/3)*7)%29;
-      let tone=2;
-      if(c==="3") tone=dx+dy>=4?0:1;
-      else if((dx===0 && cell(cx-1,cy)!==c)||(dy===0 && cell(cx,cy-1)!==c)) tone=3;
-      else if((dy>=2 && cell(cx,cy+1)!==c)||(dx>=2 && cell(cx+1,cy)!==c)) tone=1;
-      else if(noise<2) tone=3;
-      if(edge) tone=dx===3||dy===3?0:1;
-      ink.fillStyle=ramps[Number(c)-1][tone];ink.fillRect(x,y+top,1,1);
-    }
-    const dot=(x,y,w,h,col)=>{ink.fillStyle=col;ink.fillRect(x,y,w,h);};
-    const eye=(x,y)=>{
-      dot(x-1,y,5,3,"#392f33");dot(x,y-1,3,5,"#2d302f");
-      dot(x,y-1,2,2,"#fff7c9");dot(x+2,y+2,1,1,"#a88857");
-    };
-    const faces=[[[23,35],[32,35]],[[16,30],[32,30]],[[23,25],[30,25]],[[11,21],[32,21]],[[22,31],[30,31]],[[48,33]],[[36,22]],[[35,28]]];
-    for(const [x,y] of faces[family]) eye(x,y);
-    if(family===0 || family===3){
-      const y=family===0?40:28;
-      dot(25,y,4,1,"#695a46");dot(28,y-1,2,1,"#695a46");
-    }
-    // A leafy sprig, branching coral, embers or a cut crystal marks the region.
-    const crestShapes=[
-      ["......hh.",".hh..hbh.",".hbbhbh..","..hbbh...","....bd...","....d...."],
-      [".h....h..",".bh...bh.","..b.h.b..","..bbbbb..","....bd...","....d...."],
-      ["....h....","...hb..h.","..hbb.hb.",".hbbhhbb.","..bddbb..","...dd...."],
-      ["....h....","...hbh...","..hbbdh..",".hbbbddh.","..hbbdd..","...ddd..."]
-    ];
-    const crest=crestShapes[rank],tint=[["#e1e799","#83984e","#435b36"],["#def9e6","#f0a695","#946d6e"],["#fff2a4","#f59949","#bb4840"],["#e9ffff","#88dcd9","#4786a9"]][rank];
-    const crestX=[24,31,24,18,24,25,38,25][family];
-    crest.forEach((row,y)=>Array.from(row).forEach((c,x)=>{if(c!==".") dot(crestX+x*2,y*2,2,2,tint["hbd".indexOf(c)]);}));
-    artCache.set(id,surface);return surface;
-  }
-  function monster(ctx,id,x,bottom,height,lean=0,alpha=1){
-    const art=monsterArt(ctx.canvas.ownerDocument,id);
-    const ratio=height/art.height;
-    ctx.save();ctx.translate(x,bottom);ctx.rotate(lean);ctx.globalAlpha=alpha;
-    ctx.imageSmoothingEnabled=false;
-    ctx.drawImage(art,-art.width*ratio/2,-height,art.width*ratio,height);
-    ctx.restore();
-  }
   function drawRoad(ctx,w,h,path,progress) {
     const ground=h*.84, scroll=progress*w*.85;
     ctx.fillStyle=["#6f624b","#5e4637","#52516a","#797787"][path];
@@ -198,5 +123,5 @@ const Expedition = (() => {
       }
     }
   }
-  return {ranks,regions,paths,names,words,skills,palettes,rankSize,total,rankOf,numberOf,species,route,stage,reviewKinds,review,narrowGate,monster,drawRoad};
+  return {ranks,regions,paths,names,words,skills,palettes,rankSize,total,rankOf,numberOf,species,route,stage,reviewKinds,review,narrowGate,drawRoad};
 })();

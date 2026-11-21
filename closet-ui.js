@@ -47,6 +47,9 @@ function renderGear(){
   Wardrobe.preview(el("gearSample"),type?saved.gear[0]:id,type?id:saved.gear[1]);
   el("gearName").textContent=localizedPair(chosen[3]);el("gearCondition").textContent=localizedPair(chosen[4]);
   const owns=Wardrobe.owns(chosen,saved.expedition,saved.trials),worn=saved.gear[type]===id;
+  const recipe=chosen[6],mats=el("gearMaterials"),make=el("makeGear");mats.hidden=!recipe||owns;make.hidden=!recipe||owns;
+  if(recipe&&owns)el("gearCondition").textContent=localizedPair(["制作済み","제작 완료"]);
+  if(recipe){const available=Workshop.balance(saved.work);mats.textContent=recipe.req.flatMap((n,i)=>n?[localizedPair(Workshop.materials[i])+" "+available[i]+" / "+n]:[]).join(" · ");make.textContent=localizedPair(["制作する","제작하기"]);make.disabled=!Workshop.canMake(saved.work,recipe);}
   el("wearGear").textContent=t(worn?"equipped":owns?"equip":"locked");el("wearGear").disabled=!owns||worn;
 }
 function renderEffects(){
@@ -62,6 +65,7 @@ function renderEffects(){
     label.textContent=(saved.fx===id?"✓ ":"")+localizedPair(style.name);b.append(sample,label);b.onclick=()=>{effectPick=id;renderEffects();};return b;
   }));
 }
+el("makeGear").onclick=()=>{const [kind,id]=gearPick,r=gearPools[kind][id]?.[6];if(r&&Workshop.make(saved.work,r)){save();renderGear();}};
 el("wearFx").onclick=()=>{if(BoardFX.owns(effectPick,saved.expedition,saved.trials)){saved.fx=effectPick;save();renderEffects();}};
 el("showCoords").onchange=event=>{saved.coords=event.target.checked;document.body.classList.toggle("with-coords",saved.coords);save();};
 el("personalSettings").onclick=openGear;

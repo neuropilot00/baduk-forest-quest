@@ -1,7 +1,7 @@
 "use strict";
 const ExpeditionCast=(()=>{
   const sheet=new Image();sheet.src="./forest-cast.png";
-  const foes=[0,1,5,2,3,7,6,8];
+  const fauna=new Image();fauna.src="./field-fauna.png";
   const partnerFrames=[null,4,5,1,7];
   function frame(c,id,x,y,height,angle=0,alpha=1,flip=false){
     if(!sheet.naturalWidth)return;
@@ -11,8 +11,11 @@ const ExpeditionCast=(()=>{
   }
   function foe(c,id,x,y,height,angle=0,alpha=1,pose=0){
     if(id===0&&CastMotion.draw(c,1,x,y,height*1.05,pose,alpha))return;
-    if(id>=8){Expedition.monster(c,id,x,y,height,angle,alpha);return;}
-    frame(c,foes[id],x,y,height*1.18,angle,alpha);
+    if(!fauna.naturalWidth)return;
+    const step=pose||(!reduceMotion&&Math.floor(performance.now()/(310+id%7*29))%4===1?1:0);
+    const scale=height*(id<8?1.12:1.18);
+    c.save();c.imageSmoothingEnabled=false;c.translate(Math.round(x),Math.round(y));c.rotate(angle);c.globalAlpha=alpha;
+    c.drawImage(fauna,((id%5)*4+step)*96,Math.floor(id/5)*96,96,96,-scale/2,-scale*93/96,scale,scale);c.restore();
   }
   function guardian(c,rank,x,y,height,angle=0,alpha=1,pose=0){
     if(rank===0&&CastMotion.draw(c,2,x,y,height,pose,alpha))return;
@@ -37,7 +40,7 @@ const ExpeditionCast=(()=>{
     c.drawImage(cast[0],(step%8)*144,0,144,136,-size*.53,-size*.94,size*1.06,size);c.restore();
   }
   function companion(c,id,x,y,heroHeight,angle=0){if(id)party(c,id,x,y,heroHeight*(id===1?.50:.62),angle);}
-  return {sheet,foe,guardian,party,companion};
+  return {sheet,fauna,foe,guardian,party,companion};
 })();
 const WorldMap=(()=>{
   const cache=new Map(),viewport=el("mapViewport"),world=el("mapWorld");
@@ -79,7 +82,8 @@ const WorldMap=(()=>{
     function shadow(a,b,w){c.fillStyle="#293a32aa";c.fillRect(a-w,b-2,w*2,3);}
     let partner=[x-15,y+2];
     if(walking&&saved.partner){const lag=Atlas.position(trip.from,Math.max(0,trip.f-.18));if(lag.rank===rank)partner=[lag.point[0]-5,lag.point[1]+2];}
-    if(saved.partner){shadow(...partner,6);ExpeditionCast.companion(c,saved.partner,partner[0],partner[1]-bob,29,walking?Math.sin(tick/95)*.05:0);}
+    Crew.draw(c,x-26,y+1,21,beat,.53);
+    if(Crew.guide()){shadow(...partner,6);ExpeditionCast.companion(c,Crew.guide(),partner[0],partner[1]-bob,29,walking?Math.sin(tick/95)*.05:0);}
     shadow(x,y-1,7);CastMotion.hiker(c,x,y-1,heading,beat);
     if(!walking){c.fillStyle="#394a39";c.fillRect(x-3,y-40,7,3);c.fillStyle="#ffde8a";c.fillRect(x-3,y-41,7,2);c.fillRect(x-1,y-39,3,2);}
   }
