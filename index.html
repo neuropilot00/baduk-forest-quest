@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<base href="./assets/49facdf42cf93216/">
+<base href="./assets/a2549da0ab21ab24/">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="囲碁の一手で森のモンスターに立ち向かうパズルゲーム">
 <meta name="color-scheme" content="only dark">
@@ -114,7 +114,7 @@
 <div class="battle-frame"><canvas id="battle" width="312" height="115" aria-hidden="true"></canvas>
 <div class="scene-head"><div class="unit"><b data-text="party">ソルビ探検隊</b><output class="party-vital" id="allyVital" aria-live="off" hidden></output><span class="meter" role="meter" data-label="partyHP" aria-label="探検隊の体力" aria-valuenow="100"><i id="allyHP"></i></span></div><span class="scene-tag" id="region"></span><div class="unit enemy"><b id="enemyName"></b><span id="enemyShield" role="img" hidden></span><span id="enemyShieldBurst" aria-hidden="true" hidden></span><output id="guardHP"></output><span class="meter" role="meter" data-label="monsterHP" aria-label="モンスターの体力"><i id="enemyHP"></i></span></div></div>
 <div class="combat-call" id="combat" aria-live="polite"></div></div>
-<div id="tempoHud" hidden><b id="tempoTurn"></b><span id="tempoTrack" aria-hidden="true"><i id="tempoBar"></i></span><span id="tempoSeconds"></span><output id="tempoNotice" aria-live="polite"></output><button type="button" id="burstOpen" hidden></button></div>
+<div id="tempoHud" hidden><b id="tempoTurn"></b><span id="tempoTrack" aria-hidden="true"><i id="tempoBar"></i></span><span id="tempoSeconds"></span><output id="battleActor" aria-live="polite"></output><output id="tempoNotice" aria-live="polite"></output><button type="button" id="burstOpen" hidden></button></div>
 <div class="story-strip"><div class="story-heading"><div class="field-place"><b id="sceneTitle"></b><span id="fieldPath" role="img" hidden></span></div><button type="button" class="control" id="mapButton" data-text="storyMap"></button><button type="button" id="journalButton" data-text="journal">旅の手帳</button></div><p id="sceneLine" aria-live="polite"></p></div>
 </section>
 <section class="panel route" aria-labelledby="routeTitle"><div class="route-head"><h2 id="routeTitle" data-text="route">森の冒険ルート</h2><div class="tracks"><button type="button" id="expeditionTab" data-text="expedition">遠征</button><button type="button" id="trainingTab" data-text="training">囲碁の練習</button><button type="button" id="storyTab" data-text="story">物語</button></div></div><div class="rank-row" id="rankRow" hidden><label for="rankPicker" data-text="rankSelect">遠征の難易度</label><select id="rankPicker"></select></div><div id="tinyRoute" hidden></div><div id="stages" class="stages"></div></section>
@@ -156,8 +156,8 @@
   </div>
 </dialog>
 <dialog id="matchDialog" class="match-dialog" aria-labelledby="matchName"><div class="match-shell"><header><div><small data-text="duelTitle"></small><h2 id="matchName"></h2></div><button type="button" id="matchBack" class="control" data-text="storyMap"></button></header>
-<canvas id="matchScene" width="320" height="104" aria-hidden="true"></canvas><p id="matchProfile"></p><p id="matchHint"></p><div id="matchScroll"><div id="matchPaper"><canvas id="matchBoard" width="720" height="720" aria-hidden="true"></canvas><canvas class="board-fx" id="matchFx" width="720" height="720" aria-hidden="true"></canvas><div id="matchPoints" role="group" data-label="boardLabel"></div></div></div>
-<p id="matchStatus" role="status"></p><div class="buttons"><button id="matchPlace" class="control primary"></button><button id="matchPass" class="control"></button><button id="matchZoom" class="control" data-text="enlarge"></button><button id="matchAgain" class="control"></button><button id="matchRepeat" class="control" data-text="retryAI"></button><button id="matchDone" class="control primary"></button></div></div></dialog>
+<canvas id="matchScene" width="320" height="104" aria-hidden="true"></canvas><p id="matchProfile"></p><p id="matchHint"></p><div id="matchPlacement" class="match-placement" hidden><output id="matchPick"></output><button type="button" id="matchPlace" class="control primary"></button><button type="button" id="matchCancelPlacement" class="control"></button></div><div id="matchScroll"><div id="matchPaper"><canvas id="matchBoard" width="720" height="720" aria-hidden="true"></canvas><canvas class="board-fx" id="matchFx" width="720" height="720" aria-hidden="true"></canvas><div id="matchPoints" role="group" data-label="boardLabel"></div></div></div>
+<p id="matchStatus" role="status"></p><div class="buttons"><button id="matchPass" class="control"></button><button id="matchZoom" class="control" data-text="enlarge"></button><button type="button" id="matchContinue" class="control" hidden></button><button id="matchAgain" class="control"></button><button id="matchRepeat" class="control" data-text="retryAI"></button><button id="matchDone" class="control primary"></button></div></div></dialog>
 <section id="gearDialog" aria-labelledby="gearHeading" hidden><div class="settings-inner">
 <header class="settings-head"><button type="button" id="closeGear" data-label="storyMap">‹</button><h2 id="gearHeading" data-text="settings"></h2></header>
 <div class="settings-tabs" role="tablist" aria-labelledby="gearHeading">
@@ -165,6 +165,7 @@
 <div id="pane-basic" class="preference-pane preferences" role="tabpanel" aria-labelledby="tab-basic">
 <div class="pref-row"><b id="langLabel"></b><button class="sound" id="language" type="button">한국어</button></div>
 <div class="pref-row"><b id="soundLabel"></b><button class="sound" id="sound" type="button" aria-pressed="false"></button></div>
+<div class="pref-row"><b id="coachSetting"></b><button type="button" id="coachPreference" aria-labelledby="coachSetting coachPreference"></button></div>
 <div class="pref-row"><label for="showCoords" data-text="coordinatesLabel"></label><input type="checkbox" id="showCoords"></div></div>
 <div id="pane-board" class="preference-pane" role="tabpanel" aria-labelledby="tab-board" hidden><div class="gear-items" id="boardsList"></div></div>
 <div id="pane-stone" class="preference-pane" role="tabpanel" aria-labelledby="tab-stone" hidden><div class="gear-items" id="stonesList"></div></div>
@@ -231,6 +232,10 @@
 <script src="./party-growth.js"></script>
 <script src="./outer-crossings.js"></script>
 <script src="./field-book.js"></script>
+<script src="./pixelfx-frames.js"></script>
+<script src="./battle-pixel-fx.js"></script>
+<script src="./battle-actions.js"></script>
+<script src="./field-coaching.js"></script>
 <script src="./tempo-combat.js"></script>
 <script src="./first-lesson.js"></script>
 <script>
@@ -275,6 +280,7 @@ const copy = {
   winAtari:["アタリ！ 白石の呼吸点はあとひとつ。","단수! 백돌의 활로가 하나 남았어요."],
   retryLiberty:["白石に斜めではなく、上下左右で接する空き交点を探そう。","대각선을 빼고 백돌 바로 옆의 빈 교차점을 찾으세요."],
   retryAtari:["白石を取らず、呼吸点をひとつ残そう。","백돌을 바로 잡기보다 활로가 하나만 남게 두세요."],
+  atariTaken:["白をアタリにしたけど、打った黒も呼吸点が一つだった。白が取り返せない手を探そう。","백을 단수로 몰았지만 방금 둔 흑도 활로가 하나였어요. 백이 바로 잡을 수 없는 수를 찾아보세요."],
   problemCleared:["問題クリア！","문제를 풀었어요!"],
   unlockedCourse:["次の章が解放されたよ。","다음 장이 열렸어요."],
   backupTitle:["進み具合のバックアップ","진행 기록 백업"],
@@ -476,16 +482,27 @@ const foundations = [
 function solved(board, mission) {
   if (mission.kind==="signal") return LastSignal.inspect(board,mission).won;
   const {kind, targets} = mission;
-  if (kind === "liberty" || kind === "atari") {
+  if (kind === "atari") return targets.every(p=>board[p]===white&&group(board,p).liberties.size===1);
+  if (kind === "liberty") {
     const target=targets[0];
     if (board[target] !== white) return false;
     const liberties=group(board,target).liberties.size;
-    return kind==="atari" ? liberties===1 : liberties<group(mission.board,target).liberties.size;
+    return liberties<group(mission.board,target).liberties.size;
   }
   if (kind === "capture" || kind === "read") return targets.every(p => board[p] !== white);
   if (targets.some(p => board[p] !== black)) return false;
   const unit = group(board, targets[0]);
   return kind === "link" ? targets.every(p => unit.stones.has(p)) : unit.liberties.size >= 3;
+}
+function atariCounter(attack, mission, point) {
+  if (mission.kind!=="atari" || !solved(attack.board,mission) || attack.board[point]!==black) return null;
+  const liberties=group(attack.board,point).liberties;
+  if (liberties.size!==1) return null;
+  const reply=[...liberties][0], defense=play(attack,reply,white);
+  return defense?.captured.includes(point)?{point:reply,state:defense}:null;
+}
+function completedMove(attack, mission, point) {
+  return solved(attack.board,mission) && !atariCounter(attack,mission,point);
 }
 function attackingPoints(board, mission) {
   const points = new Set();
@@ -513,7 +530,7 @@ function canWin(state, mission, turns) {
   for (const p of attackingPoints(state.board, mission)) {
     const attack = play(state,p,black);
     if (!attack) continue;
-    if (solved(attack.board, mission)) return true;
+    if (completedMove(attack,mission,p)) return true;
     if (turns > 1 && replies(attack,mission,turns-1,p).every(reply => reply.canWin)) return true;
   }
   return false;
@@ -533,7 +550,7 @@ function goodMove(state, mission, turns, point) {
   if(mission.guardian)return guardianMove(state,mission,turns,point).win;
   const result = play(state,point,black);
   if (!result) return false;
-  return solved(result.board,mission) || (
+  return completedMove(result,mission,point) || (
     (mission.kind === "read" || mission.kind === "capture") && turns > 1 && replies(result,mission,turns-1,point).every(reply=>reply.canWin)
   );
 }
@@ -755,9 +772,18 @@ function localize() {
   language.lang=saved.locale;language.textContent=saved.locale==="ja"?"日本語 ⇄":"한국어 ⇄";
   language.setAttribute("aria-label",saved.locale==="ja"?"日本語 · 한국어로 전환":"한국어 · 日本語に切り替え");
   for (const [id,[key,args]] of Object.entries(messages)) message(id,key,...args);
-  soundLabel();
+  soundLabel();FieldCoaching.preferences();
 }
 let audio;
+function unlockBattleAudio(){
+  if(saved.muted)return;
+  const Audio=window.AudioContext||window.webkitAudioContext;
+  if(!Audio)return;
+  try{audio??=new Audio();if(audio.state==="suspended")void audio.resume().catch(()=>{});}catch{}
+}
+for(const event of ["pointerdown","keydown"]){
+  document.addEventListener(event,e=>{if(e.isTrusted)unlockBattleAudio();},true);
+}
 function sound(kind) {
   if (saved.muted) return;
   const Audio = window.AudioContext || window.webkitAudioContext;
@@ -766,6 +792,23 @@ function sound(kind) {
     audio ??= new Audio();
     if (audio.state === "suspended") void audio.resume().catch(()=>{});
     const t = audio.currentTime;
+    const impacts={
+      stoneImpact:[[174,78,.11,.13,"triangle"],[388,145,.035,.075,"triangle"]],
+      followImpact:[[464,210,.075,.14,"triangle"],[1150,610,.019,.095,"sine"]],
+      counterImpact:[[138,51,.14,.18,"triangle"],[286,99,.043,.11,"sawtooth"]],
+      parryImpact:[[635,470,.068,.24,"triangle"],[1177,770,.036,.16,"sine"]],
+      mendImpact:[[332,523,.049,.32,"sine"],[508,784,.031,.42,"sine"]]
+    };
+    if(impacts[kind]){
+      for(const [from,to,volume,decay,wave] of impacts[kind]){
+        const tone=audio.createOscillator(),gain=audio.createGain(),end=t+decay;
+        tone.type=wave;tone.frequency.setValueAtTime(from,t);tone.frequency.exponentialRampToValueAtTime(to,end);
+        gain.gain.setValueAtTime(.0001,t);gain.gain.exponentialRampToValueAtTime(volume,t+.009);
+        gain.gain.exponentialRampToValueAtTime(.0001,end);tone.connect(gain).connect(audio.destination);
+        tone.start(t);tone.stop(end+.02);tone.onended=()=>{tone.disconnect();gain.disconnect();};
+      }
+      return;
+    }
     if(kind==="doorWest"||kind==="doorEast"){
       const tone=audio.createOscillator(),voice=audio.createGain(),wood=kind==="doorWest"?166:227;
       tone.type="triangle";tone.frequency.setValueAtTime(wood*1.7,t);tone.frequency.exponentialRampToValueAtTime(wood,t+.045);
@@ -785,7 +828,7 @@ function sound(kind) {
       return;
     }
     const notes = {tap:[330], bad:[165,130], win:[523,659,784], reply:[245], skill:[392,523,659]};
-    notes[kind].forEach((frequency,i)=>{
+    notes[kind]?.forEach((frequency,i)=>{
       const osc = audio.createOscillator();
       const gain = audio.createGain();
       const start = t + i * 0.077;
@@ -808,7 +851,8 @@ el("sound").onclick = () => {
   saved.muted = !saved.muted;
   save();
   soundLabel();
-  sound("skill");
+  if(saved.muted&&audio){const closing=audio;audio=null;void closing.close().catch(()=>{});}
+  else if(!saved.muted){unlockBattleAudio();sound("skill");}
 };
 
 function oval(c,color,x,y,rx,ry) {
@@ -919,7 +963,7 @@ function drawBattle(time,force=false) {
   ctx.imageSmoothingEnabled=false;
   ctx.fillStyle="#213c35";ctx.fillRect(0,0,w,h);
   if(journey()){
-    const landscape=ScenicArt.encounterPlate(level)||MapArt.battle(Expedition.rankOf(level),level%20);
+    const landscape=MapArt.battle(Expedition.rankOf(level),level%20,true);
     drawBattleBackdrop(ctx,landscape,w,h);
   }
   else if(picture.naturalWidth) {
@@ -954,6 +998,8 @@ function drawBattle(time,force=false) {
   const placing=!reduceMotion&&mode==="waiting"?Math.sin(Math.PI*clamp(elapsed/.43)):0;
   const heroX=w*(.25+followerCount*.059+crowded*.028)+placing*22+(winning?lunge*33:0)-(hit?impact*9:0);
   const pack=journey()&&!trial?TempoCombat.foes:[];
+  const action=journey()&&!trial?TempoCombat.action:null,foeAction=BattleActions.foe(action,time);
+  let actors=[];
   const lanes=pack.length?FoeParty.layout(w,h,base,pack.length):null;
   const strike=pack.length?TempoCombat.partyHit:null;
   const aimed=lanes?.[TempoCombat.targetSlot(time)];
@@ -971,8 +1017,9 @@ function drawBattle(time,force=false) {
   oval(ctx,"#14200b63",heroX,base,heroHeight*.31,8);
   if(!pack.length&&exit<1) oval(ctx,"#14200b63",enemyX,base,foeHeight*.37*(1-exit),Math.min(9,foeHeight*.065));
   if(journey()){
-    Crew.draw(ctx,12,heroX-partyHeight*.55,base,partyHeight,reduceMotion?0:Math.floor(time/180)%4,CastMotion.crewPhase(time),5);
-    WorldScale.hero(ctx,heroX,base,partyHeight,CastMotion.phase(1,time));
+    actors=Crew.draw(ctx,12,heroX-partyHeight*.55,base,partyHeight,reduceMotion?0:Math.floor(time/180)%4,0,5,action,time);
+    const response=BattleActions.body(action,time,null,partyHeight);
+    WorldScale.hero(ctx,heroX+response.x,base+response.y,partyHeight,response.pose||(action?.side===2&&action.recipient!==null?0:CastMotion.phase(1,time)));
   }
   else sprite(0,heroX,base+wave*1.2,heroHeight,winning?lunge*.07:wave*.009,1,active?(winning?1:2):0);
   if(journey()){
@@ -980,9 +1027,14 @@ function drawBattle(time,force=false) {
     if(Fortress.isHere())drawWaterwheel(enemyX,base,foeHeight,clock,phase+(mode==="phase" || mode==="won"?1:0));
     const p=active?impact:0;
     if(pack.length){
-      const frame=CastMotion.phase(2,time),pose=frame===2?"strike":frame===3?"hit":frame===1?"tell":"idle";
-      FoeParty.draw(ctx,pack,w,h,base,time,{pose,beat:clamp(elapsed/.62),hit:strike});
-    }else (isGuardian?ExpeditionCast.guardian:ExpeditionCast.foe)(ctx,isGuardian?Math.floor(level/10):stage.species,enemyX,base-wave*2+exit*6,foeHeight*(1+wave*.014),hit?-lunge*.17:p*.16+wave*.012,1-exit,CastMotion.phase(2,time)||(Fortress.isHere()&&mode==="waiting"?1:0),true);
+      const frame=CastMotion.phase(2,time),pose=foeAction?.pose??(frame===2?"strike":frame===3?"hit":frame===1||mode==="waiting"?"tell":"idle");
+      FoeParty.draw(ctx,pack,w,h,base,time,{pose,beat:foeAction?.beat??clamp(elapsed/.62),shift:foeAction?.shift,hit:strike});
+    }else{
+      const pose=foeAction?({tell:1,strike:2,recover:1}[foeAction.pose]??0):CastMotion.phase(2,time)||(mode==="waiting"?1:0);
+      (isGuardian?ExpeditionCast.guardian:ExpeditionCast.foe)(ctx,isGuardian?Math.floor(level/10):stage.species,
+        enemyX+(foeAction?.shift??0)*foeHeight,base-wave*2+exit*6,foeHeight*(1+wave*.014),
+        hit?-lunge*.17:p*.16+wave*.012,1-exit,pose,true);
+    }
     if(active && winning){
       const color=Expedition.palettes[Expedition.rankOf(level)][3];
       for(let i=0;i<8;i++){
@@ -1043,7 +1095,7 @@ function drawBattle(time,force=false) {
     const x=(i*97+clock*(3+i%4))%w,y=h*.25+(i*31-clock*(4+i%3)+10000)%Math.max(1,h*.65);
     spark(x,y,1.5+Math.sin(clock+i),zone===3?"#a5eaff":"#ffd88c");
   }
-  TempoCombat.render(ctx,w,h,time,heroX,enemyX);
+  TempoCombat.render(ctx,w,h,time,heroX,enemyX,actors,base,targetGround,partyHeight);
 }
 
 // Each encounter has an opening line and a consequence which is revealed on victory.
@@ -1736,7 +1788,7 @@ function encounterText() {
   el("enemyName").textContent=journey()&&!trial&&TempoCombat.foes.length?localizedPair(["敵の群れ","적 무리"]):journey()?((!trial||trial.fortress) && level%10===9?localizedPair(Voyage.guardians[Math.floor(level/10)]):monsterName(stage.species)):t(creatures[stage.enemy][0]);
 }
 function setPosition(puzzle,nextMode="playing") {
-  FirstLesson.reset();
+  FirstLesson.reset();FieldCoaching.dismiss("feedback");
   fieldTransition.cancel();BattleEntrance.cancel();clearTimeout(timer);
   lanternPoints=[];crewHint=crewReview=crewIntercept=null;interceptSpent=false;beforeMove=null;scouting=false;lights=[];allyMarks=[];counterPoint=null;hintStep=0;usedSkills=new Set();
   if(typeof CastMotion!=="undefined")CastMotion.reset();
@@ -1923,13 +1975,15 @@ function finish(completedPuzzle=true) {
 function combatGift(kind){
   return journey() && campaignStage.phases.slice(0,phase+(mode==="phase" || mode==="won"?1:0)).some(m=>m.kind===kind);
 }
-function retryAfter(reply) {
+function retryAfter(reply,atariRefuted=false) {
   counterPoint=reply && reply.point>=0?reply.point:null;
   crewIntercept=journey()&&!trial&&!interceptSpent&&beforeMove?CrewFormation.intercept(saved.roster,beforeMove.state,mission,beforeMove.turns,reply):null;
+  if(crewIntercept&&(TempoCombat.status?.aids&(1<<crewIntercept.member)))crewIntercept=null;
   if(journey() && !crewIntercept && !boundSpent && beforeMove && combatGift("atari")){
     boundSpent=true;studyAttempt.wrong=true;
     ({state,turns,last,wounds,teamPending}=beforeMove);beforeMove=null;mode="playing";if(!trial){TempoCombat.newTurn(turns);TempoCombat.block();}battleMessage("boundGuard");
-    message("feedback","wrong"+mission.kind,state.board[mission.targets[0]]?group(state.board,mission.targets[0]).liberties.size:0);
+    if(atariRefuted)message("feedback","atariTaken");
+    else message("feedback","wrong"+mission.kind,state.board[mission.targets[0]]?group(state.board,mission.targets[0]).liberties.size:0);
     refresh();return;
   }
   if(reply && reply.point!==-1) {
@@ -1938,7 +1992,8 @@ function retryAfter(reply) {
   }
   mode="retry";
   if(journey()&&!trial){
-    TempoCombat.hit();if(TempoCombat.status.ally===0){exhaustedParty();return;}
+    TempoCombat.hit(reply,{protector:crewIntercept?.member??null});
+    if(TempoCombat.status.ally===0){exhaustedParty();return;}
   }
   if(journey())studyAttempt.wrong=true;
   wounds++;if(journey()&&!trial)checkpointStand({retry:true});
@@ -1946,7 +2001,8 @@ function retryAfter(reply) {
   const advice={link:"retryLink",escape:"retryEscape",read:"retryRead",capture:"retryCapture",liberty:"retryLiberty",atari:"retryAtari"}[mission.kind];
   battleMessage(notice,"bad","bad");
   const target=mission.targets[0],liberties=state.board[target]?group(state.board,target).liberties.size:0;
-  if(journey()&&mission.kind==="liberty"&&reply){
+  if(atariRefuted)message("feedback","atariTaken");
+  else if(journey()&&mission.kind==="liberty"&&reply){
     message("feedback","whiteExtended",group(beforeMove.state.board,target).liberties.size,liberties);
   }else if(journey()&&reply?.point===-1)message("feedback","whitePassDefense");
   else message("feedback",mission.guardian && mission.kind==="atari"?"wrongThreat":journey()?"wrong"+mission.kind:advice,liberties);
@@ -1985,7 +2041,8 @@ function attempt(p) {
   }
   const attack=play(state,p,black);
   if(!attack){
-    message("feedback","illegal");
+    const ko=journey()&&!trial&&FieldCoaching.koReason(state,p,black);
+    message("feedback","illegal");if(ko)el("feedback").textContent=ko;
     sound("bad");
     return;
   }
@@ -1994,18 +2051,20 @@ function attempt(p) {
   lights=[];allyMarks=[];counterPoint=null;hinted=null;hintStep=0;
   last=p;
   const guardian=mission.guardian?guardianMove(state,mission,turns,p):null;
+  const mistakenAtari=!guardian&&atariCounter(attack,mission,p);
   state=attack;if(journey())CastMotion.strike(black);BoardFX.playOn(el("boardFx"),9,p,attack.captured,black,saved.fx);
   turns--;
   sound("tap");
   const event={before:priorState.board,after:attack.board,point:p,mission,remaining:turns,previousWhite:priorWhite,ids:Crew.deployed(),accepted:true,done:false};
-  if(guardian?guardian.done:solved(state.board,mission)){
+  if(guardian?guardian.done:!mistakenAtari&&solved(state.board,mission)){
     const relay=journey()&&!trial&&recordTeam({...event,done:true});
     if(journey()&&!trial){
-      TempoCombat.attack(true,true);
+      TempoCombat.attack(true,true,event);
       if(TempoCombat.status.ally===0){exhaustedParty();return;}
     }
     if(Fortress.isHere()&&phase===0)Fortress.connection(p);
     finish();if(relay)relayNotice();
+    if(journey()&&!trial)FieldCoaching.record({before:priorState,after:attack,mission,blackPoint:p,accepted:true},{stage:level,host:"feedback",board:"points"});
     return;
   }
   const kind=mission.kind;
@@ -2017,7 +2076,7 @@ function attempt(p) {
     holds=tactic.holds;reply=tactic.reply;foeDelay=tactic.delay;defenses=tactic.defenses;
   }
   else if(kind==="read" || kind==="capture"){
-    const defenses=replies(state,mission,turns,p);
+    defenses=replies(state,mission,turns,p);
     if(turns>0) holds=defenses.every(candidate=>candidate.canWin);
     const legalReplies=defenses.filter(c=>c.point!==-1);
     if(journey() && level>=5){
@@ -2059,19 +2118,22 @@ function attempt(p) {
     const old=teamPending;relay=recordTeam(event);
     if(defenses&&CrewTactics.redirect)reply=CrewTactics.redirect(teamPending&~old,defenses,reply,event);
   }
-  if(!holds&&journey()&&!trial)reply=TempoDefense.counter(priorState,state,mission)??reply;
+  if(mistakenAtari)reply=mistakenAtari;
+  else if(!holds&&journey()&&!trial)reply=TempoDefense.counter(priorState,state,mission)??reply;
   if(journey()&&!trial){
-    TempoCombat.attack(holds,false);
+    TempoCombat.attack(holds,false,event);
+    if(holds)reply=TempoCombat.relay(reply,mission,p,defenses);
     if(TempoCombat.status.ally===0){exhaustedParty();return;}
   }
-  if(journey()&&!trial&&holds&&reply){fieldTrail.push([p,reply.point]);checkpointStand();}
+  if(journey()&&!trial&&holds&&reply)fieldTrail.push([p,reply.point]);
   mode="waiting";
   battleMessage(holds?"enemySearching":"enemyCounter");
   message("feedback","waitReply");
   refresh();
   const resolveWhite=()=>{
     if(!holds){
-      retryAfter(reply);
+      retryAfter(reply,!!mistakenAtari);
+      if(journey()&&!trial)FieldCoaching.record({before:priorState,after:attack,mission,blackPoint:p,accepted:false,whiteReply:reply},{stage:level,host:"feedback",board:"points"});
       return;
     }
     if(reply){
@@ -2079,15 +2141,23 @@ function attempt(p) {
       last=reply.point;
     }
     mode="playing";
-    if(journey()&&!trial)TempoCombat.newTurn(turns);
+    let retaliation=null;
+    if(journey()&&!trial){
+      if(reply?.point>=0)retaliation=TempoCombat.hit(reply,{continued:true});
+      if(TempoCombat.status.ally===0){exhaustedParty();return;}
+      TempoCombat.newTurn(turns);
+    }
     battleMessage(reply?"enemyFighting":"enemyStopped","","bad");
     message("feedback","readReply",turns);if(relay)relayNotice();
     sound("reply");if(journey()&&!trial)checkpointStand();
     refresh();
+    if(journey()&&!trial&&reply?.point>=0)FieldCoaching.record({before:priorState,after:attack,mission,blackPoint:p,accepted:true,whiteReply:reply,retaliation},{stage:level,host:"feedback",board:"points"});
   };
   const replyDelay=reduceMotion?100:(foeDelay??450);
-  if(journey()&&!trial)TempoCombat.prepareReply(replyDelay,resolveWhite);
-  else timer=setTimeout(resolveWhite,replyDelay);
+  if(journey()&&!trial){
+    TempoCombat.prepareReply(replyDelay,resolveWhite,holds?reply:null);
+    if(holds&&reply)checkpointStand();
+  }else timer=setTimeout(resolveWhite,replyDelay);
 }
 el("hint").onclick=()=>{
   if(mode==="playing"&&crewReview?.survey){
@@ -2156,7 +2226,7 @@ function advanceBoard(){
     return;
   }
   if(mode==="phase"){
-    if(journey())startExpedition(level,(trial?phase:fieldRound)+1);else start(level,phase+1);
+    if(journey())FieldCoaching.afterAdvance("feedback",()=>startExpedition(level,(trial?phase:fieldRound)+1));else start(level,phase+1);
     if(journey())window.scrollTo({top:0,behavior:"instant"});
   }
   else if(mode==="walking") arrive();
@@ -2258,8 +2328,14 @@ function restoreCampaignPayload(payload){
     }
     if(localFork&&!incomingFork)incomingReach=Math.min(incomingReach,Math.max(oathQ,saved.reach));
     const fresh=!saved.expedition&&!saved.reach&&!saved.cleared&&!saved.training.some(Boolean);
-    if(!CampaignSlots.accept(extra.c,fresh)){
-      el("backupStatus").textContent=localizedPair(["別の旅のコードです。タイトルで空の記録を選んでください。","다른 여행의 백업입니다. 타이틀에서 빈 슬롯을 선택해 주세요."]);return;
+  const rejected=CampaignSlots.accept(extra.c,fresh);
+  if(rejected){
+    const slot=3-CampaignSlots.number;
+    const reason={duplicate:[`この旅は記録${slot}にあります。タイトルで記録${slot}を選び、そこで復元してください。`,`이 원정은 이미 ${slot}번 슬롯에 있어요. 타이틀에서 ${slot}번 슬롯을 열어 복원하세요.`],
+      occupied:["別の旅のコードです。タイトルで空の記録を選んでください。","다른 여행의 백업입니다. 타이틀에서 빈 슬롯을 선택해 주세요."],
+      storage:["旅の記録を書き込めません。ブラウザの保存設定を確認してください。","여행 기록을 저장할 수 없어요. 브라우저의 저장 설정을 확인해 주세요."]};
+    if(!reason[rejected])throw Error("invalid campaign identity");
+    el("backupStatus").textContent=localizedPair(reason[rejected]);return;
     }
     MapJourney.restored();
     saved.campaignId=CampaignSlots.id;
@@ -2335,6 +2411,8 @@ el("restoreBackup").onclick=()=>{
 </script>
 <script src="./atlas.js"></script>
 <script src="./scenic-art.js"></script>
+<script src="./arena-plates.js"></script>
+<script src="./arena-art.js"></script>
 <script src="./forest-outposts.js"></script>
 <script src="./atlas-art.js"></script>
 <script src="./fauna-motion.js"></script>
@@ -2356,6 +2434,7 @@ el("restoreBackup").onclick=()=>{
 <script src="./talk-portraits.js"></script>
 <script src="./event-landscapes.js"></script>
 <script src="./story-frame.js"></script>
+<script src="./story-originals.js"></script>
 <script src="./event-plates.js"></script>
 <script src="./story-panels.js"></script>
 <script src="./journey-events.js"></script>

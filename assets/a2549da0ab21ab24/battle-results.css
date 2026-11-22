@@ -1,0 +1,71 @@
+/* A folded dispatch uses the same paper, oxblood wax and pine as the field pack. */
+#battleResult {
+  box-sizing:border-box;width:min(94vw,420px);max-width:100%;max-height:calc(100dvh - max(28px,env(safe-area-inset-top)) - max(20px,env(safe-area-inset-bottom)));
+  padding:0;overflow:hidden;border:2px solid #574e37;border-radius:4px;
+  color:#273a30;background:#f4e7c7;box-shadow:0 0 0 2px #c1a775,0 12px 38px #0a171ab3;
+  font-family:var(--game-ui-font,system-ui);text-align:start;
+}
+#battleResult[open]{display:flex;flex-direction:column}
+#battleResult::backdrop{background:#0c1b17c9}
+#battleResult .loot-head{
+  position:relative;display:flex;flex:none;align-items:center;justify-content:space-between;gap:8px;min-height:82px;
+  padding:8px 15px 7px 20px;background:#e9d5a8;
+  border-bottom:1px dashed #978365;box-shadow:inset 0 4px #d0b486;
+}
+#battleResult .loot-head::before{content:"";position:absolute;inset:9px auto 9px 7px;border-inline-start:2px solid #b18b63}
+#battleResult .loot-head .expedition-mark{width:82px;height:65px;flex:none;image-rendering:pixelated}
+#battleResult h2{margin:0;color:#293e33;font:750 clamp(1.45rem,6vw,1.84rem)/1.15 var(--game-display,serif);text-shadow:none}
+#battleResult .loot-place{margin:5px 0 0;color:#65543c;font:600 .9rem/1.25 var(--game-ui-font,system-ui)}
+#battleResult .loot-lines{
+  min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-color:#aa9775 #ebddbc;
+  padding:0 18px;background:linear-gradient(90deg,#ddc99e 0,transparent 4px,transparent calc(100% - 4px),#e4d2ac),#f4e7c7;
+}
+#battleResult .loot-line {padding:9px 0 9px;border-bottom:1px solid #cbbc99}
+#battleResult .loot-line:last-child{border-bottom:0}
+#battleResult .loot-line h3 {margin:0 0 1px 49px;color:#65513a;font:650 .73rem/1.3 var(--game-ui-font,system-ui)}
+#battleResult .loot-line ul,.growth-marks{margin:0;padding:0;list-style:none}
+#battleResult .loot-line li{position:relative;display:grid;grid-template-columns:42px minmax(0,1fr) max-content;align-items:center;gap:7px;min-height:26px;color:#283e32;font:700 1.03rem/1.24 var(--game-display,serif)}
+#battleResult .loot-line li canvas,#battleResult .loot-line li svg{display:block;width:40px;height:30px;object-fit:contain;image-rendering:pixelated;margin-block:-2px}
+#battleResult .loot-line li svg{width:29px;justify-self:center}
+#battleResult .loot-line li .reward-swatch{width:37px;height:27px;border:1px solid #ad9974;border-radius:2px}
+#battleResult .loot-line li b{font:750 1.1rem/1 var(--game-ui-font,system-ui);color:#305144;font-variant-numeric:tabular-nums}
+#battleResult .loot-line small{display:block;margin:2px 0 0 49px;color:#544f40;font:500 .75rem/1.35 var(--game-ui-font,system-ui)}
+#battleResult footer{flex:none;padding:9px 17px 12px;border-top:1px dashed #a49170;background:#e4d2ac}
+#battleResult #battleResultNext {
+  display:block;box-sizing:border-box;width:100%;height:auto;min-height:44px;margin:0;padding:8px;
+  color:#fff1cb;background:linear-gradient(#42624c,#2b4939);border:2px solid #52694e;border-radius:3px;box-shadow:inset 0 1px #8a9a73,0 2px #877a5e;
+  font:700 1rem/1.2 var(--game-display,serif);text-shadow:0 1px #263a2e;
+}
+#battleResult #battleResultNext:focus-visible,#campMenu #partyGrowth :is(button,summary):focus-visible{outline:2px solid #b37534;outline-offset:2px}
+#battleResult #battleResultNext:active{transform:translateY(1px)}
+/* The training register stays in one column on a phone. */
+#campMenu #camp-party #partyGrowth{box-sizing:border-box;margin:0 0 14px;border:1px solid #798268;border-radius:4px;color:#f9e9c5;background:#20372e;overflow:hidden}
+#campMenu #camp-party #partyGrowth summary{
+  display:flex;align-items:center;gap:9px;box-sizing:border-box;cursor:pointer;padding:6px 12px;min-height:48px;
+  color:#fae7b5;background:linear-gradient(100deg,#4a6149,#2f4837 78%);border:0;border-radius:0;font:700 1.07rem/1.25 var(--game-display,serif);
+}
+#campMenu #camp-party #partyGrowth summary::before{display:none}
+#campMenu #camp-party #partyGrowth summary::after{font-size:1.1rem;color:#f6d69a}
+#campMenu #partyGrowth summary svg{width:31px;height:32px;flex:none}
+#campMenu #partyGrowth[open] summary{border-bottom:1px solid #7b8769}
+#partyGrowth .training-details{padding:12px 11px 11px}
+#partyGrowth .growth-pool{font:700 1rem/1.3 var(--game-display,serif);color:#fae0a2;margin:0}
+#partyGrowth .growth-rule,#partyGrowth .growth-when{margin:5px 0 0;font:.81rem/1.44 var(--game-ui-font,system-ui);color:#d5dcc9}
+#partyGrowth .growth-marks{display:flex;gap:4px 6px;flex-wrap:wrap;margin:8px 0 11px}
+#partyGrowth .growth-marks li{box-sizing:border-box;padding:2px 6px;border:1px dashed #738473;border-radius:2px;color:#c7d2c0;font:.735rem/1.27 var(--game-ui-font,system-ui)}
+#partyGrowth .growth-marks [data-earned=true]{border:1px solid #c7aa70;background:#405541;color:#f8e1a7}
+#partyGrowth .growth-track{
+  display:grid;grid-template-columns:32px minmax(0,1fr) 44px 16px 44px;gap:4px;align-items:center;border-top:1px solid #536a54;padding:7px 0;
+}
+#partyGrowth .growth-track svg{width:31px;height:34px}
+#partyGrowth .growth-track b{font:700 1rem/1.22 var(--game-display,serif);color:#f6e8bd}
+#partyGrowth .growth-track small{display:block;margin-top:2px;color:#ced9c8;font:.74rem/1.35 var(--game-ui-font,system-ui)}
+#partyGrowth .growth-track output{text-align:center;min-width:0;font:700 1rem/1 var(--game-ui-font,system-ui);color:#f9e6b3}
+body #campMenu #partyGrowth .growth-track button{
+  box-sizing:border-box;min-height:44px;width:44px;padding:3px;border:1px solid #c0a977;border-radius:3px;
+  color:#ffedc4;background:#3b5744;box-shadow:inset 0 1px #7a8b69;text-align:center;font:700 1.18rem/1 var(--game-ui-font,system-ui);
+}
+body #campMenu #partyGrowth .growth-track button:disabled{border-color:#536957;color:#a7b5a4;background:#2a4034;box-shadow:none;opacity:1}
+body #campMenu #partyGrowth .growth-track button::before,body #campMenu #partyGrowth .growth-track button::after{display:none}
+#partyGrowth .growth-when{padding-top:7px;border-top:1px solid #536a54}
+#partyGrowth output[role=status]:empty{display:none}

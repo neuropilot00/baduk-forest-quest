@@ -1,0 +1,82 @@
+/* Keep the whole reward slip and its action inside the usable screen. */
+#battleResult[open]{
+  position:fixed;inset:auto;left:50%;top:46%;transform:translate(-50%,-50%);margin:0;
+  max-height:calc(88dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+}
+.duel-reading:not([hidden]){
+  display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:3px 8px;
+  margin:6px 0;padding:6px 10px;background:#263c34;border-inline-start:3px solid #c3a770;
+}
+.duel-reading strong{font:700 1rem/1.3 var(--game-display,serif);color:#ffdfa0}
+.duel-reading p{grid-column:1/-1;font:.82rem/1.42 var(--game-ui-font,sans-serif);margin:0;color:#eeead3}
+.duel-reading button{min-height:44px;color:#f6e7c1;font-weight:700}
+:is(#matchPoints,#reachPoints) button[data-duel-mark]{position:relative}
+:is(#matchPoints,#reachPoints) button[data-duel-mark]::after{
+  content:"";pointer-events:none;position:absolute;inset:22%;border:2px solid #12605a;border-radius:50%;box-shadow:0 0 0 1px #fcebb9;
+}
+:is(#matchPoints,#reachPoints) button[data-duel-mark=group]::after{inset:36%;border:0;border-radius:1px;background:#934d25;box-shadow:none;transform:rotate(45deg)}
+#fieldPath{display:none}
+#reachScene{aspect-ratio:480/150}
+#matchScene{aspect-ratio:320/104}
+body #matchDialog #matchHint:not([hidden]){min-height:0;padding:0;border:0;border-image:none;background:none;color:#f2e5bf;box-shadow:none}
+.duel-reading strong:focus{outline:none}
+@media (min-width:700px) and (min-aspect-ratio:6/5){.reach-fight .duel-reading{grid-column:1}}
+@media (max-width:700px) and (orientation:portrait){
+  body:has(#battleLayout:not([hidden])) .shell{padding-block:4px max(5px,env(safe-area-inset-bottom))}
+  #battleLayout:not([hidden])>.main{
+    display:flex;flex-direction:column;min-height:calc(100dvh - 9px - env(safe-area-inset-bottom));
+  }
+  #battleLayout .scene{flex:1 0 auto;display:flex;flex-direction:column}
+  #battleLayout .scene .battle-frame{flex:1 0 auto;min-height:clamp(145px,24dvh,265px)}
+  #battleLayout .scene #battle{position:absolute;inset:0;width:100%;height:100%}
+  .field-place{min-width:0}
+  #fieldPath:not([hidden]){display:block;position:relative;width:min(72px,100%);height:3px;margin:5px 4px 2px;background:linear-gradient(to right,#d4b673 var(--field-position),#556858 var(--field-position))}
+  #fieldPath::after{content:"";position:absolute;left:var(--field-position);top:50%;width:6px;height:6px;background:#ffdda0;transform:translate(-50%,-50%) rotate(45deg);outline:1px solid #263930}
+  /* Keep the route with its place name, above the goal. */
+  .on-campaign #battleLayout .route{display:none}
+  #battleLayout .story-strip{min-height:0;padding:2px 6px 4px}
+  #battleLayout .story-heading{gap:4px}
+  .on-campaign #battleLayout .challenge{min-height:34px;margin:4px 0}
+  #battleLayout .board-top{position:absolute;clip-path:inset(50%);width:1px;height:1px;overflow:hidden}
+  #battleLayout .board-panel{padding:4px 5px}
+  #battleLayout .status{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;min-height:65px;margin:4px auto 0;gap:2px}
+  #battleLayout .status #feedback{order:2}
+  #battleLayout .status .buttons{order:1;display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:3px}
+  #battleLayout .status #fieldTools:not([hidden]){display:contents}
+  body #battleLayout .status .buttons button:not([hidden]){padding-inline:4px;font-size:.78rem}
+  #battleLayout .status #fieldTools button:disabled{display:none}
+  #battleLayout[data-settling=true] .status{justify-content:center}
+
+  #battleLayout .status .buttons:not(:has(button:not([hidden]):enabled)){display:none}
+  #battleLayout #fieldTools{margin:3px auto}
+  #battleLayout[data-settling=true] .status #fieldTools:not([hidden]){display:none}
+  #reachBattleDialog[open],#matchDialog[open]{width:100%;max-height:100dvh}
+  .reach-fight,.match-shell{box-sizing:border-box;display:flex;flex-direction:column;min-height:100dvh;padding:6px 8px max(8px,env(safe-area-inset-bottom))}
+  #reachScene,#matchScene{flex:1 0 auto;height:clamp(118px,21dvh,230px);max-height:none;min-height:0}
+  .reach-goban,#matchScroll{flex-shrink:0}
+}
+
+@media (min-width:800px) and (min-aspect-ratio:6/5){
+  #matchDialog[open]{width:min(94vw,950px)}
+  .match-shell{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);gap:4px 16px;align-content:center;padding:12px 16px}
+  .match-shell header{grid-column:1/-1}
+  #matchScene{grid-column:1;grid-row:2;height:clamp(125px,27dvh,245px);max-height:none}
+  .match-shell .duel-reading{grid-column:1;grid-row:3;align-self:start}
+  #matchProfile{grid-column:1;grid-row:4}
+  #matchHint{grid-column:1;grid-row:5}
+  #matchStatus{grid-column:1;grid-row:6}
+  #matchScroll{grid-column:2;grid-row:2/7;align-self:start;width:min(100%,70dvh);justify-self:center;max-height:70dvh}
+  .match-shell .buttons{grid-column:2;grid-row:7}
+}
+.duel-reading[data-outcome=review]{background:#333c32;border-color:#c3a770}
+.match-placement:not([hidden]){
+  display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:5px;
+  padding:4px 5px;border-block:1px solid #586a56;background:#21362d;color:#fbe7b4;
+}
+.match-placement .control{min-height:44px;padding-inline:7px}
+.match-placement output{padding-inline:4px;font-size:.8rem}
+#matchPoints [aria-pressed=true]{outline:2px dashed #26746c;outline-offset:-1px;border-radius:50%}
+@media(max-width:480px) and (orientation:portrait){
+  #matchDialog:has(#matchPlacement:not([hidden])) #matchScene{height:clamp(108px,17.5dvh,150px)}
+  #matchDialog:has(#matchPlacement:not([hidden])) .duel-reading{padding-block:4px;margin-block:3px}
+}

@@ -1,0 +1,8 @@
+#lessonTrace{flex:0 0 auto;align-self:center;min-height:36px;max-width:7.1em;padding:4px 7px;font:650 .76rem/1.2 var(--game-ui-font,sans-serif);color:#efedcb;background:linear-gradient(#355448,#203c32);border:1px solid #bca575;box-shadow:inset 0 0 0 2px #1b352c;border-radius:4px;touch-action:manipulation}
+#lessonTrace::before{content:"◇";display:inline-block;margin-right:.24em;color:#a9e4af}
+#lessonTrace[aria-pressed=true]{background:#2e4c3b;color:#fff5ce}
+#lessonTrace:focus-visible{outline:2px solid #ffe7a0;outline-offset:2px}
+#lessonTrace[hidden]{display:none}
+.challenge:has(#lessonTrace:not([hidden])){gap:6px}
+.challenge:has(#lessonTrace:not([hidden]))>div{min-width:0;flex:1}
+.challenge:has(#lessonTrace:not([hidden])) #turn{display:none}
