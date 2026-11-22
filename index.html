@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<base href="./assets/351a00cbc77abf2d/">
+<base href="./assets/eaecd090510d7805/">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="囲碁の一手で森のモンスターに立ち向かうパズルゲーム">
 <meta name="color-scheme" content="only dark">
@@ -126,7 +126,7 @@
 <span class="art-note" id="combatArt" hidden></span><div class="status"><p id="feedback" role="status"></p><div class="buttons"><div id="fieldTools" class="field-tools" role="group" data-label="supportLabel" hidden></div><button type="button" class="control" id="hint" data-text="hint">ヒント</button><button type="button" class="control" id="reset" data-text="retryBoard">打ち直す</button><button type="button" class="control primary" id="next" hidden>次のバトル</button></div></div>
 </section>
 </div>
-<aside class="rail"><section class="panel field-guide" id="fieldGuide" hidden><details><summary><span data-text="bestiary"></span> <span id="fieldCount"></span></summary><div class="collection expedition-collection" id="fieldCollection"></div></details><h2 data-text="supportLabel"></h2><div class="techbook" id="fieldBook"></div><h2 data-text="battleArtsTitle"></h2><p data-text="battleArtsHelp"></p></section>
+<aside class="rail"><section class="panel field-guide" id="fieldGuide" hidden><h2 class="bestiary-title"><span data-text="bestiary"></span> <span id="fieldBestiaryTotal"></span></h2><details><summary><span id="fieldForestLabel"></span> <span id="fieldCount"></span></summary><div class="collection expedition-collection" id="fieldCollection"></div></details><h2 data-text="supportLabel"></h2><div class="techbook" id="fieldBook"></div><h2 data-text="battleArtsTitle"></h2><p data-text="battleArtsHelp"></p></section>
 
 
 <section class="panel"><h2 data-text="techniques">技図鑑</h2><div class="techbook" id="techbook"></div></section>
@@ -229,6 +229,7 @@
 <script src="./burst-altar.js"></script>
 <script src="./tempo-defense.js"></script>
 <script src="./foe-party.js"></script>
+<script src="./crossing-art.js"></script>
 <script src="./battle-entrance.js"></script>
 <script src="./party-growth.js"></script>
 <script src="./outer-crossings.js"></script>
@@ -1763,15 +1764,6 @@ function renderGuide(){
   picker.replaceChildren(...Expedition.ranks.map((pair,i)=>new Option(localizedPair(pair),String(i),false,i===viewedRank)));
   const seen=new Set(Array.from({length:saved.expedition},(_,i)=>Expedition.species(i)));
   el("fieldCount").textContent=seen.size+" / "+Expedition.names.flat().length;
-  el("fieldCollection").replaceChildren(...Expedition.names.flat().map((_,id)=>{
-    const card=document.createElement("div");
-    card.className="creature"+(seen.has(id)?"":" locked");
-    const image=document.createElement("canvas");
-    image.width=108;image.height=90;image.setAttribute("aria-hidden","true");
-    const paint=()=>ExpeditionCast.foe(image.getContext("2d"),id,54,84,69,0,1,-1);
-    if(!ExpeditionCast.fauna.naturalWidth)ExpeditionCast.fauna.addEventListener("load",paint,{once:true});else paint();
-    card.append(image,seen.has(id)?monsterName(id):t("undiscovered"));return card;
-  }));
   const learned=Expedition.skills.filter(([,gate])=>gate<=saved.expedition);
   el("fieldBook").replaceChildren(...(learned.length?learned.map(([id])=>{
     const line=document.createElement("div"), label=document.createElement("strong");
@@ -2506,6 +2498,7 @@ el("restoreBackup").onclick=()=>{
 <script src="./voyage-ui.js"></script>
 <script src="./camp-atlas.js"></script>
 <script src="./pack-ui.js"></script>
+<script src="./field-bestiary.js"></script>
 <script src="./camp-menu.js"></script>
 <script src="./front-door.js"></script>
 <script>CampaignSlots.menu();PartyInfo.install();</script>

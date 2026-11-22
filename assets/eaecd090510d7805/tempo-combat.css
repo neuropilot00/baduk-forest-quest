@@ -1,0 +1,122 @@
+/* The bar shows a forecast before the move and a receipt after it lands. */
+#tempoHud {
+  display:flex; flex-wrap:wrap; align-items:center; gap:2px 7px;
+  min-height:29px; padding:3px 10px; background:#142524; color:#fff1cd;
+  font-size:.85rem; line-height:1.28; font-variant-numeric:tabular-nums;
+}
+#tempoHud[hidden],#burstOpen[hidden],#tempoSeconds:empty,#tempoNotice:empty{display:none}
+#tempoTurn{flex:0 0 auto;min-width:4em}
+#tempoTrack{height:4px;flex:1 1 22px;min-width:18px;background:#445252;border-radius:3px;overflow:hidden}
+#tempoBar{height:100%;display:block;background:linear-gradient(90deg,#8ed8b2,#f5d57d);transform-origin:left center}
+#tempoHud[data-side="white"] #tempoBar{background:linear-gradient(90deg,#849bb0,#f0c3ad)}
+#tempoSeconds{flex:0 0 auto;min-width:2.2em;font-size:.9rem;color:#ffe299}
+#tempoNotice{order:2;max-width:100%;margin-inline-start:auto;font-weight:650;color:#fff1d4;overflow-wrap:anywhere}
+#burstOpen{order:1;min-height:35px;background:#4c3824;color:#ffe7a4;border:1px solid #bfa16d;border-radius:4px;padding:3px 9px;font:inherit;font-weight:800}
+@media(max-width:530px){
+  #tempoHud:has(#tempoSeconds:not(:empty)) #tempoNotice:not(:empty){flex-basis:100%;margin-inline-start:0}
+}
+/* The ritual occupies the entire camera. Keep scenery, inscriptions and input on separate layers. */
+dialog#burstDialog{position:fixed;inset:0;box-sizing:border-box;width:100%;max-width:none;height:100%;max-height:none;margin:0;padding:0;border:0;border-radius:0;background:#101b2d;color:#fff1c9;overflow:auto;overscroll-behavior:contain}
+#burstDialog::backdrop{background:#0b1425}#burstDialog *{box-sizing:border-box}
+.rite-world{position:relative;isolation:isolate;min-height:100%;display:flex;flex-direction:column;background:linear-gradient(175deg,#243354 0%,#203b49 48%,#131e23 100%);overflow:hidden}
+.rite-landscape,.rite-veil{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:-1}
+.rite-landscape{object-fit:cover;object-position:50% 36%}
+.rite-veil{background:linear-gradient(180deg,#0813235c 0%,transparent 13%,#121b2a10 23%,#101c2b35 40%,#0b19253d 67%,#06151acf 100%)}
+.rite-tools{position:relative;display:flex;align-items:flex-start;justify-content:space-between;padding:max(13px,env(safe-area-inset-top)) max(20px,env(safe-area-inset-right)) 0 max(16px,env(safe-area-inset-left));height:58px;z-index:1}
+#burstDialog #burstBack{min-height:40px;padding:0 12px 0 10px;color:#f4e6bf;font-size:.83rem;background-color:#132a30a6;text-shadow:0 1px 2px #020c16;align-self:flex-start}
+.rite-clock{position:relative;display:grid;grid-template-columns:18px auto;grid-template-rows:auto 3px;align-items:center;column-gap:7px;row-gap:4px;min-width:69px;padding:4px 2px 0;text-shadow:0 1px 5px #141223}
+.rite-hourglass{grid-column:1;grid-row:1;display:block;width:12px;height:19px;border-block:2px solid #c8ab72;background:linear-gradient(145deg,transparent 44%,#f7db99 46% 53%,transparent 55%) center/100% 100%,linear-gradient(35deg,transparent 44%,#f7db99 46% 53%,transparent 55%) center/100% 100%}
+#burstSeconds{grid-column:2;grid-row:1;color:#f8e8bc;font:700 1.28rem/1.05 Georgia,serif;font-variant-numeric:tabular-nums;letter-spacing:.025em;text-align:right}
+.rite-fuse{grid-column:1/3;display:block;height:2px;background:#65716a99}.rite-fuse i{display:block;height:100%;background:#f5d283;box-shadow:0 0 4px #ffcb69;transform-origin:left}
+.rite-sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.rite-layout{position:relative;display:grid;grid-template-rows:minmax(110px,1fr) auto clamp(52px,11.5svh,94px);justify-items:center;align-items:center;width:100%;min-height:calc(100svh - 58px);padding:0 12px max(8px,env(safe-area-inset-bottom))}
+.rite-name{position:relative;text-align:center;align-self:end;margin:0 0 clamp(8px,2svh,20px);padding:0 8px;filter:drop-shadow(0 2px 6px #07131d)}
+#burstType{display:flex;justify-content:center;align-items:center;gap:.65em;margin:0 0 4px;color:#f4d18b;font-size:.72rem;letter-spacing:.15em;font-weight:760}
+#burstType:before,#burstType:after{content:"";display:block;width:26px;height:1px;background:linear-gradient(90deg,transparent,#d3b270)}#burstType:after{transform:scaleX(-1)}
+#burstTitle{color:#ffe9af;font-family:var(--game-display,Georgia,"Hiragino Mincho ProN","AppleMyungjo",serif);font-size:clamp(2rem,8.9vw,3.1rem);line-height:1.22;font-weight:700;letter-spacing:.005em;margin:0;text-wrap:balance;text-shadow:0 2px 1px #493b2f,0 4px 12px #040f1d,0 0 24px #e5c88a30}
+#burstRule{margin:.36em 0 0;font-size:clamp(.8rem,3.6vw,.96rem);color:#e8e1ce;line-height:1.45;text-shadow:0 1px 3px #091821}
+.rite-test{width:min(91vw,47svh,407px);margin:0 auto;isolation:isolate}
+.rite-command{display:flex;align-items:center;justify-content:center;gap:.7rem;margin:0 0 7px;color:#fff1d1;text-shadow:0 2px 5px #091824}
+#burstCount{display:block;white-space:nowrap;font-size:.71rem;color:#f2d394;border-bottom:1px solid #ad8b58;letter-spacing:.05em;font-variant-numeric:tabular-nums}
+#burstGoal{margin:0;font-size:clamp(1rem,4.7vw,1.26rem);line-height:1.4;font-weight:700}
+.burst-board{position:relative;width:100%;aspect-ratio:1;margin:0 auto;filter:drop-shadow(0 12px 10px #05131ce0)}
+#burstArt{display:block;width:100%;height:100%}
+#burstPoints{position:absolute;inset:10%;display:grid;grid-template:repeat(5,minmax(0,1fr))/repeat(5,minmax(0,1fr))}
+#burstPoints button{display:block;appearance:none;min-width:0;min-height:0;border:0;border-radius:0;padding:0;background:transparent;opacity:1;touch-action:manipulation}
+#burstPoints button:focus-visible{outline:2px solid #fff1c1;outline-offset:-4px;box-shadow:inset 0 0 0 3px #16584d}
+#burstSigil{align-self:center;width:auto;height:100%;max-height:93px;max-width:90vw;image-rendering:pixelated;filter:drop-shadow(0 3px 6px #04111f)}
+#burstDialog[data-result="win"] .rite-test{filter:drop-shadow(0 0 12px #f6db9770)}
+@media(min-aspect-ratio:6/5){
+  .rite-world{min-height:100svh}.rite-landscape{object-position:50% 33%}
+  .rite-veil{background:linear-gradient(90deg,#091b21ad,transparent 55%,#10152145),linear-gradient(0deg,#0b1829a8,transparent 72%)}
+  .rite-tools{height:52px;padding-inline:clamp(20px,4vw,64px)}
+  .rite-layout{min-height:calc(100svh - 52px);grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:1fr auto 1fr;column-gap:clamp(12px,4vw,70px);padding:0 max(5vw,env(safe-area-inset-left)) 10px;max-width:1280px;margin:auto}
+  .rite-name{grid-row:1/3;grid-column:1;align-self:end;margin:0}.rite-test{grid-row:1/4;grid-column:2;width:min(100%,72svh,490px)}
+  #burstSigil{grid-row:3;grid-column:1;align-self:start;margin-top:5px;height:min(13svh,94px)}
+  #burstTitle{font-size:clamp(1.9rem,4.8vw,4.1rem)}#burstRule{font-size:clamp(.82rem,1.55vw,1.07rem)}
+}
+@media(prefers-reduced-motion:reduce){#burstDialog .burst-board,#burstDialog .rite-test{transition:none}}
+
+#tempoHud{position:relative}
+#battleActor:empty{display:none}
+#battleActor{
+  position:absolute;z-index:2;bottom:calc(100% + 26px);left:50%;
+  transform:translateX(-50%);max-width:85%;padding:2px 7px;border:1px solid #b6a074;
+  border-radius:3px;background:#182926ed;color:#fff1c7;font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;
+}
+
+/* The coaching strip owns its own row above the board, clear of live points and vital bars. */
+.field-coach{grid-column:1/-1;width:100%;min-width:0;position:relative;margin:2px 0;color:#f6ecd0;font-size:.82rem}
+#battleLayout .challenge:has(+ .field-coach[open][data-settled=true]:not([data-replay])){display:none}
+#reachGoal:has(+ .field-coach[open][data-settled=true]:not([data-replay])){display:none}
+@media(min-width:700px) and (min-aspect-ratio:6/5){.reach-fight>.field-coach{grid-column:1}}
+.field-coach summary{min-height:34px;padding:5px 7px;cursor:pointer;color:#d6ead7;text-underline-offset:3px;width:max-content;max-width:100%}
+.field-coach[open] summary{display:none}
+.coach-card{display:grid;grid-template-columns:60px minmax(0,1fr);gap:8px;align-items:center;padding:6px 8px;border:1px solid #8aa79799;border-inline-start:3px solid #90c5aa;background:linear-gradient(120deg,#1c392ce8,#0b1b17eb);min-height:80px;overflow:hidden}
+.field-coach[data-side=reply] .coach-card{grid-template-columns:minmax(0,1fr) 60px;border-inline-start:1px solid #aa997d99;border-inline-end:3px solid #edc590;background:linear-gradient(240deg,#412b21e8,#171b17ef)}
+.coach-cutout{width:60px;height:60px;align-self:end;object-fit:contain;filter:drop-shadow(1px 0 #e3d5ac) drop-shadow(-1px 0 #e3d5ac) drop-shadow(0 -1px #e3d5ac) drop-shadow(0 1px #150f0b)}
+.field-coach[data-side=reply] .coach-cutout{grid-column:2;grid-row:1;transform:scaleX(-1)}
+.field-coach[data-side=reply] .coach-voice{grid-column:1;grid-row:1}
+.field-coach[open][data-side=ally] .coach-cutout{animation:coach-enter-left 210ms ease-out both}
+.field-coach[open][data-side=reply] .coach-cutout{animation:coach-enter-right 210ms ease-out both}
+@keyframes coach-enter-left{from{transform:translateX(-28px);opacity:.3}to{transform:translateX(0);opacity:1}}
+@keyframes coach-enter-right{from{transform:translateX(28px) scaleX(-1);opacity:.3}to{transform:translateX(0) scaleX(-1);opacity:1}}
+.coach-voice strong{display:block;color:#f5e0a9;font-family:var(--serif,serif)}
+.field-coach .coach-voice p{min-height:0;padding:0;margin:2px 0;color:#f6ecd0;font-size:.83rem;line-height:1.38}
+.coach-controls{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.field-coach .coach-controls button{border:0;background:none;padding:4px 0;box-shadow:none;min-height:30px;color:#d6ead7;text-decoration:underline;font-size:.73rem}
+.coach-card :focus-visible,.field-coach summary:focus-visible{outline:2px solid #f9dead;outline-offset:2px}
+#points .coach-witness,#reachPoints .coach-witness{outline:2px solid #64f2df;outline-offset:-3px;border-radius:50%;z-index:1}
+#points .coach-target,#reachPoints .coach-target{outline:1px dashed #fff2c2;outline-offset:-6px;border-radius:50%}
+@media(prefers-reduced-motion:reduce){.field-coach[open] .coach-cutout{animation:none!important}}
+.coach-comparison{display:none;grid-column:1/-1;grid-row:2;border-top:1px solid #8aa79766;padding-top:5px}
+.field-coach:is([data-capture],[data-replay],[data-relay]) .coach-comparison{display:block}
+:lang(ko) .field-coach[data-relay] .coach-voice p{word-break:keep-all;overflow-wrap:anywhere}
+.coach-diagrams{display:flex;gap:8px;justify-content:center}
+.coach-diagrams figure{width:clamp(60px,20vw,86px);min-width:0;margin:0;text-align:center}
+.coach-diagrams canvas{display:block;width:100%;height:auto;aspect-ratio:1;border:1px solid #d6ae74;border-radius:3px}
+.coach-diagrams figcaption,.coach-legend{margin:3px 0 0;color:#f5dfad;font-size:.73rem;line-height:1.25;text-align:center}
+.coach-diagram-label{display:none;color:#f5dfad;text-align:center;font-size:.73rem;line-height:1.25;margin-bottom:4px}
+.field-coach[data-replay] .coach-diagram-label{display:block}
+@media(max-width:480px) and (orientation:portrait){
+  #battleLayout .scene .battle-frame:has(#battle[data-exchanging]){min-height:clamp(183px,24dvh,265px)}
+  #battleLayout>.main:has(.field-coach[open]:is([data-capture],[data-replay])) .scene .battle-frame:not(:has(#battle[data-exchanging])){min-height:145px}
+  .field-coach[data-side=ally]:is([data-capture],[data-replay]) .coach-card{grid-template-columns:39px minmax(0,1fr) minmax(112px,39%);gap:5px}
+  .field-coach[data-side=ally]:is([data-capture],[data-replay]) .coach-cutout{width:39px;height:39px;align-self:start}
+  .field-coach[data-side=ally]:is([data-capture],[data-replay]) .coach-comparison{
+    grid-column:3;grid-row:1;border:0;border-inline-start:1px solid #8aa79766;padding:0 0 0 5px
+  }
+  .field-coach[data-side=ally]:is([data-capture],[data-replay]) .coach-diagrams{gap:4px}
+  .field-coach[data-side=ally]:is([data-capture],[data-replay]) .coach-diagrams figure{width:min(48%,62px)}
+  .field-coach[data-side=ally][data-replay] .coach-card{grid-template-columns:minmax(0,1fr) minmax(116px,45%)}
+  .field-coach[data-side=ally][data-replay] .coach-cutout{display:none}
+  .field-coach[data-side=ally][data-replay] .coach-comparison{grid-column:2}
+  #battleLayout>.main:has(.field-coach[open][data-replay]) #sceneLine{display:none}
+  .field-coach[data-relay][data-side=reply] .coach-card{grid-template-columns:minmax(0,1fr) minmax(112px,39%) 33px;gap:5px}
+  .field-coach[data-relay][data-side=reply] .coach-comparison{grid-column:2;grid-row:1;border:0;border-inline-start:1px solid #8aa79766;padding:0 0 0 4px}
+  .field-coach[data-relay][data-side=reply] .coach-cutout{grid-column:3;width:33px;height:33px}
+  .field-coach[data-relay] .coach-diagrams{gap:4px}
+  .field-coach[data-relay] .coach-diagrams figure{width:min(48%,62px)}
+  .field-coach[data-relay] .coach-diagrams figcaption{font-size:.66rem}
+  .field-coach[data-replay] .coach-controls button+button{display:none}
+}
