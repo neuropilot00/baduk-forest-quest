@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<base href="./assets/a2549da0ab21ab24/">
+<base href="./assets/351a00cbc77abf2d/">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="囲碁の一手で森のモンスターに立ち向かうパズルゲーム">
 <meta name="color-scheme" content="only dark">
@@ -81,6 +81,7 @@
 <link rel="stylesheet" href="./story-panels.css">
 <link rel="stylesheet" href="./battle-entrance.css">
 <link rel="stylesheet" href="./map-journey.css">
+<link rel="stylesheet" href="./map-place-portraits.css">
 <link rel="stylesheet" href="./camp-atlas.css">
 <link rel="stylesheet" href="./battle-layout.css">
 </head>
@@ -133,7 +134,7 @@
 </aside>
 </main>
 </div>
-<dialog id="siteBrief" aria-labelledby="briefTitle" aria-describedby="briefQuestion briefGoal"><div class="brief-inner"><small id="briefQuestion"></small><h2 id="briefTitle"></h2><div id="briefSpeech"></div><p id="briefGoal"></p><footer><button type="button" id="briefStay" class="control"></button><button type="button" id="briefStart" class="control"></button></footer></div></dialog>
+<dialog id="siteBrief" aria-labelledby="briefTitle" aria-describedby="briefGoal"><div class="brief-inner"><header class="brief-place"><img id="briefApproach" width="1110" height="370" alt="" decoding="async" hidden><h2 id="briefTitle"></h2></header><div id="briefSpeech"></div><p id="briefGoal"></p><footer><button type="button" id="briefStay" class="control"></button><button type="button" id="briefStart" class="control"></button></footer></div></dialog>
 <dialog id="roadDialog" class="travel-dialog" aria-labelledby="roadPlace"><div class="road-full"><header><small id="roadChapter"></small><button class="control" id="roadSkip" data-text="skipScene"></button></header><canvas id="roadIllustration" width="384" height="154" aria-hidden="true"></canvas><div class="road-words"><h2 id="roadPlace"></h2><b id="roadWho"></b><p id="roadLine" aria-live="polite"></p><button class="voyage-action" id="roadNext"></button></div></div></dialog>
 <dialog id="burstDialog" aria-labelledby="burstTitle" aria-describedby="burstRule">
   <div class="rite-world">
@@ -231,6 +232,7 @@
 <script src="./battle-entrance.js"></script>
 <script src="./party-growth.js"></script>
 <script src="./outer-crossings.js"></script>
+<script src="./training-progress.js"></script>
 <script src="./field-book.js"></script>
 <script src="./pixelfx-frames.js"></script>
 <script src="./battle-pixel-fx.js"></script>
@@ -250,6 +252,8 @@ const copy = {
   newProblem:["次の問題","다음 문제"],
   courseDone:["この章をすべてクリア！","이 장의 모든 문제를 완료했어요!"],
   trainingDone:["すべての練習問題をクリア！","훈련 문제를 모두 완료했어요!"],
+  courseExhausted:["この章に新しい問題はありません。","이 장에 남은 새 문제는 없어요.","There are no new problems in this course.","本章没有新的题目了。"],
+  leaveTraining:["物語と地図","스토리 지도","Story map","故事地图"],
   nextCourse:["次の章","다음 장"],
   clearedCount:["{0}問クリア","{0}문제 완료"],
   allProblems:["全{0}問","총 {0}문제"],
@@ -620,8 +624,9 @@ const creatures = [
   ["king","#dbbd78","#866644",10]
 ];
 const el = id => document.getElementById(id);
+const trainingBoard = el("boardArt").closest(".board-wrap");
 const blank = {campaignId:CampaignSlots.id,growth:0,reach:0,reachLamps:"",reachFork:0,finalBell:0,crossings:0,sentries:0,outer:"",outerLamp:"",lamps:"",roster:Roster.blank(),teamBank:0,fortRoute:0,work:Workshop.blank(),coords:false,fx:0,gate:-1,matchWins:0,past:0,location:0,cleared:0, muted:true, locale:"ja", track:"expedition", course:0, expedition:0, round:0, partner:0, trials:0, gear:[0,0], reviews:[0,0,0,0,0,0], marks:"", study:{},
-  training:courses.map(()=>0)};
+  training:courses.map(()=>0),trainingSkips:courses.map(()=>"")};
 function validTraining(values) {
   return Array.isArray(values) && values.length===courseLimits.length &&
     values.every((v,i)=>Number.isInteger(v) && v>=0 && v<=courseLimits[i]);
@@ -629,15 +634,36 @@ function validTraining(values) {
 function unlocked(values,course) {
   return course===0 || values[course-1]>=(course===1?foundations.length:5);
 }
+function trainingRow(course){
+  const count=saved.training[course],limit=courseLimits[course];
+  return TrainingProgress.read(count,saved.trainingSkips[course],limit)??TrainingProgress.read(count,"",limit);
+}
+function trainingFinished(course){
+  return trainingRow(course).cursor>=courseLimits[course];
+}
+function storeTrainingRow(course,row){
+  saved.training[course]=row.solved;
+  saved.trainingSkips[course]=TrainingProgress.encode(row.gap);
+}
+function mergeTraining(counts,skips){
+  if(skips!==undefined&&!TrainingProgress.valid(skips,counts,courseLimits))return;
+  const merged=courseLimits.map((limit,i)=>{
+    const incoming=TrainingProgress.read(counts[i],skips?.[i],limit);
+    return TrainingProgress.merge(trainingRow(i),incoming);
+  });
+  saved.training=merged.map(row=>row.solved);
+  saved.trainingSkips=merged.map(row=>TrainingProgress.encode(row.gap));
+}
 // These five pre-atlas positions taught different skills. Keep earned study results tied to the lesson actually played.
 const revisedLessons=[[2,2,"link"],[4,0,"atari"],[4,1,"capture"],[4,2,"link"],[4,3,"escape"]];
 const storageKey = CampaignSlots.key;
-let saved = {...blank};
+let saved = {...blank,training:blank.training.slice(),trainingSkips:blank.trainingSkips.slice()};
 try {
   const stored = JSON.parse(localStorage.getItem(storageKey));
   if (stored && Number.isInteger(stored.cleared) && stored.cleared >= 0 && stored.cleared <= stages.length) {
-    saved = {...blank, track:stored.training?"training":"story", cleared:stored.cleared, muted:stored.muted !== false, locale:GameLanguage.released(stored.locale)};
+    saved = {...saved, track:stored.training?"training":"story", cleared:stored.cleared, muted:stored.muted !== false, locale:GameLanguage.released(stored.locale)};
     if (validTraining(stored.training)) saved.training=stored.training;
+    if (TrainingProgress.valid(stored.trainingSkips,saved.training,courseLimits)) saved.trainingSkips=stored.trainingSkips;
     if (stored.track==="story" || stored.track==="expedition") saved.track=stored.track;
     if (Number.isInteger(stored.expedition) && stored.expedition>=0 && stored.expedition<=Expedition.total) saved.expedition=stored.expedition;
     saved.reach=ReachProgress.read(stored.reach,saved.expedition);
@@ -735,6 +761,9 @@ function save(fieldGrant=null) {
   try {
     let prior=null;const previous=localStorage.getItem(storageKey);
     if(previous){try{prior=JSON.parse(previous);}catch{}}
+    if(validTraining(prior?.training)&&(prior.campaignId===undefined||prior.campaignId===CampaignSlots.id)){
+      mergeTraining(prior.training,prior.trainingSkips);
+    }
     saved.reach=Math.max(ReachProgress.read(saved.reach,saved.expedition),ReachProgress.read(prior?.reach,prior?.expedition));
     saved.sentries=EarlyGuardians.checked(saved.sentries,saved.expedition,saved.reach)|EarlyGuardians.checked(EarlyGuardians.checked(prior?.sentries,prior?.expedition,prior?.reach),saved.expedition,saved.reach);
     saved.outer=OuterCampaign.merge(saved.outer,prior?.outer,saved.expedition);saved.outerLamp=OuterCampaign.lamps(saved.outerLamp,prior?.outerLamp);
@@ -876,7 +905,7 @@ let lastDraw=0;
 const reduceMotion=matchMedia("(prefers-reduced-motion: reduce)").matches;
 const fieldTransition=boardTransition();
 const screenWidth=760;
-let screenHeight=310,battleReady=false;
+let screenHeight=310,actorHeight=310,battleReady=false;
 function resizeBattle() {
   const bounds=canvas.getBoundingClientRect();
   if(!bounds.width || !bounds.height) return;
@@ -886,6 +915,9 @@ function resizeBattle() {
   if(canvas.width!==width)canvas.width=width;
   if(canvas.height!==height)canvas.height=height;
   screenHeight=screenWidth*bounds.height/bounds.width;
+  // A taller caption or the action buttons can resize the arena during a turn.
+  // Keep the party at the camera scale defined by the stable mobile frame height.
+  actorHeight=portraitArenaHeight(screenWidth,bounds.width,145,.24,265)||screenHeight;
   if(battleReady)drawBattle(performance.now(),true);
 }
 new ResizeObserver(resizeBattle).observe(canvas);
@@ -956,7 +988,12 @@ function drawBattle(time,force=false) {
   const winning=mode==="won" || mode==="phase";
   const hit=animation.type==="bad";
   const skill=mission.kind;
-  const active=elapsed<1.1 && (winning || hit);
+  const tempoScene=journey()&&!trial;
+  const receipt=tempoScene?TempoCombat.action:null;
+  const action=BattleActions.phase(receipt,time,reduceMotion)?receipt:null;
+  const exchanging=Boolean(action&&!reduceMotion);
+  if(canvas.hasAttribute("data-exchanging")!==exchanging)canvas.toggleAttribute("data-exchanging",exchanging);
+  const active=!receipt&&elapsed<1.1 && (winning || hit);
   const lunge=active?Math.sin(Math.PI*clamp(elapsed/.6)):0;
   const impact=active?Math.sin(Math.PI*clamp((elapsed-.38)/.45)):0;
   ctx.setTransform(canvas.width/w,0,0,canvas.height/h,0,0);
@@ -979,7 +1016,7 @@ function drawBattle(time,force=false) {
   const followers=journey()?Crew.travelers():[],followerCount=followers.length;
   const tall=followers.filter(id=>WorldScale.rows[id].cm>=90).length;
   const crowded=Math.max(0,tall-1);
-  const partyHeight=Math.min(h*.52,w/(4.04+followerCount*.23+crowded*.68));
+  const partyHeight=Math.min(actorHeight*.52,w/(4.04+followerCount*.23+crowded*.68));
   const foeHeight=journey()?(isGuardian?Math.min(220,h*(level===9?.74:.59)):Math.max(w*.077,FaunaMotion.fieldHeight(stage.species,partyHeight))):Math.min(241,h*([.49,.50,.56,.68][zone]));
   if(mode==="walking"){
     drawForestDepth(w,h,clock,zone);
@@ -996,9 +1033,10 @@ function drawBattle(time,force=false) {
     return;
   }
   const placing=!reduceMotion&&mode==="waiting"?Math.sin(Math.PI*clamp(elapsed/.43)):0;
-  const heroX=w*(.25+followerCount*.059+crowded*.028)+placing*22+(winning?lunge*33:0)-(hit?impact*9:0);
-  const pack=journey()&&!trial?TempoCombat.foes:[];
-  const action=journey()&&!trial?TempoCombat.action:null,foeAction=BattleActions.foe(action,time);
+  const heroX=w*(.25+followerCount*.059+crowded*.028)+(action?0:placing*22)+(winning?lunge*33:0)-(hit?impact*9:0);
+  const pack=tempoScene?TempoCombat.shownFoes(time):[];
+  const health=tempoScene?TempoCombat.shownHealth(time):null;
+  const foeAction=BattleActions.foe(receipt,time,!pack.length&&health?.hp===0);
   let actors=[];
   const lanes=pack.length?FoeParty.layout(w,h,base,pack.length):null;
   const strike=pack.length?TempoCombat.partyHit:null;
@@ -1010,16 +1048,18 @@ function drawBattle(time,force=false) {
     const id=isGuardian?Math.floor(level/10):stage.species,asset=isGuardian?ExpeditionCast.guardian:ExpeditionCast.foe;
     const body=isGuardian?FaunaMotion.guards[id].move:FaunaMotion.field[id];
     const arrival={x:enemyX,height:foeHeight,name:isGuardian?Voyage.guardians[id][1]:Expedition.names.flat()[id][1],kind:body.movement,
-      paint:(ink,x,y,height,frame)=>asset(ink,id,x,y,height,0,1,frame===0?-1:1,true)};
+      paint:(ink,x,y,height,frame,cel)=>asset(ink,id,x,y,height,0,1,0,true,{pose:frame===2?"tell":"idle",beat:frame===1?.75:.25,cel})};
     if(BattleEntrance.draw(ctx,canvas,w,h,base,heroX,partyHeight,12,heroX-partyHeight*.55,5,arrival,time))return;
   }
-  const exit=mode==="won" && !inTraining()?clamp((elapsed-.48)/.5):0;
+  const afterDefeat=receipt?(time-receipt.at-BattleActions.impactDelay(reduceMotion)-BattleActions.fallDuration)/350:(elapsed-.48)/.5;
+  const exit=mode==="won" && !inTraining()?clamp(afterDefeat):0;
   oval(ctx,"#14200b63",heroX,base,heroHeight*.31,8);
   if(!pack.length&&exit<1) oval(ctx,"#14200b63",enemyX,base,foeHeight*.37*(1-exit),Math.min(9,foeHeight*.065));
   if(journey()){
-    actors=Crew.draw(ctx,12,heroX-partyHeight*.55,base,partyHeight,reduceMotion?0:Math.floor(time/180)%4,0,5,action,time);
-    const response=BattleActions.body(action,time,null,partyHeight);
-    WorldScale.hero(ctx,heroX+response.x,base+response.y,partyHeight,response.pose||(action?.side===2&&action.recipient!==null?0:CastMotion.phase(1,time)));
+    actors=Crew.draw(ctx,12,heroX-partyHeight*.55,base,partyHeight,reduceMotion?0:Math.floor(time/180)%4,0,5,receipt,time,health?.ally===0,tempoScene?TempoCombat.techniques:null);
+    const response=tempoScene?BattleActions.hero(receipt,time,partyHeight,health?.ally===0):
+      {x:0,y:0,pose:CastMotion.phase(1,time)};
+    WorldScale.hero(ctx,heroX+response.x,base+response.y,partyHeight,response.pose,response.cel);
   }
   else sprite(0,heroX,base+wave*1.2,heroHeight,winning?lunge*.07:wave*.009,1,active?(winning?1:2):0);
   if(journey()){
@@ -1028,12 +1068,12 @@ function drawBattle(time,force=false) {
     const p=active?impact:0;
     if(pack.length){
       const frame=CastMotion.phase(2,time),pose=foeAction?.pose??(frame===2?"strike":frame===3?"hit":frame===1||mode==="waiting"?"tell":"idle");
-      FoeParty.draw(ctx,pack,w,h,base,time,{pose,beat:foeAction?.beat??clamp(elapsed/.62),shift:foeAction?.shift,hit:strike});
+      FoeParty.draw(ctx,pack,w,h,base,time,{pose,beat:foeAction?.beat??clamp(elapsed/.62),shift:foeAction?.shift,step:foeAction?.step,hit:strike});
     }else{
-      const pose=foeAction?({tell:1,strike:2,recover:1}[foeAction.pose]??0):CastMotion.phase(2,time)||(mode==="waiting"?1:0);
+      const pose=foeAction?({tell:1,strike:2,contact:2,recover:1,hit:3,break:3}[foeAction.pose]??0):CastMotion.phase(2,time)||(mode==="waiting"?1:0);
       (isGuardian?ExpeditionCast.guardian:ExpeditionCast.foe)(ctx,isGuardian?Math.floor(level/10):stage.species,
-        enemyX+(foeAction?.shift??0)*foeHeight,base-wave*2+exit*6,foeHeight*(1+wave*.014),
-        hit?-lunge*.17:p*.16+wave*.012,1-exit,pose,true);
+        enemyX+(foeAction?.shift??0)*foeHeight,base-(foeAction?0:wave*2)+exit*6,foeHeight,
+        foeAction?0:hit?-lunge*.17:p*.16+wave*.012,1-exit,pose,true,foeAction??undefined);
     }
     if(active && winning){
       const color=Expedition.palettes[Expedition.rankOf(level)][3];
@@ -1049,8 +1089,9 @@ function drawBattle(time,force=false) {
   }else sprite(zone+1,enemyX,base-wave*1.5+exit*6,foeHeight,hit?-lunge*.12:impact*.12+wave*.008,1-exit,active?(hit?1:2):0);
   EnemyShield.draw(ctx,w,h,base,foeHeight,enemyX,time);
   if(journey()&&!trial&&[0,2,4].includes(level))drawStoryAction(ctx,level,phase,mode,elapsed,w,base);
-  if(active && winning && (skill==="link" || skill==="escape")){
-    MapArt.deliverySeal(ctx,heroX,enemyX,base,partyHeight,skill,elapsed);
+  if(winning&&!reduceMotion&&(active||receipt?.side===1)){
+    const sealAge=receipt?(time-receipt.at-BattleActions.impactDelay(false))*.001:elapsed;
+    MapArt.deliverySeal(ctx,heroX,enemyX,base,partyHeight,skill,sealAge);
   }
   if(active && winning && skill==="read"){
     const steps=mission.turns;
@@ -1384,7 +1425,7 @@ function arrive(){
 function automaticBoard() {
   if(mode==="phase"||mode==="matchReady")return true;
   if(mode!=="won"||trial)return false;
-  if(inTraining())return saved.training[saved.course]<courseLimits[saved.course];
+  if(inTraining())return !trainingFinished(saved.course);
   return journey()||level<stages.length-1;
 }
 function encounter() {
@@ -1566,6 +1607,11 @@ function refresh() {
   renderFieldTools();
   sceneText();
   boardView();
+  const openField=journey()&&!trial;
+  const feedbackKey=messages.feedback?.[0];
+  el("feedback").toggleAttribute("data-illustrated-status",openField&&(
+    mode==="playing"&&feedbackKey==="placeBlack"||mode==="waiting"&&feedbackKey==="waitReply"));
+  el("combat").toggleAttribute("data-illustrated-status",openField&&mode==="waiting"&&messages.combat?.[0]==="enemySearching");
   if(mission.studyPattern)el("objective").textContent=goal(mission);
   if(mission.lastStand)el("objective").textContent=turns===2?localizedPair(["最後の守り · 印の白を黒2手で取る","마지막 방어 · 흑 두 수로 표시한 백을 따내세요"]):localizedPair(["白が逃げた先の最後の呼吸点を塞ごう。","달아난 백 무리의 마지막 활로를 막으세요."]);
   if(Fortress.isHere()&&phase<3)el("objective").textContent=Fortress.objective();
@@ -1582,7 +1628,7 @@ function refresh() {
   el("guardHP").textContent=inTraining()?"":t("stageHP",Math.max(0,mode==="walking"?0:remaining),phaseCount);
   meter("enemyHP",boss ? bossHP : mode==="won" ? 0 : mission.kind==="read" ? Math.max(14,Math.round((turns/mission.turns)*100)) : 100);
   meter("allyHP",Math.max(28,100-wounds*24));
-  const health=journey()&&!trial?TempoCombat.status:null;
+  const health=journey()&&!trial?TempoCombat.shownHealth(performance.now()):null;
   showPartyHealth(el("allyVital"),health?.ally);
   if(health){
     const hp=health;el("guardHP").textContent=hp.hp+"/"+hp.max;
@@ -1591,11 +1637,11 @@ function refresh() {
     el("allyHP").parentElement.setAttribute("aria-valuetext",hp.ally+"/100");
   }
   el("turn").textContent=!mission.studyPattern&&(mode==="playing"||mode==="waiting")?t("moves",turns):"";
-  el("toMove").textContent=t(mode==="complete"?"courseDone":mode);
-  const courseFinished=inTraining() && saved.training[saved.course]===courseLimits[saved.course];
+  el("toMove").textContent=t(mode==="complete"?trainingCompletion():mode);
+  const courseFinished=inTraining() && trainingFinished(saved.course);
+  trainingBoard.hidden=inTraining()&&mode==="complete";
   el("next").hidden=mode!=="walking" && mode!=="phase" && mode!=="won" && mode!=="complete";
-  if (courseFinished && !availableCourse()) el("next").hidden=true;
-  el("next").textContent=t(inTraining() ? courseFinished?"nextCourse":"newProblem" : mode==="walking"?"arrive":mode==="phase"?"nextPhase":level===(journey()?Expedition.total:stages.length)-1?"replay":"continueWalk");
+  el("next").textContent=t(inTraining() ? courseFinished?availableCourse()?"nextCourse":"leaveTraining":"newProblem" : mode==="walking"?"arrive":mode==="phase"?"nextPhase":level===(journey()?Expedition.total:stages.length)-1?"replay":"continueWalk");
   el("hint").hidden=mode==="walking" || mode==="phase" || mode==="won" || mode==="complete";
   el("reset").hidden=el("hint").hidden;
   el("hint").textContent=t(journey() && hintStep===1?"hintMore":"hint");
@@ -1773,7 +1819,7 @@ function battleMessage(key,tone="",type="idle",...args) {
 function encounterText() {
   el("sigil").textContent=techniques[mission.kind];
   el("skill").textContent=mode==="complete"?t("course"+saved.course):t(mission.kind);
-  el("objective").textContent=journey() && !trial && level===0&&fieldRound<3?t("firstLesson"+phase):mode==="complete"?t("courseDone"):goal(mission);
+  el("objective").textContent=journey() && !trial && level===0&&fieldRound<3?t("firstLesson"+phase):mode==="complete"?t(trainingCompletion()):goal(mission);
   if(mission.guardian && ["atari","link"].includes(mission.kind))el("objective").textContent=t(mission.kind==="atari"?"guardianAtari":"guardianLink");
   if(Fortress.isHere()&&phase<3)el("objective").textContent=Fortress.objective();
   const stage=encounter();
@@ -1812,20 +1858,30 @@ function start(nextLevel,nextPhase=0) {
   rail();
 }
 function availableCourse() {
-  const next=courses.findIndex((_,i)=>i>saved.course && unlocked(saved.training,i) && saved.training[i]<courseLimits[i]);
+  const next=courses.findIndex((_,i)=>i>saved.course && unlocked(saved.training,i) && !trainingFinished(i));
   if(next>=0) return next+1;
-  return courses.findIndex((_,i)=>unlocked(saved.training,i) && saved.training[i]<courseLimits[i])+1;
+  return courses.findIndex((_,i)=>unlocked(saved.training,i) && !trainingFinished(i))+1;
+}
+function trainingCompletion(){
+  if(saved.training.every((count,i)=>count===courseLimits[i]))return "trainingDone";
+  return saved.training[saved.course]===courseLimits[saved.course]?"courseDone":"courseExhausted";
 }
 function startTraining(course=saved.course) {
   saved.course=course;
-  problemNumber=saved.training[course];
+  const row=trainingRow(course),start=row.cursor,limit=courseLimits[course];
+  let puzzle=null;
+  while(row.cursor<limit){
+    const candidate=exercise(course,row.cursor);
+    if(course===0||!FieldBook.completed(candidate)){puzzle=candidate;break;}
+    row.gap.add(row.cursor++);
+  }
+  if(row.cursor!==start)storeTrainingRow(course,row);
+  problemNumber=row.cursor;
   phase=0;
-  const complete=problemNumber===courseLimits[course];
-  const puzzle=complete?{kind:courses[course][0],board:Array(81).fill(0),targets:[],turns:1}:exercise(course,problemNumber);
-  setPosition(puzzle,complete?"complete":"playing");
-  const done=availableCourse()===0;
-  battleMessage(complete?(done?"trainingDone":"courseDone"):"courseIntro"+course,complete?"win":"");
-  message("feedback",complete?(done?"trainingDone":"courseDone"):course===0?"foundation"+problemNumber:"placeBlack");
+  const complete=puzzle===null;
+  setPosition(puzzle??exercise(course,limit-1),complete?"complete":"playing");
+  battleMessage(complete?trainingCompletion():"courseIntro"+course,complete?"win":"");
+  message("feedback",complete?trainingCompletion():course===0?"foundation"+problemNumber:"placeBlack");
   save();
   refresh();
   rail();
@@ -1839,10 +1895,12 @@ function selectTrack(track) {
 function finishTraining() {
   const course=saved.course;
   const hadNext=Boolean(courses[course+1] && unlocked(saved.training,course+1));
-  saved.training[course]=Math.max(saved.training[course],problemNumber+1);
-  const opensNext=Boolean(!hadNext && courses[course+1] && unlocked(saved.training,course+1));
+  const row=trainingRow(course);
+  TrainingProgress.solve(row,problemNumber);
+  storeTrainingRow(course,row);
   mode="won";
   save();
+  const opensNext=Boolean(!hadNext && courses[course+1] && unlocked(saved.training,course+1));
   rail();
   const effects={liberty:"winLiberty",capture:"winCapture",link:"winLink",escape:"winEscape",atari:"winAtari",read:"winRead"};
   battleMessage(effects[mission.kind],"win",["liberty","atari"].includes(mission.kind)?"read":mission.kind);
@@ -2023,7 +2081,7 @@ function exhaustedParty(){
 function recordTeam(event){
   const prior=teamPending;
   teamPending=CrewTactics.record(Crew.deployed(),prior,event,saved.roster);
-  return !!((teamPending&~prior)&CrewTactics.relayBit);
+  return teamPending&~prior;
 }
 function relayNotice(){
   el("feedback").append(localizedPair([" · 中列連携：読星を確保"," · 중열 연계로 수읽기 별 예치"]));
@@ -2057,13 +2115,14 @@ function attempt(p) {
   sound("tap");
   const event={before:priorState.board,after:attack.board,point:p,mission,remaining:turns,previousWhite:priorWhite,ids:Crew.deployed(),accepted:true,done:false};
   if(guardian?guardian.done:!mistakenAtari&&solved(state.board,mission)){
-    const relay=journey()&&!trial&&recordTeam({...event,done:true});
+    const earned=journey()&&!trial?recordTeam({...event,done:true}):0;
     if(journey()&&!trial){
       TempoCombat.attack(true,true,event);
       if(TempoCombat.status.ally===0){exhaustedParty();return;}
+      TempoCombat.earnedTechniques(earned);
     }
     if(Fortress.isHere()&&phase===0)Fortress.connection(p);
-    finish();if(relay)relayNotice();
+    finish();if(earned&CrewTactics.relayBit)relayNotice();
     if(journey()&&!trial)FieldCoaching.record({before:priorState,after:attack,mission,blackPoint:p,accepted:true},{stage:level,host:"feedback",board:"points"});
     return;
   }
@@ -2113,10 +2172,10 @@ function attempt(p) {
       }
     }
   }
-  let relay=false;
+  let earned=0;
   if(holds&&!trial&&journey()){
-    const old=teamPending;relay=recordTeam(event);
-    if(defenses&&CrewTactics.redirect)reply=CrewTactics.redirect(teamPending&~old,defenses,reply,event);
+    earned=recordTeam(event);
+    if(defenses&&CrewTactics.redirect)reply=CrewTactics.redirect(earned,defenses,reply,event);
   }
   if(mistakenAtari)reply=mistakenAtari;
   else if(!holds&&journey()&&!trial)reply=TempoDefense.counter(priorState,state,mission)??reply;
@@ -2124,6 +2183,7 @@ function attempt(p) {
     TempoCombat.attack(holds,false,event);
     if(holds)reply=TempoCombat.relay(reply,mission,p,defenses);
     if(TempoCombat.status.ally===0){exhaustedParty();return;}
+    TempoCombat.earnedTechniques(earned);
   }
   if(journey()&&!trial&&holds&&reply)fieldTrail.push([p,reply.point]);
   mode="waiting";
@@ -2148,7 +2208,7 @@ function attempt(p) {
       TempoCombat.newTurn(turns);
     }
     battleMessage(reply?"enemyFighting":"enemyStopped","","bad");
-    message("feedback","readReply",turns);if(relay)relayNotice();
+    message("feedback","readReply",turns);if(earned&CrewTactics.relayBit)relayNotice();
     sound("reply");if(journey()&&!trial)checkpointStand();
     refresh();
     if(journey()&&!trial&&reply?.point>=0)FieldCoaching.record({before:priorState,after:attack,mission,blackPoint:p,accepted:true,whiteReply:reply,retaliation},{stage:level,host:"feedback",board:"points"});
@@ -2221,8 +2281,9 @@ function advanceBoard(){
   if(mode==="matchReady"){showBossMatch();return;}
   if(inTraining()) {
     if (mode!=="won" && mode!=="complete") return;
-    if(saved.training[saved.course]<courseLimits[saved.course]) startTraining();
+    if(!trainingFinished(saved.course)) startTraining();
     else if(availableCourse()) startTraining(availableCourse()-1);
+    else el("mapButton").click();
     return;
   }
   if(mode==="phase"){
@@ -2268,12 +2329,13 @@ el("backup").onclick=()=>{
     // Signed checkpoint gate -1 uses byte 255; all other fields are already bounded to one byte.
     ex.p=btoa(String.fromCharCode(...ex.z.map(n=>n&255)));delete ex.z;
   }
-  const book=FieldBook.snapshot();
-  if(book){
+  const book=FieldBook.snapshot(),skips=saved.trainingSkips.some(Boolean)?saved.trainingSkips:null;
+  if(book||skips){
     checkpointStand();
     const id=saved.expedition,record=id<80?LastStand.load(id):null;
     const core=record&&record.sequence>=Expedition.stage(id,exercise).phases.length+Number(LastStand.has(id))&&record.round===saved.round?[id,record]:null;
-    ex.reading={version:1,book,core,regions:SecondReach.exportExtras()};
+    ex.reading={version:1,book:book??[[],[]],core,regions:SecondReach.exportExtras()};
+    if(skips)ex.reading.trainingSkips=skips;
   }
   backupCode.value=CampaignBackup.format(data);
   delete messages.backupStatus;
@@ -2309,6 +2371,7 @@ function restoreCampaignPayload(payload){
     }
     const reading=extra.reading;
     if(reading!==undefined&&(!reading||reading.version!==1||!FieldBook.valid(reading.book)||!Array.isArray(reading.regions)||
+       reading.trainingSkips!==undefined&&!TrainingProgress.valid(reading.trainingSkips,trained,courseLimits)||
        reading.regions.length>12||reading.core!==null&&(!Array.isArray(reading.core)||reading.core.length!==2||
        reading.core[0]!==extra.expedition||!Number.isInteger(reading.core[1]?.sequence)||reading.core[1].sequence>=32||
        reading.core[1].sequence<3||!Number.isInteger(reading.core[1].round))))throw Error("invalid reading history");
@@ -2327,7 +2390,7 @@ function restoreCampaignPayload(payload){
       el("backupStatus").textContent=localizedPair(["この旅では別の道に誓いを立てています。","이 여행은 이미 다른 길을 선택했어요."]);return;
     }
     if(localFork&&!incomingFork)incomingReach=Math.min(incomingReach,Math.max(oathQ,saved.reach));
-    const fresh=!saved.expedition&&!saved.reach&&!saved.cleared&&!saved.training.some(Boolean);
+    const fresh=!saved.expedition&&!saved.reach&&!saved.cleared&&!saved.training.some(Boolean)&&!saved.trainingSkips.some(Boolean);
   const rejected=CampaignSlots.accept(extra.c,fresh);
   if(rejected){
     const slot=3-CampaignSlots.number;
@@ -2342,7 +2405,7 @@ function restoreCampaignPayload(payload){
     PartyGrowth.restore(extra.gp);
     saved.lamps=Lanterns.merge(saved.lamps,extra.l);
     saved.cleared=Math.max(saved.cleared,story);
-    saved.training=saved.training.map((value,i)=>Math.max(value,trained[i]));
+    mergeTraining(trained,reading?.trainingSkips);
     if(extra.expedition>=saved.expedition){
       if(extra.expedition>saved.expedition)saved.gate=-1;
       if(extra.gate===extra.expedition&&extra.gate%10===9)saved.gate=extra.gate;
@@ -2421,6 +2484,7 @@ el("restoreBackup").onclick=()=>{
 <script src="./brief-upriver.js"></script>
 <script src="./brief-tide.js"></script>
 <script src="./brief-downriver.js"></script>
+<script src="./map-place-assets.js"></script>
 <script src="./map-visit.js"></script>
 <script src="./map-journey.js"></script>
 <script src="./atlas-ui.js"></script>
