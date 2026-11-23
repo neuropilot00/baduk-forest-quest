@@ -1,0 +1,82 @@
+/* The expedition's measured health, directly beside the character name. */
+#allyVital,#reachAllyVital {
+  display:inline-flex;align-items:center;justify-content:flex-start;gap:.38em;
+  color:#f4ffe7;font-family:var(--game-ui,sans-serif);font-size:.85rem;
+  font-weight:750;line-height:1.2;font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+#allyVital[hidden],#reachAllyVital[hidden] {display:none}
+.party-vital::before {
+  content:"";width:11px;height:10px;flex:none;background:linear-gradient(#daffd8 0 20%,#98e7aa 20% 65%,#60bca0 65%);
+  clip-path:polygon(0 20%,18% 20%,18% 0,38% 0,38% 18%,62% 18%,62% 0,82% 0,82% 20%,100% 20%,100% 55%,82% 55%,82% 72%,65% 72%,65% 86%,55% 86%,55% 100%,45% 100%,45% 86%,35% 86%,35% 72%,18% 72%,18% 55%,0 55%);
+}
+.party-vital[data-health=low]::before,.party-vital[data-health=down]::before {background:#ffb68a}
+.scene-head .unit:has(#allyVital:not([hidden])) .meter {margin-top:3px;height:5px}
+#reachHP #reachAllyVital {position:relative;padding-bottom:5px;margin-bottom:1px}
+#reachAllyVital::after {content:"";position:absolute;inset:auto 0 0;height:3px;background:linear-gradient(to right,#8be0a6 0 var(--party-health,100%),#394b42 var(--party-health,100%) 100%)}
+@media(max-width:700px){.on-campaign .scene-head #guardHP{font-size:.79rem}}
+
+/* Opposed health plates share a fixed rhythm across both writers of the field HUD. */
+#battleLayout .scene-head:has(#allyVital:not([hidden])){
+  display:grid;grid-template-columns:minmax(94px,124px) minmax(0,1fr) minmax(94px,124px);
+  align-items:start;inset:7px 7px auto;gap:6px;pointer-events:none;
+}
+#battleLayout .scene-head:has(#allyVital:not([hidden])) .unit{
+  --vital:#84e5b2;--vital-deep:#2ca583;min-width:0;
+  color:#fff5dc;background:linear-gradient(150deg,#203630fa,#101d20fa);
+  border:1px solid #8fa78c;border-top:2px solid var(--vital);border-radius:3px 3px 6px 6px;
+  box-shadow:0 2px 4px #15252566,inset 0 0 0 1px #112020;padding:4px 7px 6px;
+}
+#battleLayout .scene-head:has(#allyVital:not([hidden])) .enemy{--vital:#ffab83;--vital-deep:#db6659;border-color:#bf9881;border-top-color:var(--vital)}
+#battleLayout .scene-head:has(#allyVital:not([hidden])) b{
+  margin:0 0 2px;color:#fcf4df;font-size:12px;line-height:1.24;word-break:keep-all;
+}
+#battleLayout .scene-head:has(#allyVital:not([hidden])) #region{
+  justify-self:center;max-width:100%;text-align:center;overflow-wrap:normal;word-break:keep-all;
+  background:#182b29ed;color:#f9ead1;padding:3px 5px;line-height:1.2;font-size:11px;
+}
+#battleLayout #allyVital:not([hidden]),#battleLayout .scene-head:has(#allyVital:not([hidden])) #guardHP{
+  display:inline-flex;align-items:baseline;gap:4px;white-space:nowrap;
+  font:750 clamp(16px,4.6vw,20px)/1.1 var(--game-numbers,sans-serif);
+  font-variant-numeric:tabular-nums;letter-spacing:-.035em;color:#fff8e8;
+}
+#battleLayout #allyVital::before,#battleLayout .scene-head:has(#allyVital:not([hidden])) #guardHP::before{
+  content:"HP";clip-path:none;background:none;width:auto;height:auto;
+  font:700 10px/1 var(--game-ui-font,sans-serif);letter-spacing:.035em;color:var(--vital);
+}
+#battleLayout .scene-head:has(#allyVital:not([hidden])) .meter{
+  height:8px;margin-top:4px;border-radius:2px;position:relative;box-shadow:inset 0 0 0 1px #ffffff30,0 1px 0 #080f14;
+  background:#384244;overflow:hidden;
+}
+#battleLayout .scene-head:has(#allyVital:not([hidden])) .meter::after{
+  content:"";position:absolute;inset:0;background:repeating-linear-gradient(to right,transparent 0 calc(25% - 1px),#101e2355 calc(25% - 1px) 25%);pointer-events:none;
+}
+#battleLayout .scene-head:has(#allyVital:not([hidden])) .meter i{
+  background:linear-gradient(to bottom,var(--vital) 0 55%,var(--vital-deep) 55%);transition:width .18s ease-out;
+}
+#battleLayout .unit:has(#allyVital[data-health=low]) .meter i{background:linear-gradient(#ffe297 55%,#b5823e 55%)}
+#battleLayout .scene-head:has(#allyVital:not([hidden])) .unit:has(#enemyShield:not([hidden])){padding-inline:4px}
+#battleLayout .scene-head:has(#allyVital:not([hidden])) ~ .combat-call{bottom:3px;max-width:92%;line-height:1.15}
+@media(max-width:510px){
+  #battleLayout .scene-head:has(#allyVital:not([hidden])){grid-template-columns:minmax(0,1fr) minmax(68px,.81fr) minmax(0,1fr)}
+}
+.reach-fight header:has(#reachHP:not([hidden])){display:grid;grid-template-columns:auto minmax(0,1fr);gap:5px 9px}
+#reachHP:not([hidden]){
+  grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:1px 0 2px;
+  text-align:start;font:750 17px/1.2 var(--game-numbers,sans-serif);
+}
+#reachHP:not([hidden]) > span{
+  position:relative;padding:3px 7px 11px;margin:0;border:1px solid #637b72;border-radius:3px;
+  color:#fff7e5;background:#192925;font-size:17px;white-space:nowrap;
+}
+#reachHP:not([hidden]) > span:last-child{text-align:end;border-color:#9c7664}
+#reachHP #reachAllyVital::before{
+  content:attr(aria-label);width:auto;height:auto;clip-path:none;background:none;
+  color:#b5eecc;font:700 11px/1 var(--game-ui-font,sans-serif);
+}
+#reachHP:not([hidden]) > span::after{
+  content:"";position:absolute;inset:auto 6px 3px;height:6px;border-radius:1px;
+  background:linear-gradient(to right,#83e5b1 0 var(--party-health,100%),#404846 var(--party-health,100%) 100%);
+}
+#reachHP:not([hidden]) > span:last-child::after{
+  background:linear-gradient(to left,#ff9f79 0 var(--enemy-health,100%),#504442 var(--enemy-health,100%) 100%);
+}

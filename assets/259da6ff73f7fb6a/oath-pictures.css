@@ -1,0 +1,12 @@
+/* Story illustrations use continuous tone. All board and battle canvases retain their pixel rendering. */
+#reachForkDialog[data-film=true] #forkScene,
+#lastDeliveryDialog #letterScene,#crossResultScene { image-rendering:auto; }
+@media(min-width:740px) and (min-aspect-ratio:5/4) {
+  #reachForkDialog[data-film=true] #forkWords,
+  #lastDeliveryDialog article>section {
+    left:55%; right:0; top:0; bottom:0; width:45%; height:100%; max-height:none;
+    display:flex; flex-direction:column; align-items:stretch; justify-content:safe center;
+    padding:clamp(24px,4vw,70px); background:#152a29;
+  }
+  #reachForkDialog[data-film=true] #forkWords { top:auto; height:auto; max-height:73%; }
+}
