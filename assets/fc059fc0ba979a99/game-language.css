@@ -1,0 +1,9 @@
+/* Prefer platform UI faces and locally installed CJK companions. No fonts are fetched. */
+:root{--game-ui-font:system-ui,-apple-system,"Segoe UI","Hiragino Sans","Yu Gothic UI","Apple SD Gothic Neo","Malgun Gothic","PingFang SC","Microsoft YaHei",sans-serif}
+body{font-family:var(--game-ui-font)}
+:where(#campMenu,#gearDialog,#matchDialog,#roadDialog,#battleLayout) :is(button,h2,h3,p,label,small){font-family:var(--game-ui-font)}
+:where(#roadLine,#matchStatus,#objective,.camp-choice,.formation-member small){overflow-wrap:break-word}
+:lang(ja) :where(#roadLine,#matchStatus,#objective){line-break:strict}
+:lang(ko) :where(#roadLine,#matchStatus,#objective,#outerJourneyTitle,#outerJourneyClue,#reachJourneyTitle,#reachJourneyClue,#forkStory,#letterLine,.brief-caption p){word-break:keep-all}
+:lang(zh-Hans) :where(#roadLine,#matchStatus,#objective){line-break:strict}
+:lang(en) :where(#roadLine,#matchStatus,#objective){word-break:normal;hyphens:auto}

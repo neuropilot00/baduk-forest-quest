@@ -1,0 +1,37 @@
+#reachAreaOpen,.reach-top button{color:#d9d7b5;background:none;border:0;font:inherit;font-size:.81rem;min-height:40px;padding:4px 9px;cursor:pointer}
+#reachAreaOpen{margin-left:auto;text-align:right}#reachAreaOpen:disabled{color:#acb8a9;font-size:.7rem;cursor:default}
+#voyage.in-reach>*:not(#reachMap){display:none!important}
+#reachMap[hidden]{display:none}#reachMap{max-width:980px;margin:0 auto;color:#f3ecd0}
+.reach-top,.reach-end{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.reach-top h2{margin:0;font-size:1.05rem;line-height:1.3;font-weight:700}.reach-top{min-height:44px}
+.reach-spread{display:grid;grid-template-columns:minmax(260px,1.45fr) minmax(225px,1fr);overflow:hidden;border-radius:8px;background:#1b302d}
+#reachViewport{max-height:clamp(300px,73dvh,620px);overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;touch-action:pan-y}
+#reachWorld{position:relative;width:100%;aspect-ratio:384/748;isolation:isolate}
+#reachLand,#reachActors,#reachStops{position:absolute;inset:0;width:100%;height:100%}
+#reachLand,#reachActors{image-rendering:pixelated;pointer-events:none}
+.reach-stop{position:absolute;transform:translate(-50%,-50%);height:44px;width:44px;min-width:0;border:0;background:none;display:grid;place-items:center;padding:0;cursor:pointer;color:#ffe7af;touch-action:manipulation}
+.reach-stop i{display:grid;place-items:center;width:15px;height:15px;border-radius:50%;font:800 10px/1 system-ui;font-style:normal;border:2px solid #e8d8a5;background:#566957;box-shadow:0 0 0 1px #354a43}
+.reach-stop.sentinel i{width:19px;height:19px;background:#675348}.reach-stop.closed i{position:relative;background:#718276;border-color:#b7c3aa;width:12px;height:10px;border-radius:2px}
+.reach-stop.closed i:before{content:"";position:absolute;left:1px;top:-8px;width:7px;height:7px;border:2px solid #d3c5a2;border-bottom:0;border-radius:5px 5px 0 0}
+.reach-stop.cleared i{background:#315d50}
+.reach-stop:focus-visible,.reach-top button:focus-visible,#reachAction:focus-visible{outline:2px solid #ffdf83;outline-offset:1px}
+.reach-detail{padding:clamp(12px,3vw,28px);align-self:center}.reach-detail small{color:#dcc996}.reach-detail h3{font-size:1.23rem;margin:.3rem 0 .5rem}
+.reach-detail p{font-size:.93rem;line-height:1.5;margin:.45rem 0}.reach-detail #reachMapGoal{font-size:.81rem;color:#c5d5c2}
+.reach-end{margin-top:.8rem}.reach-end span{font-size:.73rem;color:#b5c9b9}
+#reachAction{min-height:42px;padding:.4rem 1.1rem;cursor:pointer;border:1px solid #d5bb80;border-radius:4px;background:#dbc28a;color:#2a382d;font-weight:700}
+#reachAction:disabled{background:#485b50;border-color:#657568;color:#d3d6c0;cursor:default}
+.reach-walking #reachStops{pointer-events:none}.reach-walking .reach-stop[aria-pressed=true]:after{display:none}
+@media(max-width:680px){
+  .reach-spread{display:block}#reachViewport{max-height:clamp(270px,48dvh,470px)}.reach-detail{padding:12px 15px}.reach-top{min-height:42px}
+  #reachMap.reach-walking{position:fixed;inset:0;z-index:20;background:#162a29;display:flex;flex-direction:column}
+  .reach-walking .reach-spread{display:flex;flex-direction:column;flex:1;min-height:0}.reach-walking #reachViewport{flex:1;min-height:0;max-height:none}.reach-walking .reach-detail{align-self:stretch}
+}
+
+#reachLabels{position:absolute;inset:0;pointer-events:none}#reachLabels span{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;color:#f6e6b8;background:#34534cd9;border-radius:2px;padding:1px 5px;font-size:clamp(.64rem,1.5vw,.85rem);letter-spacing:.02em}
+#reachForkStops{position:absolute;inset:0;pointer-events:none}.reach-fork-stop{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;display:grid;place-items:center;min-height:42px;min-width:42px;padding:0;background:transparent;border:0;border-radius:3px;cursor:pointer;touch-action:manipulation;color:#f5dfaa}
+.reach-fork-stop i{font:800 13px/17px system-ui;font-style:normal;width:18px;height:18px;border:2px solid #ebc789;background:#486851;box-shadow:0 0 0 1px #31463d;border-radius:3px}
+.reach-fork-stop b{position:absolute;top:30px;white-space:nowrap;background:#273e39e6;padding:1px 4px;color:#f1d9a3;border-radius:2px;font-size:.62rem;line-height:1.3}
+.reach-fork-stop.closed:not(.sealed) b{display:none}.reach-fork-stop.closed i{background:#5d6c60;border-color:#b1a88a}.reach-fork-stop.sealed i{color:#e6c3a0;background:#614e47}.reach-fork-stop[aria-pressed=true] i,.reach-fork-stop:focus-visible i{outline:2px solid #ffdf88;outline-offset:2px}
+.reach-fork-stop:last-child b{right:0}.reach-walking #reachForkStops{visibility:hidden}
+
+.reach-stop.elite i{border-radius:1px 8px 1px 8px;border-style:double;border-width:3px;width:20px;height:20px}
