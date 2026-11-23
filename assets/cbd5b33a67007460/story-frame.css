@@ -1,0 +1,94 @@
+/* Full-screen landscape, with live dialogue and controls in the same frame. */
+#roadDialog[open],#reachForkDialog[data-film=true][open],#lastDeliveryDialog[open],#reachJourney[open],#outerJourney[open]{
+  position:fixed;inset:0;width:100%;height:100vh;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;box-sizing:border-box;border:0;overflow:hidden;border-radius:0;background:#1c3234;color:#fff4d8
+}
+#roadDialog .road-full,#reachForkDialog[data-film=true] article,#lastDeliveryDialog article{position:relative;display:block;width:100%;max-width:none;height:100%;margin:0;padding:0}
+#roadDialog #roadIllustration,#reachForkDialog[data-film=true] #forkScene,#lastDeliveryDialog .letter-scene,#lastDeliveryDialog #letterScene,#outerJourney .event-land,#reachJourney .event-land{
+  display:block;position:absolute;inset:0;width:100%;height:100%;max-height:none;margin:0;border:0;object-fit:fill;image-rendering:pixelated;pointer-events:none
+}
+#roadDialog .road-full header,#reachForkDialog[data-film=true] header{position:absolute;inset:0 0 auto;z-index:2;box-sizing:border-box;display:flex;justify-content:space-between;align-items:center;margin:0;padding:max(12px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 30px max(16px,env(safe-area-inset-left));background:linear-gradient(#112024b0,transparent);text-shadow:0 1px 3px #182021}
+#reachForkDialog[data-film=true] header{justify-content:flex-start;gap:12px}
+#roadDialog .road-words,#reachForkDialog[data-film=true] #forkWords,#outerJourney .outer-journey-copy,#reachJourney .reach-journey-copy,#lastDeliveryDialog article>section{
+  position:absolute;z-index:1;bottom:0;left:0;right:0;display:block;box-sizing:border-box;width:100%;max-width:none;max-height:59%;overflow:auto;margin:0;border:0;
+  padding:clamp(25px,5dvh,46px) max(18px,calc((100vw - 820px)/2),env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(18px,calc((100vw - 820px)/2),env(safe-area-inset-left));
+  background:linear-gradient(180deg,transparent,#132526ed 24px,#122626f7 88%);color:#fff4d8;
+  scrollbar-width:thin;text-shadow:0 1px 2px #152827
+}
+#roadDialog .road-words h2,#reachForkDialog[data-film=true] #forkTitle,#outerJourney #outerJourneyTitle,#reachJourney h3,#lastDeliveryDialog #letterTitle{
+  font:700 clamp(1.1rem,3.8vw,1.65rem)/1.26 var(--game-display,serif);color:#f6dfaa;margin:0 0 6px;overflow-wrap:break-word
+}
+#roadDialog #roadLine,#reachForkDialog[data-film=true] #forkStory,#outerJourney .outer-journey-copy p,#reachJourney p,#lastDeliveryDialog #letterLine{font:600 clamp(.93rem,3.5vw,1.08rem)/1.48 var(--game-ui-font,sans-serif);color:#fff4de;margin:4px 0 9px;min-height:0;overflow-wrap:break-word}
+#roadDialog #roadWho,#reachForkDialog[data-film=true] #forkWho,#reachJourney b,#lastDeliveryDialog #letterVoice{font:650 .83rem/1.3 var(--game-ui-font,sans-serif);color:#b9dfcc}
+#reachForkDialog #forkWords{display:contents}#reachForkDialog #forkWho,#reachForkDialog #forkReconsider{display:none}
+#reachForkDialog[data-film=true] #forkWho,#reachForkDialog[data-film=true] #forkReconsider:not([hidden]){display:inline-block}
+#reachForkDialog[data-film=true] #forkGoal{border:0;border-inline-start:3px solid #d6ad67;margin:10px 0;padding:6px 10px;background:#2136329c;line-height:1.43;color:#ffe6ae}
+#reachForkDialog[data-film=true] footer,#lastDeliveryDialog #letterChoice,#lastDeliveryDialog footer{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+#roadDialog #roadNext,#reachJourney button,#outerJourney #outerJourneySkip{display:block;margin-inline-start:auto}
+#reachJourney button{min-height:44px;padding:6px 14px;border:3px solid #a08f67;color:#f7eac7;background:#29473d;font:inherit;cursor:pointer}
+#roadDialog button:focus-visible,#reachJourney button:focus-visible,#lastDeliveryDialog button:focus-visible{outline:2px solid #ffe099;outline-offset:2px}
+#outerJourney[open]{display:block}
+#outerJourney .outer-journey-map{display:block;position:absolute;z-index:1;right:max(12px,env(safe-area-inset-right));top:max(12px,env(safe-area-inset-top));width:clamp(78px,20vw,128px);height:clamp(75px,14vh,104px);box-shadow:0 0 0 2px #796e4d;background:#31443b;opacity:.94}
+#outerJourney #outerViewport{height:100%;width:100%;box-shadow:none}
+#outerJourney #outerJourneySpeaker{color:#b9dfcc}#outerJourney .outer-journey-words{margin:0 0 6px;display:block}
+#outerJourney .outer-journey-words b{margin-inline-end:.6em}
+.story-head{float:left;width:clamp(46px,11vw,66px);height:clamp(50px,12vw,72px);margin:0 12px 5px 0;object-fit:contain;image-rendering:pixelated}
+.story-head[hidden]{display:none}
+@media(min-width:740px) and (min-aspect-ratio:6/5){#roadDialog .road-words,#reachForkDialog[data-film=true] #forkWords,#outerJourney .outer-journey-copy,#reachJourney .reach-journey-copy,#lastDeliveryDialog article>section{max-height:49%;padding-bottom:max(14px,env(safe-area-inset-bottom))} .story-head{width:76px;height:79px}}
+@media(max-height:490px){#roadDialog .road-words,#reachForkDialog[data-film=true] #forkWords,#outerJourney .outer-journey-copy,#reachJourney .reach-journey-copy,#lastDeliveryDialog article>section{padding-top:18px;max-height:61%}#roadDialog .road-words h2,#lastDeliveryDialog #letterTitle,#reachForkDialog[data-film=true] #forkTitle{margin-bottom:2px;font-size:1.05rem}}
+#forkOptions{display:none}
+#reachForkDialog[data-mode=confirm] #forkOptions{display:flex;gap:7px;clear:both;margin:8px 0 4px}
+#reachForkDialog #forkOptions button{position:relative;display:flex;align-items:center;gap:6px;flex:1 1 0;min-width:0;min-height:47px;padding:3px 6px;border:1px solid #73877c;border-radius:2px;background:#223b36;color:#dbe5cb;text-align:start;font:600 clamp(.83rem,3.3vw,1rem)/1.25 var(--game-ui-font,sans-serif)}
+#reachForkDialog #forkOptions button canvas{width:38px;height:28px;flex:none;image-rendering:pixelated}
+#reachForkDialog #forkOptions button[aria-checked=true]{color:#fff1c1;border:2px solid #d9bc76;background:#3b4837}
+#reachForkDialog #forkOptions button[aria-checked=true]::after{content:"";position:absolute;inset:auto auto -4px 48%;width:6px;height:6px;transform:rotate(45deg);background:#d9bc76}
+#reachForkDialog[data-film=true] #forkWords{max-height:68%}
+
+/* Give all illustrated beats a stable stage and a scrollable caption region.
+   Canvas fitting reads this reserved edge, so text wrapping never zooms art. */
+@media (orientation:portrait){
+  #roadDialog .road-words,#reachForkDialog[data-film=true] #forkWords,#outerJourney .outer-journey-copy,
+  #reachJourney .reach-journey-copy,#lastDeliveryDialog article>section {
+    height:clamp(198px,35svh,350px);max-height:none;padding-top:22px;overscroll-behavior:contain;
+  }
+  :is(#roadDialog .road-words,#outerJourney .outer-journey-copy,#reachJourney .reach-journey-copy){
+    height:clamp(210px,41svh,390px);
+  }
+}
+@media (orientation:landscape){
+  #roadDialog.painted-road .road-words{top:15%;max-height:none;height:80%;overflow:auto}
+  #outerJourney .outer-journey-copy,#reachJourney .reach-journey-copy,
+  #reachForkDialog[data-film=true] #forkWords,#lastDeliveryDialog article>section {
+    height:45svh;max-height:none;overflow:auto;
+  }
+}
+
+/* Reserve the navigation row at the thumb edge and scroll the line itself. */
+:is(#roadDialog .road-words,#outerJourney .outer-journey-copy,#reachJourney .reach-journey-copy) {
+  display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;align-items:start;
+  overflow:hidden;gap:4px;
+}
+:is(#roadDialog .road-words,#outerJourney .outer-journey-copy,#reachJourney .reach-journey-copy) .story-head {
+  position:absolute;top:24px;margin:0;inset-inline-start:max(16px,env(safe-area-inset-left));
+}
+:is(#roadDialog .road-words,#outerJourney .outer-journey-copy,#reachJourney .reach-journey-copy):has(.story-head:not([hidden])) :is(h2,h3,b){
+  padding-inline-start:calc(clamp(46px,11vw,76px) + 9px);
+}
+:is(#roadDialog #roadLine,#outerJourney .outer-journey-copy p,#reachJourney .reach-journey-copy p) {
+  overflow:auto;overscroll-behavior:contain;min-height:0;max-height:100%;
+  align-self:stretch;padding-top:2px;scrollbar-width:thin;
+}
+:is(#roadDialog #roadNext,#outerJourney #outerJourneySkip,#reachJourney .reach-journey-copy button) {
+  justify-self:end;width:clamp(130px,36vw,156px);min-height:44px;position:static;float:none;margin:0;white-space:nowrap;
+}
+.story-turn{display:block}
+.story-turn+.story-turn{margin-block-start:.35em}
+.story-turn-name{color:#b9dfcc;font-weight:750}
+[data-story-turns]:focus-visible{outline:1px solid #bbd8c5;outline-offset:-1px}
+@media (orientation:portrait){
+  #lastDeliveryDialog article>section{
+    display:grid;grid-template-rows:auto auto auto minmax(0,1fr) auto auto;overflow:hidden;
+  }
+  #lastDeliveryDialog #letterLine{grid-row:4;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
+  #lastDeliveryDialog #letterChoice{grid-row:5}
+  #lastDeliveryDialog footer{grid-row:6}
+}
