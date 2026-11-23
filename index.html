@@ -2,7 +2,8 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<base href="./assets/eaecd090510d7805/">
+<base href="./assets/97f896e716f6c4bc/">
+<meta name="bfq-media-parent" content="eaecd090510d7805">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="囲碁の一手で森のモンスターに立ち向かうパズルゲーム">
 <meta name="color-scheme" content="only dark">
@@ -67,6 +68,7 @@
 <link rel="stylesheet" href="./game-language.css">
 <link rel="stylesheet" href="./camp-menu.css">
 <link rel="stylesheet" href="./formation-ui.css">
+<link rel="stylesheet" href="./interface-polish.css">
 <link rel="stylesheet" href="./second-reach.css">
 <link rel="stylesheet" href="./reach-fork.css">
 <link rel="stylesheet" href="./pixel-controls.css">
@@ -87,7 +89,7 @@
 </head>
 <body>
 <section id="titleScene" aria-labelledby="titleName">
-<picture class="cover-picture"><source id="titleWide" media="(min-aspect-ratio: 6/5)" srcset="./dawnbell-wide-ja.webp"><img id="titleArt" src="./dawnbell-portrait-ja.webp" alt="" decoding="async" fetchpriority="high"></picture>
+<picture class="cover-picture"><source id="titleWide" media="(min-aspect-ratio: 6/5)" srcset="../eaecd090510d7805/dawnbell-wide-ja.webp"><img id="titleArt" src="../eaecd090510d7805/dawnbell-portrait-ja.webp" alt="" decoding="async" fetchpriority="high"></picture>
 <div class="title-words"><h1 id="titleName">囲碁探検隊</h1><p id="titleStory">消えた朝の鐘</p></div>
 <button type="button" id="enterGame"><span id="titlePrompt">冒険をはじめる</span></button></section>
 <div class="shell">
@@ -910,8 +912,8 @@ let screenHeight=310,actorHeight=310,battleReady=false;
 function resizeBattle() {
   const bounds=canvas.getBoundingClientRect();
   if(!bounds.width || !bounds.height) return;
-  const density=Math.min(2,window.devicePixelRatio||1);
-  const width=Math.min(900,Math.max(330,Math.round(bounds.width*density)));
+  const density=Math.min(3,window.devicePixelRatio||1);
+  const width=Math.min(1440,Math.max(330,Math.round(bounds.width*density)));
   const height=Math.round(width*bounds.height/bounds.width);
   if(canvas.width!==width)canvas.width=width;
   if(canvas.height!==height)canvas.height=height;
@@ -1330,7 +1332,7 @@ function resumeTrack(){
   else start(Math.min(saved.cleared,stages.length-1));
 }
 let ticketWon=false,lastLoot=null,teamPending=0,teamCheckpoint=0,teamFound=[];
-let fieldRound=0,fieldTrail=[],fieldLessonVersion=1;
+let fieldRound=0,fieldTrail=[],fieldLessonVersion=1,fieldSettlement=null;
 function storedFieldRound(id,round){
   const record=LastStand.load(id);
   return record?.round===round&&Number.isInteger(record.sequence)&&record.sequence>=round&&record.sequence<32?record.sequence:round;
@@ -1923,7 +1925,7 @@ async function grantMaterials(id){
   BattleResults.start(receipt);
   if(mapOutcome&&mapStage===id&&!el("voyage").hidden)BattleResults.present(id);
 }
-function finishDuel(id){
+function finishDuel(id,closeMatch){
   const early=EarlyGuardians.is(id)&&id<80;
   if(level!==id||(!early&&id%10!==9)||id>saved.expedition)return;
   newRecruit=0;earnedCosmetic=null;
@@ -1932,7 +1934,13 @@ function finishDuel(id){
     awardStage(id);
   }
   if(early)saved.sentries|=EarlyGuardians.bit(id);
-  save();grantMaterials(id);mode="won";sound("win");rail();refresh();openMap(id,true);
+  save();mode="won";sound("win");rail();refresh();
+  const board=state,returnToMap=()=>{closeMatch();openMap(id,true);};
+  fieldSettlement={board,ready:grantMaterials(id)};
+  fieldSettlement.ready.then(()=>{
+    if(state!==board||!BossMatch.active)return;
+    if(!BattleResults.holdAtField(id,returnToMap))returnToMap();
+  });
 }
 function showBossMatch(){clearTimeout(timer);const early=EarlyGuardians.game(level);BossMatch.open(early?early.rank:Math.floor(level/10),false,false,early?level:null);}
 function finish(completedPuzzle=true) {
@@ -1994,7 +2002,7 @@ function finish(completedPuzzle=true) {
     if(reward) message("feedback","skillReward",reward[0]);
     else message("feedback",end?(level===Expedition.total-1?"journeyDone":"trailWon"):"gateWon");
     sound(end?"win":"skill");refresh();
-    if(end)grantMaterials(level);
+    if(end)fieldSettlement={board:state,ready:grantMaterials(level)};
     return;
   }
   const stage=storyBattles[level];
@@ -2285,7 +2293,17 @@ function advanceBoard(){
   else if(mode==="walking") arrive();
   else if(mode==="won"){
     if(trial){returnFromTrial();return;}
-    if(journey()){openMap(level,true);return;}
+    if(journey()){
+      const cleared=level,board=state;
+      const returnToMap=()=>openMap(cleared,true);
+      const showReceipt=()=>{
+        if(state!==board||el("battleLayout").hidden||BossMatch.active)return;
+        if(!BattleResults.holdAtField(cleared,returnToMap))returnToMap();
+      };
+      if(fieldSettlement?.board===board)fieldSettlement.ready.then(showReceipt);
+      else showReceipt();
+      return;
+    }
     if(level===(journey()?Expedition.total:stages.length)-1) journey()?startExpedition(0):start(0);
     else beginWalk();
   }
@@ -2485,8 +2503,6 @@ el("restoreBackup").onclick=()=>{
 <script src="./match-rules.js"></script>
 <script src="./road-forest.js"></script>
 <script src="./road-chapters.js"></script>
-<script src="./road-objects.js"></script>
-<script src="./road-poses.js"></script>
 <script src="./talk-portraits.js"></script>
 <script src="./event-landscapes.js"></script>
 <script src="./story-frame.js"></script>
