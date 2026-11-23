@@ -1,0 +1,75 @@
+#voyage button[data-place-portrait] {
+  width:44px;
+  height:44px;
+  outline:0;
+  -webkit-tap-highlight-color:transparent;
+  --portrait-diameter:34px;
+}
+#voyage button[data-place-portrait]::after {content:none;margin:0;box-sizing:border-box}
+#voyage button:is(.sentinel,.elite,[aria-pressed="true"])[data-place-portrait] {--portrait-diameter:38px;z-index:1}
+#voyage button[data-place-portrait] > i {
+  box-sizing:content-box;
+  width:var(--portrait-diameter);
+  height:var(--portrait-diameter);
+  border-radius:50%;
+  border:1px solid #dcc99b;
+  background:var(--place-sheet) var(--place-x) var(--place-y)/400% var(--place-height) no-repeat;
+  box-shadow:0 1px 4px #161811ef;
+  outline:0;
+  font-size:0;
+  color:transparent;
+  pointer-events:none;
+}
+#voyage button[data-place-portrait].closed > i {border-color:#abb3aa}
+#voyage button[data-place-portrait].cleared > i {border-color:#a0cbaa}
+#voyage button[data-place-portrait]:is(.closed,.cleared)::after {
+  position:absolute;
+  inset:auto 1px 2px auto;
+  display:grid;
+  place-items:center;
+  height:14px;
+  width:14px;
+  border:1px solid #b2c9ad;
+  border-radius:50%;
+  background:#213b30;
+  color:#e9fedc;
+  font:700 11px/1 system-ui;
+  pointer-events:none;
+  box-shadow:0 1px 2px #101812;
+}
+#voyage button[data-place-portrait].cleared::after {content:"✓"}
+#voyage button[data-place-portrait].closed::after {
+  content:"";border-color:#b0b9b0;
+  background:linear-gradient(#eff0df,#eff0df) center 6px/7px 5px no-repeat,
+    radial-gradient(ellipse at center,transparent 31%,#eff0df 33% 60%,transparent 64%) center 2px/7px 7px no-repeat,#28332c;
+}
+#voyage button[data-place-portrait].sealed::after {content:"×";background:#28332c;color:#eff0df}
+#voyage button[data-place-portrait] > i::before,
+#voyage button[data-place-portrait] > i::after,
+#voyage button[data-place-portrait].here::before,
+#voyage button[data-place-portrait][data-travel-next]::before {content:none}
+#voyage button[data-place-portrait][aria-current="location"] > i {box-shadow:0 0 0 1px #172b24,0 0 0 2px #c0dbc5,0 1px 4px #162921}
+#voyage button[data-place-portrait]:is([aria-pressed="true"],[data-travel-next],:focus-visible) > i {
+  border-color:#fff0bf;
+  box-shadow:0 0 0 1px #5a4530,0 0 0 2px #ffe3a1,0 0 5px 1px #251b0ff0;
+}
+#voyage .map-stop[data-place-portrait] {--portrait-diameter:31px}
+#voyage .map-stop[aria-pressed="true"][data-place-portrait] {--portrait-diameter:35px}
+#voyage .map-stop[data-place-portrait] .gate-sign {left:auto;right:1px;bottom:auto;top:0;width:10px;height:11px;z-index:1}
+#voyage button[data-place-portrait] > b {top:100%;pointer-events:none}
+:is(#briefApproach,#forkArrival):not([hidden]) {
+  display:block;
+  width:100%;
+  height:auto;
+  border-radius:4px;
+  border:1px solid #a59776;
+  margin-block:0 8px;
+}
+#forkArrival:not([hidden]) {max-height:clamp(72px,15dvh,165px);object-fit:cover}
+#briefApproach:not([hidden]) {margin:0}
+@media (min-width:701px), (orientation:landscape){
+  .brief-place:has(#briefApproach:not([hidden])) #briefTitle{
+    position:absolute;inset:auto 1px 1px;margin:0;padding:22px 12px 10px;
+    background:linear-gradient(transparent,#111d1bf5);border-radius:0 0 3px 3px;
+  }
+}
